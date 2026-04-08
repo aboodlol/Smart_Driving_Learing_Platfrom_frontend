@@ -1,0 +1,85 @@
+<header class="app-header bg-white border-bottom">
+  <div class="container header-shell py-3">
+    <div class="header-main">
+      <a routerLink="/home" class="brand text-decoration-none fw-bold fs-5 text-dark d-flex align-items-center gap-2">
+        <span class="bg-light rounded p-1 text-muted fs-6 border" style="font-size: 0.75rem !important;">Image</span>
+        Smart Driving Learning
+      </a>
+
+      @if (isAuthenticated()) {
+        <button
+          class="menu-toggle btn btn-light border"
+          type="button"
+          (click)="toggleMobileMenu()"
+          [attr.aria-expanded]="mobileMenuOpen()"
+          aria-controls="primary-nav"
+          aria-label="Toggle navigation menu"
+        >
+          <span class="material-icons" aria-hidden="true">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+        </button>
+      }
+    </div>
+
+    @if (isAuthenticated()) {
+      <nav id="primary-nav" class="nav-links" [class.mobile-open]="mobileMenuOpen()">
+        <a
+          routerLink="/home"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link-item text-decoration-none text-dark"
+          (click)="closeMobileMenu()"
+        >
+          Home
+        </a>
+        <a
+          routerLink="/lessons"
+          routerLinkActive="active-link"
+          class="nav-link-item text-decoration-none text-dark"
+          (click)="closeMobileMenu()"
+        >
+          Lessons
+        </a>
+        <a
+          routerLink="/quiz"
+          routerLinkActive="active-link"
+          class="nav-link-item text-decoration-none text-dark"
+          (click)="closeMobileMenu()"
+        >
+          Quiz
+        </a>
+        <a
+          routerLink="/progress"
+          routerLinkActive="active-link"
+          class="nav-link-item text-decoration-none text-dark"
+          (click)="closeMobileMenu()"
+        >
+          Progress
+        </a>
+        <a
+          routerLink="/assistant"
+          routerLinkActive="active-link"
+          class="nav-link-item text-decoration-none text-dark"
+          (click)="closeMobileMenu()"
+        >
+          Assistant
+        </a>
+
+        <button class="btn btn-light border rounded px-4 py-2 text-dark" type="button" (click)="logout()">
+          Logout
+        </button>
+      </nav>
+    }
+  </div>
+</header>
+
+<main class="app-content" style="min-height: calc(100vh - 150px)">
+  <div class="container py-5">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <div class="container py-3 text-center text-muted">
+    <small>© 2023 Smart Driving Learning Platform</small>
+  </div>
+</footer>

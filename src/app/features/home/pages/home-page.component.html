@@ -1,0 +1,86 @@
+<section class="home-stack d-grid gap-4">
+  @if (loading()) {
+    <mat-card>
+      <mat-card-content class="loading-card py-5 text-center">
+        <mat-spinner diameter="42"></mat-spinner>
+        <p class="mt-3 mb-0">Loading dashboard...</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (overview(); as data) {
+    <mat-card class="hero-card">
+      <mat-card-content>
+        <h1 class="mb-2">{{ data.title }}</h1>
+        <p class="mb-2 subtitle">{{ data.subtitle }}</p>
+        <p class="mb-0 user-label">Logged in as: {{ currentUser()?.name }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="row g-3">
+      @for (action of data.actions; track action.title) {
+        <div class="col-12 col-md-4">
+          <mat-card class="h-100 action-card">
+            <mat-card-content>
+              <h3>{{ action.title }}</h3>
+              <p>{{ action.description }}</p>
+              <button mat-flat-button color="primary" type="button" [routerLink]="action.route">
+                {{ action.buttonLabel }}
+              </button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+
+    <mat-card>
+      <mat-card-content class="progress-wrap">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <h2 class="mb-0">Quick Progress Overview</h2>
+          <button mat-stroked-button type="button" (click)="reload()">Refresh Data</button>
+        </div>
+
+        @for (item of data.progress; track item.label) {
+          <div class="progress-block">
+            <div class="d-flex justify-content-between mb-1">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.value }}%</span>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="item.value"></mat-progress-bar>
+            <button mat-button type="button" class="mt-2" [routerLink]="'/home'">{{ item.ctaLabel }}</button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <mat-card>
+          <mat-card-content>
+            <h3>Lesson Lookups</h3>
+            <mat-divider class="my-2"></mat-divider>
+            <mat-chip-set>
+              @for (item of lessonTypes(); track item.key) {
+                <mat-chip>{{ item.label }}</mat-chip>
+              }
+            </mat-chip-set>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <mat-card>
+          <mat-card-content>
+            <h3>Support Channels</h3>
+            <mat-divider class="my-2"></mat-divider>
+            <mat-chip-set>
+              @for (item of supportChannels(); track item.key) {
+                <mat-chip>{{ item.label }}</mat-chip>
+              }
+            </mat-chip-set>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</section>

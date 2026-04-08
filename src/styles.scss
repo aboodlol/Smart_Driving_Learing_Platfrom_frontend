@@ -1,0 +1,49 @@
+@use './styles/theme';
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+  --app-page-bg: #f4f8ff;
+  --app-ink: #162033;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+  color: var(--app-ink);
+  background:
+    radial-gradient(circle at 20% 0%, #e2efff 0%, transparent 45%),
+    radial-gradient(circle at 90% 0%, #f5efe2 0%, transparent 40%),
+    var(--app-page-bg);
+}
+
+a {
+  color: inherit;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.toast-success.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: #1f7a40;
+  color: #ffffff;
+}
+
+.toast-error.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: #b4232f;
+  color: #ffffff;
+}
+
+.toast-info.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: #1f3b64;
+  color: #ffffff;
+}
