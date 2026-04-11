@@ -1,0 +1,149 @@
+<div class="admin-dashboard">
+  <div class="container py-4">
+    <div class="page-header mb-4">
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-subtitle">Overview of platform statistics and activity</p>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else if (error()) {
+      <div class="alert alert-danger">{{ error() }}</div>
+    } @else {
+      <!-- Stats Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon users-icon">👥</div>
+            <div class="stat-value">{{ stats()?.totalUsers ?? 0 }}</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon chapters-icon">📚</div>
+            <div class="stat-value">{{ stats()?.totalChapters ?? 0 }}</div>
+            <div class="stat-label">Chapters</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon lessons-icon">📝</div>
+            <div class="stat-value">{{ stats()?.totalSubLessons ?? 0 }}</div>
+            <div class="stat-label">Sub-Lessons</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon docs-icon">📄</div>
+            <div class="stat-value">{{ stats()?.totalDocuments ?? 0 }}</div>
+            <div class="stat-label">Documents</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Chapter Completion Chart -->
+        <div class="col-lg-8">
+          <div class="panel">
+            <h2 class="panel-title">Chapter Completion Rates</h2>
+            @if (chapters().length === 0) {
+              <p class="text-muted">No chapter data available.</p>
+            } @else {
+              <div class="chart-bars">
+                @for (ch of chapters(); track ch._id) {
+                  <div class="chart-row">
+                    <div class="chart-label" [title]="ch.title">{{ ch.title }}</div>
+                    <div class="chart-bar-wrap">
+                      <div
+                        class="chart-bar-fill"
+                        [style.width.%]="ch.completionRate"
+                        [class.bar-high]="ch.completionRate >= 70"
+                        [class.bar-mid]="ch.completionRate >= 40 && ch.completionRate < 70"
+                        [class.bar-low]="ch.completionRate < 40"
+                      ></div>
+                    </div>
+                    <span class="chart-pct">{{ ch.completionRate | number: '1.0-0' }}%</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Quiz Questions per Chapter -->
+          <div class="panel mt-4">
+            <h2 class="panel-title">Content per Chapter</h2>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Chapter</th>
+                    <th class="text-center">Sub-Lessons</th>
+                    <th class="text-center">Quiz Questions</th>
+                    <th>Completion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ch of chapters(); track ch._id) {
+                    <tr>
+                      <td class="fw-500">{{ ch.title }}</td>
+                      <td class="text-center">{{ ch.subLessonCount }}</td>
+                      <td class="text-center">{{ ch.quizCount }}</td>
+                      <td style="min-width: 140px">
+                        <mat-progress-bar
+                          mode="determinate"
+                          [value]="ch.completionRate"
+                        ></mat-progress-bar>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-4">
+          <div class="panel">
+            <h2 class="panel-title">Recent Activity</h2>
+            @if (activities().length === 0) {
+              <p class="text-muted">No recent activity.</p>
+            } @else {
+              <div class="activity-feed">
+                @for (a of activities(); track a._id) {
+                  <div class="activity-item">
+                    <span class="activity-icon">{{ activityIcon(a.type) }}</span>
+                    <div class="activity-body">
+                      <div class="activity-desc">{{ a.description }}</div>
+                      <div class="activity-meta">
+                        {{ a.user.name }} &middot; {{ formatDate(a.createdAt) }}
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Quick Links -->
+          <div class="panel mt-4">
+            <h2 class="panel-title">Quick Links</h2>
+            <div class="d-grid gap-2">
+              <a routerLink="/admin/users" class="quick-link-btn">
+                👥 Manage Users
+              </a>
+              <a routerLink="/admin/documents" class="quick-link-btn">
+                📄 Manage Documents
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,53 @@
+<div class="container py-4">
+  <div class="page-header mb-3">
+    <h1>AI Assistant</h1>
+    <p class="text-muted">Ask me anything about driving rules, traffic signs, or exam preparation.</p>
+  </div>
+
+  <div class="chat-wrapper">
+    <div class="chat-messages" #chatContainer>
+      @if (messages().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">&#x1F697;</div>
+          <h3>DriveReady Assistant</h3>
+          <p>I'm here to help you learn about driving. Ask me about traffic signs, road rules, exam tips, or anything driving-related!</p>
+        </div>
+      }
+
+      @for (msg of messages(); track $index) {
+        <div class="message" [class.user-message]="msg.role === 'user'" [class.assistant-message]="msg.role === 'assistant'">
+          <div class="message-bubble">{{ msg.content }}</div>
+        </div>
+      }
+
+      @if (loading()) {
+        <div class="message assistant-message">
+          <div class="message-bubble typing-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="chat-input-bar">
+      <input
+        type="text"
+        class="chat-input"
+        placeholder="Type your message..."
+        [ngModel]="inputText()"
+        (ngModelChange)="inputText.set($event)"
+        (keydown)="onKeyDown($event)"
+        [disabled]="loading()"
+      />
+      <button class="btn-send" [disabled]="!inputText().trim() || loading()" (click)="sendMessage()">
+        @if (loading()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          Send
+        }
+      </button>
+    </div>
+  </div>
+</div>

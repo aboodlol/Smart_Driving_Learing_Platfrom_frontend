@@ -1,0 +1,226 @@
+:host {
+  display: block;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--dr-text);
+}
+
+/* Overall Card */
+.overall-card {
+  background: #ffffff;
+  border: 1px solid var(--dr-border);
+  border-radius: 14px;
+  padding: 2rem;
+}
+
+.overall-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.overall-circle {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-active {
+  background: linear-gradient(135deg, var(--dr-primary), var(--dr-primary-light));
+}
+
+.circle-done {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.overall-percent {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.overall-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--dr-text);
+}
+
+.overall-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--dr-text-muted);
+}
+
+.overall-bar {
+  border-radius: 999px;
+  height: 8px;
+}
+
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid var(--dr-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--dr-primary);
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--dr-text-muted);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dr-text);
+}
+
+/* Chapter Cards */
+.chapter-card {
+  background: #ffffff;
+  border: 1px solid var(--dr-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  height: 100%;
+}
+
+.chapter-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-card-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dr-text);
+  margin: 0;
+}
+
+.status-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-not-started {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.chapter-desc {
+  font-size: 0.82rem;
+  color: var(--dr-text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.chapter-progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chapter-count {
+  font-size: 0.75rem;
+  color: var(--dr-text-muted);
+  font-weight: 500;
+}
+
+/* Reset Section */
+.reset-section {
+  background: #ffffff;
+  border: 1px solid var(--dr-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.reset-section h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--dr-text);
+  margin: 0 0 0.35rem;
+}
+
+.reset-section p {
+  font-size: 0.85rem;
+}
+
+.btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  background: transparent;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-reset:hover:not(:disabled) {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .overall-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,12 +1,12 @@
-<header class="app-header bg-white border-bottom">
-  <div class="container header-shell py-3">
-    <div class="header-main">
-      <a routerLink="/home" class="brand text-decoration-none fw-bold fs-5 text-dark d-flex align-items-center gap-2">
-        <span class="bg-light rounded p-1 text-muted fs-6 border" style="font-size: 0.75rem !important;">Image</span>
-        Smart Driving Learning
-      </a>
+@if (isAuthenticated()) {
+  <header class="app-header" [class.header-hidden]="headerHidden()">
+    <div class="container header-shell py-3">
+      <div class="header-main">
+        <a routerLink="/home" class="brand text-decoration-none d-flex align-items-center gap-2">
+          <span class="brand-icon">&#x1F697;</span>
+          DriveReady
+        </a>
 
-      @if (isAuthenticated()) {
         <button
           class="menu-toggle btn btn-light border"
           type="button"
@@ -17,69 +17,55 @@
         >
           <span class="material-icons" aria-hidden="true">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
         </button>
-      }
-    </div>
+      </div>
 
-    @if (isAuthenticated()) {
       <nav id="primary-nav" class="nav-links" [class.mobile-open]="mobileMenuOpen()">
-        <a
-          routerLink="/home"
-          routerLinkActive="active-link"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="nav-link-item text-decoration-none text-dark"
-          (click)="closeMobileMenu()"
-        >
-          Home
-        </a>
-        <a
-          routerLink="/lessons"
-          routerLinkActive="active-link"
-          class="nav-link-item text-decoration-none text-dark"
-          (click)="closeMobileMenu()"
-        >
-          Lessons
-        </a>
-        <a
-          routerLink="/quiz"
-          routerLinkActive="active-link"
-          class="nav-link-item text-decoration-none text-dark"
-          (click)="closeMobileMenu()"
-        >
-          Quiz
-        </a>
-        <a
-          routerLink="/progress"
-          routerLinkActive="active-link"
-          class="nav-link-item text-decoration-none text-dark"
-          (click)="closeMobileMenu()"
-        >
-          Progress
-        </a>
-        <a
-          routerLink="/assistant"
-          routerLinkActive="active-link"
-          class="nav-link-item text-decoration-none text-dark"
-          (click)="closeMobileMenu()"
-        >
-          Assistant
-        </a>
+        <a routerLink="/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
+           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Home</a>
+        <a routerLink="/lessons" routerLinkActive="active-link"
+           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Lessons</a>
+        <a routerLink="/quiz" routerLinkActive="active-link"
+           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Quiz</a>
+        <a routerLink="/progress" routerLinkActive="active-link"
+           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Progress</a>
+        <a routerLink="/assistant" routerLinkActive="active-link"
+           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Assistant</a>
 
-        <button class="btn btn-light border rounded px-4 py-2 text-dark" type="button" (click)="logout()">
-          Logout
-        </button>
+        @if (currentUser()?.role === 'admin') {
+          <a routerLink="/admin" routerLinkActive="active-link"
+             class="nav-link-item admin-link text-decoration-none" (click)="closeMobileMenu()">Admin</a>
+        }
+
+        <div class="nav-user-section">
+          <span class="user-chip">{{ currentUser()?.name }}</span>
+          <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" (click)="logout()">Logout</button>
+        </div>
       </nav>
-    }
-  </div>
-</header>
+    </div>
+  </header>
+} @else {
+  <header class="app-header public-header" [class.header-hidden]="headerHidden()">
+    <div class="container header-shell py-3">
+      <div class="header-main">
+        <a routerLink="/landing" class="brand text-decoration-none d-flex align-items-center gap-2">
+          <span class="brand-icon">&#x1F697;</span>
+          DriveReady
+        </a>
+        <nav class="public-nav d-flex align-items-center gap-3">
+          <a routerLink="/login" class="text-decoration-none public-signin-link">Sign In</a>
+          <a routerLink="/register" class="btn btn-primary-dr rounded-pill px-4 py-2 text-decoration-none">Get Started Free</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+}
 
-<main class="app-content" style="min-height: calc(100vh - 150px)">
-  <div class="container py-5">
-    <router-outlet></router-outlet>
-  </div>
+<main class="app-content">
+  <router-outlet></router-outlet>
 </main>
 
 <footer class="app-footer">
   <div class="container py-3 text-center text-muted">
-    <small>© 2023 Smart Driving Learning Platform</small>
+    <small>&copy; 2026 DriveReady</small>
   </div>
 </footer>

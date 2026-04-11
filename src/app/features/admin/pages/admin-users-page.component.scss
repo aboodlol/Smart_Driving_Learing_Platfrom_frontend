@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  border-bottom: 1px solid var(--dr-border);
+  padding-bottom: 1rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--dr-text);
+  margin: 0;
+}
+
+.page-subtitle {
+  color: var(--dr-text-muted);
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.back-link {
+  color: var(--dr-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.search-bar .form-control {
+  border-radius: 0.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--dr-border);
+}
+
+.search-bar .form-control:focus {
+  border-color: var(--dr-primary);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
+}
+
+.table {
+  background: #ffffff;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dr-text-muted);
+  border-bottom-width: 1px;
+  padding: 0.75rem;
+}
+
+.table td {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.fw-500 {
+  font-weight: 500;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #e0e7ff;
+  color: var(--dr-primary);
+  text-transform: capitalize;
+}
+
+.admin-badge {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--dr-accent-green);
+}
+
+.editing-row {
+  background: #fafbff;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--dr-text-muted);
+}
+
+.users-count .badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.4rem;
+  }
+
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+}

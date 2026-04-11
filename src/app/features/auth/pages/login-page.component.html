@@ -1,0 +1,64 @@
+<div class="auth-split">
+  <div class="auth-left login-gradient">
+    <div class="auth-left-icon">&#x1F697;</div>
+    <h2>Welcome Back,<br>Driver!</h2>
+    <p>Continue your journey to becoming a confident, safe driver. Your progress is waiting for you.</p>
+    <ul class="auth-left-features">
+      <li>&#x1F4D7; Rich lessons across 5 chapters</li>
+      <li>&#x1F68D; AI explains every mistake you make</li>
+      <li>&#x1F3C6; Real exam-style quiz questions</li>
+      <li>&#x1F5C3; Visual progress tracking</li>
+    </ul>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <div class="auth-brand">
+        <span class="auth-brand-icon">&#x1F697;</span>
+        DriveReady
+      </div>
+
+      <h2>Sign In</h2>
+      <span class="auth-toggle-link">
+        No account? <a routerLink="/register">Register free</a>
+      </span>
+
+      <div class="demo-box">
+        <div class="demo-box-title">&#x1F511; Demo accounts (after seeding)</div>
+        <div class="demo-box-row">Student: <strong>student&#64;driving.com</strong> / student123</div>
+        <div class="demo-box-row">Admin: <strong>admin&#64;driving.com</strong> / admin123</div>
+      </div>
+
+      <form class="auth-form-stack" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email Address</mat-label>
+          <input matInput formControlName="email" type="email" autocomplete="email" placeholder="you@example.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            autocomplete="current-password"
+          />
+          <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button" tabindex="-1">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <button class="auth-submit-btn" type="submit" [disabled]="loading() || loginForm.invalid">
+          @if (loading()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          }
+          &#x1F680; Sign In
+        </button>
+      </form>
+
+      <div class="auth-back-link">
+        <a routerLink="/landing">&larr; Back to Home</a>
+      </div>
+    </div>
+  </div>
+</div>

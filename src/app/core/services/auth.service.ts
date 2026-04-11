@@ -11,7 +11,7 @@ import {
 import { AuthApiService } from './auth-api.service';
 import { ToastService } from './toast.service';
 
-const SESSION_STORAGE_KEY = 'smart-driving-auth-user';
+const SESSION_STORAGE_KEY = 'driveready-auth-user';
 
 @Injectable({
   providedIn: 'root',
@@ -58,7 +58,7 @@ export class AuthService {
     this.authUserState.set(null);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     this.toast.info('Logged out successfully.');
-    void this.router.navigateByUrl('/auth');
+    void this.router.navigateByUrl('/landing');
   }
 
   private persistSession(response: AuthResponse): void {

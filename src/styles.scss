@@ -2,8 +2,17 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 :root {
-  --app-page-bg: #f4f8ff;
-  --app-ink: #162033;
+  --dr-primary: #4338ca;
+  --dr-primary-dark: #3730a3;
+  --dr-primary-light: #6366f1;
+  --dr-accent-green: #059669;
+  --dr-accent-green-dark: #047857;
+  --dr-accent-green-light: #0d9488;
+  --dr-bg-light: #f8f9fc;
+  --dr-text: #1e293b;
+  --dr-text-muted: #64748b;
+  --dr-surface: #ffffff;
+  --dr-border: #e5e7eb;
 }
 
 * {
@@ -14,15 +23,18 @@ html,
 body {
   height: 100%;
   margin: 0;
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
 }
 
 body {
   font-family: 'Montserrat', 'Segoe UI', sans-serif;
-  color: var(--app-ink);
-  background:
-    radial-gradient(circle at 20% 0%, #e2efff 0%, transparent 45%),
-    radial-gradient(circle at 90% 0%, #f5efe2 0%, transparent 40%),
-    var(--app-page-bg);
+  color: var(--dr-text);
+  background: var(--dr-bg-light);
 }
 
 a {

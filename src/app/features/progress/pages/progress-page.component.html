@@ -1,0 +1,75 @@
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <h1>Your Progress</h1>
+    <p class="text-muted">Track your learning journey and quiz performance.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <mat-spinner diameter="42"></mat-spinner>
+      <p class="mt-3 text-muted">Loading progress...</p>
+    </div>
+  } @else if (summary(); as s) {
+    <!-- Overall Progress -->
+    <div class="overall-card mb-4">
+      <div class="overall-content">
+        <div class="overall-circle" [class]="s.overallProgress >= 100 ? 'circle-done' : 'circle-active'">
+          <span class="overall-percent">{{ s.overallProgress }}%</span>
+        </div>
+        <div>
+          <h2>Overall Completion</h2>
+          <p>{{ s.overallProgress }}% of all chapters completed</p>
+        </div>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="s.overallProgress" class="overall-bar"></mat-progress-bar>
+    </div>
+
+    <!-- Quiz Stats -->
+    <div class="stats-row mb-4">
+      <div class="stat-card">
+        <span class="stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
+        <span class="stat-label">Last Quiz Score</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ s.quizStats.totalAttempts }}</span>
+        <span class="stat-label">Total Attempts</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ s.quizStats.averageScore }}%</span>
+        <span class="stat-label">Average Score</span>
+      </div>
+    </div>
+
+    <!-- Chapter Progress -->
+    <h2 class="section-title mb-3">Chapter Progress</h2>
+    <div class="row g-3 mb-4">
+      @for (lesson of s.lessons; track lesson.chapterId) {
+        <div class="col-12 col-md-6">
+          <div class="chapter-card">
+            <div class="chapter-card-header">
+              <h3>{{ lesson.title }}</h3>
+              <span class="status-badge" [class]="getStatusClass(lesson.status)">{{ lesson.status }}</span>
+            </div>
+            <p class="chapter-desc">{{ lesson.description }}</p>
+            <div class="chapter-progress-row">
+              <mat-progress-bar mode="determinate" [value]="getChapterPercent(lesson.totalSubLessons, lesson.completedSubLessons)"></mat-progress-bar>
+              <span class="chapter-count">{{ lesson.completedSubLessons }} / {{ lesson.totalSubLessons }} lessons</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Reset -->
+    <div class="reset-section">
+      <h3>Reset Progress</h3>
+      <p class="text-muted">This will clear all your completed lessons, quiz results, and overall progress. This action cannot be undone.</p>
+      <button class="btn-reset" [disabled]="resetting()" (click)="resetProgress()">
+        @if (resetting()) {
+          <mat-spinner diameter="16"></mat-spinner>
+        }
+        Reset All Progress
+      </button>
+    </div>
+  }
+</div>

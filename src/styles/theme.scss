@@ -2,7 +2,7 @@
 
 @include mat.core();
 
-$primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600, 500, 700);
+$primary: mat.m2-define-palette(mat.$m2-indigo-palette, 700, 500, 900);
 $accent: mat.m2-define-palette(mat.$m2-teal-palette, 500, 300, 700);
 $warn: mat.m2-define-palette(mat.$m2-red-palette);
 

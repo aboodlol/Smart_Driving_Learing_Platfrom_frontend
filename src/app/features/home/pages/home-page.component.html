@@ -1,86 +1,111 @@
-<section class="home-stack d-grid gap-4">
+<div class="container py-4">
   @if (loading()) {
-    <mat-card>
-      <mat-card-content class="loading-card py-5 text-center">
-        <mat-spinner diameter="42"></mat-spinner>
-        <p class="mt-3 mb-0">Loading dashboard...</p>
-      </mat-card-content>
-    </mat-card>
-  }
-
-  @if (overview(); as data) {
-    <mat-card class="hero-card">
-      <mat-card-content>
-        <h1 class="mb-2">{{ data.title }}</h1>
-        <p class="mb-2 subtitle">{{ data.subtitle }}</p>
-        <p class="mb-0 user-label">Logged in as: {{ currentUser()?.name }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <div class="row g-3">
-      @for (action of data.actions; track action.title) {
-        <div class="col-12 col-md-4">
-          <mat-card class="h-100 action-card">
-            <mat-card-content>
-              <h3>{{ action.title }}</h3>
-              <p>{{ action.description }}</p>
-              <button mat-flat-button color="primary" type="button" [routerLink]="action.route">
-                {{ action.buttonLabel }}
-              </button>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      }
+    <div class="text-center py-5">
+      <mat-spinner diameter="42"></mat-spinner>
+      <p class="mt-3 text-muted">Loading dashboard...</p>
+    </div>
+  } @else {
+    <!-- Welcome Hero -->
+    <div class="welcome-card mb-4">
+      <h1>Welcome back, {{ currentUser()?.name }}!</h1>
+      <p>Your driving learning dashboard. Continue your journey to becoming a confident, safe driver.</p>
     </div>
 
-    <mat-card>
-      <mat-card-content class="progress-wrap">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-          <h2 class="mb-0">Quick Progress Overview</h2>
-          <button mat-stroked-button type="button" (click)="reload()">Refresh Data</button>
+    <!-- Action Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-4">
+        <div class="action-card">
+          <div class="action-icon">&#x1F4DA;</div>
+          <h3>Start Learning</h3>
+          <p>Begin your lessons on traffic rules and signs.</p>
+          <a routerLink="/lessons" class="action-btn">Start Learning &rarr;</a>
         </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="action-card">
+          <div class="action-icon">&#x1F4DD;</div>
+          <h3>Take a Quiz</h3>
+          <p>Test your knowledge with interactive quizzes.</p>
+          <a routerLink="/quiz" class="action-btn">Start Quiz &rarr;</a>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="action-card">
+          <div class="action-icon">&#x1F4CA;</div>
+          <h3>View Progress</h3>
+          <p>Track your learning journey and achievements.</p>
+          <a routerLink="/progress" class="action-btn">View Progress &rarr;</a>
+        </div>
+      </div>
+    </div>
 
-        @for (item of data.progress; track item.label) {
-          <div class="progress-block">
-            <div class="d-flex justify-content-between mb-1">
-              <strong>{{ item.label }}</strong>
-              <span>{{ item.value }}%</span>
+    @if (summary(); as s) {
+      <!-- Quick Progress -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-8">
+          <div class="section-card">
+            <h2>Quick Progress Overview</h2>
+            <div class="overall-bar-wrap mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="progress-label">Overall Completion</span>
+                <span class="progress-percent">{{ s.overallProgress }}%</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="s.overallProgress"></mat-progress-bar>
             </div>
-            <mat-progress-bar mode="determinate" [value]="item.value"></mat-progress-bar>
-            <button mat-button type="button" class="mt-2" [routerLink]="'/home'">{{ item.ctaLabel }}</button>
+            @for (lesson of s.lessons; track lesson.chapterId) {
+              <div class="chapter-mini mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="chapter-mini-name">{{ lesson.title }}</span>
+                  <span class="chapter-mini-count">{{ lesson.completedSubLessons }}/{{ lesson.totalSubLessons }}</span>
+                </div>
+                <mat-progress-bar mode="determinate" [value]="getChapterPercent(lesson.totalSubLessons, lesson.completedSubLessons)" class="mini-bar"></mat-progress-bar>
+              </div>
+            }
           </div>
-        }
-      </mat-card-content>
-    </mat-card>
+        </div>
 
-    <div class="row g-3">
-      <div class="col-12 col-lg-6">
-        <mat-card>
-          <mat-card-content>
-            <h3>Lesson Lookups</h3>
-            <mat-divider class="my-2"></mat-divider>
-            <mat-chip-set>
-              @for (item of lessonTypes(); track item.key) {
-                <mat-chip>{{ item.label }}</mat-chip>
-              }
-            </mat-chip-set>
-          </mat-card-content>
-        </mat-card>
+        <div class="col-12 col-lg-4">
+          <div class="section-card quiz-stats-card">
+            <h2>Quiz Performance</h2>
+            <div class="quiz-stat-item">
+              <span class="quiz-stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
+              <span class="quiz-stat-label">Last Score</span>
+            </div>
+            <div class="quiz-stat-item">
+              <span class="quiz-stat-value">{{ s.quizStats.totalAttempts }}</span>
+              <span class="quiz-stat-label">Attempts</span>
+            </div>
+            <div class="quiz-stat-item">
+              <span class="quiz-stat-value">{{ s.quizStats.averageScore }}%</span>
+              <span class="quiz-stat-label">Average</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="col-12 col-lg-6">
-        <mat-card>
-          <mat-card-content>
-            <h3>Support Channels</h3>
-            <mat-divider class="my-2"></mat-divider>
-            <mat-chip-set>
-              @for (item of supportChannels(); track item.key) {
-                <mat-chip>{{ item.label }}</mat-chip>
-              }
-            </mat-chip-set>
-          </mat-card-content>
-        </mat-card>
+      <!-- Quick Links -->
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <a routerLink="/assistant" class="quick-link-card text-decoration-none">
+            <span class="ql-icon">&#x1F916;</span>
+            <div>
+              <h3>AI Assistant</h3>
+              <p>Ask driving questions or get help with quiz mistakes</p>
+            </div>
+            <span class="ql-arrow">&rarr;</span>
+          </a>
+        </div>
+        <div class="col-12 col-md-6">
+          <a routerLink="/quiz/exam" class="quick-link-card text-decoration-none">
+            <span class="ql-icon">&#x1F3AF;</span>
+            <div>
+              <h3>Exam Simulation</h3>
+              <p>Practice with a real exam-style test</p>
+            </div>
+            <span class="ql-arrow">&rarr;</span>
+          </a>
+        </div>
       </div>
-    </div>
+    }
   }
-</section>
+</div>
