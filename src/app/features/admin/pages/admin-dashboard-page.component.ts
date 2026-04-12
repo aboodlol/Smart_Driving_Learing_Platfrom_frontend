@@ -15,8 +15,16 @@ import { AdminApiService } from '../../../core/services/admin-api.service';
 import {
   ChapterReport,
   DashboardStats,
-  RecentActivity,
+  RecentQuizAttempt,
 } from '../../../core/models/admin.models';
+
+export interface MergedActivity {
+  id: string;
+  type: string;
+  description: string;
+  name: string;
+  createdAt: string;
+}
 
 @Component({
   selector: 'app-admin-dashboard-page',
@@ -32,7 +40,7 @@ export class AdminDashboardPageComponent implements OnInit {
 
   protected readonly stats = signal<DashboardStats | null>(null);
   protected readonly chapters = signal<ChapterReport[]>([]);
-  protected readonly activities = signal<RecentActivity[]>([]);
+  protected readonly activities = signal<MergedActivity[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
 
@@ -40,14 +48,40 @@ export class AdminDashboardPageComponent implements OnInit {
     forkJoin({
       stats: this.api.getDashboardStats(),
       chapters: this.api.getChapterReports(),
-      activities: this.api.getRecentActivity(),
+      activitiesData: this.api.getRecentActivity(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.stats.set(data.stats);
           this.chapters.set(data.chapters);
-          this.activities.set(data.activities);
+
+          const merged: MergedActivity[] = [];
+          if (data.activitiesData?.recentUsers) {
+            data.activitiesData.recentUsers.forEach((u) => {
+              merged.push({
+                id: u.id,
+                type: 'registration',
+                description: `New user registered: ${u.role}`,
+                name: u.name,
+                createdAt: u.createdAt,
+              });
+            });
+          }
+          if (data.activitiesData?.recentQuizAttempts) {
+            data.activitiesData.recentQuizAttempts.forEach((q: RecentQuizAttempt) => {
+              const createdAt = q.createdAt ?? new Date().toISOString();
+              merged.push({
+                id: q.id ?? `${q.user?.id ?? q.user?.name ?? 'quiz'}-${createdAt}`,
+                type: 'quiz_attempt',
+                description: `Completed quiz with score ${q.score ?? 0}`,
+                name: q.user?.name || 'Unknown',
+                createdAt,
+              });
+            });
+          }
+          merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          this.activities.set(merged);
           this.loading.set(false);
         },
         error: (err: Error) => {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -24,9 +24,10 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   private lastScrollY = 0;
 
-  protected readonly title = 'DriveReady';
+  protected readonly title = 'DriveWise';
   protected readonly currentUser = this.authService.currentUser;
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly mobileMenuOpen = signal(false);
@@ -38,6 +39,10 @@ export class App {
 
   protected closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  protected isAdminPage(): boolean {
+    return this.router.url.startsWith('/admin');
   }
 
   protected onWindowScroll(): void {

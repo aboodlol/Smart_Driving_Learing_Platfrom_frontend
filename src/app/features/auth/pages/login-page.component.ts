@@ -51,8 +51,12 @@ export class LoginPageComponent {
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => {
-        void this.router.navigateByUrl('/home');
+      .subscribe((user) => {
+        if (user.role === 'admin') {
+          void this.router.navigateByUrl('/admin');
+        } else {
+          void this.router.navigateByUrl('/home');
+        }
       });
   }
 }

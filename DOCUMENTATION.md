@@ -1,4 +1,4 @@
-# DriveReady — Frontend Architecture Documentation
+# DriveWise — Frontend Architecture Documentation
 
 > **Version:** 1.0 · April 2026
 > **Framework:** Angular 21 (standalone components) · TypeScript 5.x
@@ -27,7 +27,7 @@
 
 ## 1. Business Overview
 
-**DriveReady** (originally "The Smart Driving Learning Platform") is a web-based educational platform that helps students prepare for their driving license exam. It provides:
+**DriveWise** (originally "The Smart Driving Learning Platform") is a web-based educational platform that helps students prepare for their driving license exam. It provides:
 
 - **Structured Lessons** — 5 chapters covering traffic laws, road signs, vehicle safety, and defensive driving, each with multiple sub-lessons.
 - **Practice Quizzes** — 100+ multiple-choice questions. Students can take chapter-specific quizzes or a full exam simulation.
@@ -212,7 +212,7 @@ The "Admin" nav link only appears when `currentUser().role === 'admin'`, styled 
 3. Backend returns `{ _id, name, email, role, token }`
 4. `AuthService.persistSession()` stores the user in:
    - A `signal<AuthUser | null>` for reactive UI updates
-   - `localStorage` under key `'driveready-auth-user'` for session persistence
+   - `localStorage` under key `'drivewise-auth-user'` for session persistence
 5. `authTokenInterceptor` attaches `Authorization: Bearer <token>` to all API requests
 
 ### Token Handling
@@ -469,7 +469,7 @@ Customised in `styles/theme.scss` with primary palette shifted to indigo 700 for
 
 ## 13. State Management
 
-DriveReady uses **Angular Signals** for all component-level state:
+DriveWise uses **Angular Signals** for all component-level state:
 
 ```typescript
 // Component state

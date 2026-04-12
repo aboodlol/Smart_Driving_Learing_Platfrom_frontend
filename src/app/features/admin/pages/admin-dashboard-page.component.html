@@ -1,5 +1,5 @@
 <div class="admin-dashboard">
-  <div class="container py-4">
+  <div class="container pt-4 pb-2">
     <div class="page-header mb-4">
       <h1 class="page-title">Admin Dashboard</h1>
       <p class="page-subtitle">Overview of platform statistics and activity</p>
@@ -19,28 +19,28 @@
         <div class="col-6 col-lg-3">
           <div class="stat-card">
             <div class="stat-icon users-icon">👥</div>
-            <div class="stat-value">{{ stats()?.totalUsers ?? 0 }}</div>
+            <div class="stat-value">{{ stats()?.users?.total ?? 0 }}</div>
             <div class="stat-label">Total Users</div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
             <div class="stat-icon chapters-icon">📚</div>
-            <div class="stat-value">{{ stats()?.totalChapters ?? 0 }}</div>
+            <div class="stat-value">{{ stats()?.content?.totalChapters ?? 0 }}</div>
             <div class="stat-label">Chapters</div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
             <div class="stat-icon lessons-icon">📝</div>
-            <div class="stat-value">{{ stats()?.totalSubLessons ?? 0 }}</div>
+            <div class="stat-value">{{ stats()?.content?.totalSubLessons ?? 0 }}</div>
             <div class="stat-label">Sub-Lessons</div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
             <div class="stat-icon docs-icon">📄</div>
-            <div class="stat-value">{{ stats()?.totalDocuments ?? 0 }}</div>
+            <div class="stat-value">{{ stats()?.documents?.totalDocuments ?? 0 }}</div>
             <div class="stat-label">Documents</div>
           </div>
         </div>
@@ -55,9 +55,9 @@
               <p class="text-muted">No chapter data available.</p>
             } @else {
               <div class="chart-bars">
-                @for (ch of chapters(); track ch._id) {
+                @for (ch of chapters(); track ch.chapterTitle) {
                   <div class="chart-row">
-                    <div class="chart-label" [title]="ch.title">{{ ch.title }}</div>
+                    <div class="chart-label" [title]="ch.chapterTitle">{{ ch.chapterTitle }}</div>
                     <div class="chart-bar-wrap">
                       <div
                         class="chart-bar-fill"
@@ -88,11 +88,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (ch of chapters(); track ch._id) {
+                  @for (ch of chapters(); track ch.chapterTitle) {
                     <tr>
-                      <td class="fw-500">{{ ch.title }}</td>
-                      <td class="text-center">{{ ch.subLessonCount }}</td>
-                      <td class="text-center">{{ ch.quizCount }}</td>
+                      <td class="fw-500">{{ ch.chapterTitle }}</td>
+                      <td class="text-center">{{ ch.totalSubLessons }}</td>
+                      <td class="text-center">{{ ch.quizStats?.totalQuestions ?? 0 }}</td>
                       <td style="min-width: 140px">
                         <mat-progress-bar
                           mode="determinate"
@@ -115,13 +115,13 @@
               <p class="text-muted">No recent activity.</p>
             } @else {
               <div class="activity-feed">
-                @for (a of activities(); track a._id) {
+                @for (a of activities(); track a.id) {
                   <div class="activity-item">
                     <span class="activity-icon">{{ activityIcon(a.type) }}</span>
                     <div class="activity-body">
                       <div class="activity-desc">{{ a.description }}</div>
                       <div class="activity-meta">
-                        {{ a.user.name }} &middot; {{ formatDate(a.createdAt) }}
+                        {{ a.name }} &middot; {{ formatDate(a.createdAt) }}
                       </div>
                     </div>
                   </div>

@@ -8,7 +8,7 @@ import {
   AdminUser,
   ChapterReport,
   DashboardStats,
-  RecentActivity,
+  RecentActivityDto,
   UpdateUserPayload,
 } from '../models/admin.models';
 
@@ -72,9 +72,9 @@ export class AdminApiService {
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 
-  getRecentActivity(): Observable<RecentActivity[]> {
+  getRecentActivity(): Observable<RecentActivityDto> {
     return this.http
-      .get<RecentActivity[]>(`${this.baseUrl}/dashboard/activity`)
+      .get<RecentActivityDto>(`${this.baseUrl}/dashboard/activity`)
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 

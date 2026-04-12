@@ -11,7 +11,7 @@ import {
 import { AuthApiService } from './auth-api.service';
 import { ToastService } from './toast.service';
 
-const SESSION_STORAGE_KEY = 'driveready-auth-user';
+const SESSION_STORAGE_KEY = 'drivewise-auth-user';
 
 @Injectable({
   providedIn: 'root',

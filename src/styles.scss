@@ -26,6 +26,11 @@ body {
   scrollbar-width: none; /* Firefox */
 }
 
+app-root {
+  display: block;
+  min-height: 100dvh;
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none; /* Chrome, Edge, Safari */

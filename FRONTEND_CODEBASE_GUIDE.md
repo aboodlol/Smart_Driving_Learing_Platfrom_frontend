@@ -1,13 +1,13 @@
-# DriveReady - Frontend Codebase Guide
+# DriveWise - Frontend Codebase Guide
 
-> A complete, in-depth guide to the Angular 21 frontend of **DriveReady** — The Smart Driving Learning Platform.  
+> A complete, in-depth guide to the Angular 21 frontend of **DriveWise** — The Smart Driving Learning Platform.  
 > This document explains every layer: the business logic, the architecture, the code patterns, the AI integration, the routing, and the relationships between all parts.
 
 ---
 
 ## Table of Contents
 
-1. [What is DriveReady? (The Business)](#1-what-is-driveready-the-business)
+1. [What is DriveWise? (The Business)](#1-what-is-drivewise-the-business)
 2. [Technology Stack](#2-technology-stack)
 3. [Project Structure (File Tree)](#3-project-structure-file-tree)
 4. [Architecture Overview](#4-architecture-overview)
@@ -39,9 +39,9 @@
 
 ---
 
-## 1. What is DriveReady? (The Business)
+## 1. What is DriveWise? (The Business)
 
-**DriveReady** is an online educational platform that helps people prepare for their **driving license exam**. Think of it as an e-learning app specifically for driving education.
+**DriveWise** is an online educational platform that helps people prepare for their **driving license exam**. Think of it as an e-learning app specifically for driving education.
 
 ### The Problem It Solves
 
@@ -233,7 +233,7 @@ The project follows a **feature-based folder structure**:
 
 ## 5. How the Application Boots
 
-Here's exactly what happens when a user opens DriveReady:
+Here's exactly what happens when a user opens DriveWise:
 
 ### Step 1: `main.ts`
 ```typescript
@@ -282,7 +282,7 @@ The root component is the **shell** that wraps every page. It provides:
 ### The Header
 ```
 ┌──────────────────────────────────────────────────────┐
-│ 🚗 DriveReady    Home  Lessons  Quiz  ...   [User]   │
+│ 🚗 DriveWise    Home  Lessons  Quiz  ...   [User]   │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -1246,7 +1246,7 @@ This is the AI-powered chat interface. A full chat experience:
 
 ```
 ┌──────────────────────────────────────────────┐
-│  DriveReady AI Assistant                      │
+│  DriveWise AI Assistant                      │
 │──────────────────────────────────────────────│
 │                                               │
 │                        ┌─────────────────┐   │
@@ -1413,7 +1413,7 @@ protected formatSize(bytes: number): string {
 
 ### What the AI Does
 
-The AI in DriveReady is a **driving education chatbot** powered by **Google Gemini** (Google's large language model). Its role:
+The AI in DriveWise is a **driving education chatbot** powered by **Google Gemini** (Google's large language model). Its role:
 
 1. **Answers driving-related questions** — "What's the speed limit in a school zone?", "Explain the right-of-way rules at a 4-way stop"
 2. **Explains concepts** — Students can ask about road signs, traffic laws, driving techniques
@@ -1479,7 +1479,7 @@ The AI sees the full conversation history and understands that "in school zones"
 
 ## 11. State Management — How Data Flows
 
-DriveReady uses **Angular Signals** instead of NgRx or other state libraries.
+DriveWise uses **Angular Signals** instead of NgRx or other state libraries.
 
 ### What Are Signals?
 
@@ -1500,7 +1500,7 @@ count.update(v => v + 1);  // 6
 const doubled = computed(() => count() * 2);  // 12
 ```
 
-### State Architecture in DriveReady
+### State Architecture in DriveWise
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -1694,7 +1694,7 @@ Old way:
 constructor(private http: HttpClient, private router: Router) { }
 ```
 
-DriveReady's way (modern):
+DriveWise's way (modern):
 ```typescript
 private readonly http = inject(HttpClient);
 private readonly router = inject(Router);
@@ -1718,7 +1718,7 @@ Old way:
 <div *ngFor="let item of items">{{ item.name }}</div>
 ```
 
-DriveReady's way:
+DriveWise's way:
 ```html
 @if (loading()) {
   <div>Loading...</div>
@@ -1858,7 +1858,7 @@ Login → Home → Admin Dashboard → See Stats & Charts
 
 ## Summary
 
-DriveReady is a well-structured Angular 21 application with:
+DriveWise is a well-structured Angular 21 application with:
 - **8 feature areas** (Landing, Auth, Home, Lessons, Quiz, Progress, Assistant, Admin)
 - **14 page components** — all standalone, all OnPush, all lazy-loaded
 - **8 singleton services** — handling auth, API calls, and notifications

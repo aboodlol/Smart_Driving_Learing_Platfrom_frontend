@@ -1,10 +1,10 @@
 @if (isAuthenticated()) {
   <header class="app-header" [class.header-hidden]="headerHidden()">
-    <div class="container header-shell py-3">
+    <div class="container-fluid header-shell py-2 px-4 px-md-5">
       <div class="header-main">
         <a routerLink="/home" class="brand text-decoration-none d-flex align-items-center gap-2">
           <span class="brand-icon">&#x1F697;</span>
-          DriveReady
+          DriveWise
         </a>
 
         <button
@@ -20,16 +20,18 @@
       </div>
 
       <nav id="primary-nav" class="nav-links" [class.mobile-open]="mobileMenuOpen()">
-        <a routerLink="/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
-           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Home</a>
-        <a routerLink="/lessons" routerLinkActive="active-link"
-           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Lessons</a>
-        <a routerLink="/quiz" routerLinkActive="active-link"
-           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Quiz</a>
-        <a routerLink="/progress" routerLinkActive="active-link"
-           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Progress</a>
-        <a routerLink="/assistant" routerLinkActive="active-link"
-           class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Assistant</a>
+        @if (!isAdminPage()) {
+          <a routerLink="/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
+             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Home</a>
+          <a routerLink="/lessons" routerLinkActive="active-link"
+             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Lessons</a>
+          <a routerLink="/quiz" routerLinkActive="active-link"
+             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Quiz</a>
+          <a routerLink="/progress" routerLinkActive="active-link"
+             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Progress</a>
+          <a routerLink="/assistant" routerLinkActive="active-link"
+             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Assistant</a>
+        }
 
         @if (currentUser()?.role === 'admin') {
           <a routerLink="/admin" routerLinkActive="active-link"
@@ -38,21 +40,21 @@
 
         <div class="nav-user-section">
           <span class="user-chip">{{ currentUser()?.name }}</span>
-          <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" (click)="logout()">Logout</button>
+          <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 nav-logout-btn" type="button" (click)="logout()">Logout</button>
         </div>
       </nav>
     </div>
   </header>
 } @else {
   <header class="app-header public-header" [class.header-hidden]="headerHidden()">
-    <div class="container header-shell py-3">
+    <div class="container-fluid header-shell py-2 px-4 px-md-5">
       <div class="header-main">
         <a routerLink="/landing" class="brand text-decoration-none d-flex align-items-center gap-2">
           <span class="brand-icon">&#x1F697;</span>
-          DriveReady
+          DriveWise
         </a>
-        <nav class="public-nav d-flex align-items-center gap-3">
-          <a routerLink="/login" class="text-decoration-none public-signin-link">Sign In</a>
+        <nav class="public-nav d-flex align-items-center gap-4">
+          <a routerLink="/login" routerLinkActive="selected-theme disabled" ariaCurrentWhenActive="page" class="text-decoration-none public-signin-link">Sign In</a>
           <a routerLink="/register" class="btn btn-primary-dr rounded-pill px-4 py-2 text-decoration-none">Get Started Free</a>
         </nav>
       </div>
@@ -65,7 +67,7 @@
 </main>
 
 <footer class="app-footer">
-  <div class="container py-3 text-center text-muted">
-    <small>&copy; 2026 DriveReady</small>
+  <div class="container text-center text-muted app-footer-inner">
+    <small class="m-0 d-block lh-1">&copy; 2026 DriveWise</small>
   </div>
 </footer>
