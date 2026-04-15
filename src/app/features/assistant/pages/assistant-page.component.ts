@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
@@ -25,7 +24,7 @@ const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
 
 @Component({
   selector: 'app-assistant-page',
-  imports: [FormsModule, MatProgressSpinnerModule],
+  imports: [FormsModule],
   templateUrl: './assistant-page.component.html',
   styleUrl: './assistant-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +41,7 @@ export class AssistantPageComponent implements OnInit {
   protected readonly conversationsLoading = signal(false);
   protected readonly conversationLoading = signal(false);
   protected readonly creatingConversation = signal(false);
+  protected readonly sidebarOpen = signal(true);
 
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly inputText = signal('');
@@ -52,6 +52,7 @@ export class AssistantPageComponent implements OnInit {
   protected readonly composerError = signal('');
   protected readonly sidebarError = signal('');
   protected readonly pageError = signal('');
+  protected readonly attachMenuOpen = signal(false);
 
   protected readonly composerDisabled = computed(
     () => this.loading() || this.conversationLoading() || this.creatingConversation(),
@@ -124,13 +125,19 @@ export class AssistantPageComponent implements OnInit {
     });
   }
 
+  protected toggleAttachMenu(): void {
+    this.attachMenuOpen.update((v) => !v);
+  }
+
   protected triggerImagePicker(): void {
     if (this.composerDisabled()) return;
+    this.attachMenuOpen.set(false);
     this.imageInput()?.nativeElement.click();
   }
 
   protected triggerPdfPicker(): void {
     if (this.composerDisabled()) return;
+    this.attachMenuOpen.set(false);
     this.pdfInput()?.nativeElement.click();
   }
 
@@ -247,6 +254,10 @@ export class AssistantPageComponent implements OnInit {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  protected toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
   }
 
   protected getConversationTitle(conversation: ConversationSummary): string {

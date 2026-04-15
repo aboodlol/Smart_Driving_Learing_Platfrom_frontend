@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
-import { ProgressSummary, ChapterProgress } from '../../../core/models/progress.models';
+import { ChapterProgress } from '../../../core/models/progress.models';
 import { LessonApiService } from '../../../core/services/lesson-api.service';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
 
 @Component({
   selector: 'app-lessons-page',
-  imports: [RouterLink, MatProgressSpinnerModule],
+  imports: [RouterLink],
   templateUrl: './lessons-page.component.html',
   styleUrl: './lessons-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,5 +63,11 @@ export class LessonsPageComponent {
 
   protected getCompletedCount(chapter: Chapter): number {
     return this.progressMap().get(chapter.title)?.completedSubLessons ?? 0;
+  }
+
+  protected getChapterPercent(chapter: Chapter): number {
+    const total = chapter.lessons.length;
+    const completed = this.getCompletedCount(chapter);
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
   }
 }

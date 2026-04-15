@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
 import { LessonApiService } from '../../../core/services/lesson-api.service';
 
 @Component({
   selector: 'app-quiz-page',
-  imports: [RouterLink, MatProgressSpinnerModule],
+  imports: [RouterLink],
   templateUrl: './quiz-page.component.html',
   styleUrl: './quiz-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

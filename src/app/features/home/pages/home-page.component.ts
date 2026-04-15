@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { ProgressSummary } from '../../../core/models/progress.models';
 import { AuthService } from '../../../core/services/auth.service';
@@ -10,11 +8,7 @@ import { ProgressApiService } from '../../../core/services/progress-api.service'
 
 @Component({
   selector: 'app-home-page',
-  imports: [
-    RouterLink,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [RouterLink],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

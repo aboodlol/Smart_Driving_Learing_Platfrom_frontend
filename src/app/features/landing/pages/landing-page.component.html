@@ -1,70 +1,59 @@
-<div #animWrapper>
-  <!-- Decorative rounded squares — two rows, sliding left-to-right -->
-  <div class="deco-rows" aria-hidden="true">
-    <div class="deco-row row-1">
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-    </div>
-    <div class="deco-row row-2">
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-      <div class="deco-sq"></div>
-    </div>
+<div #animWrapper class="landing-wrapper">
+  <!-- Animated gradient blobs -->
+  <div class="blob-container" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
   </div>
 
   <!-- Hero -->
   <section class="hero-section">
-    <div class="container">
-      <div class="hero-content text-center scroll-reveal">
-        <span class="trust-badge">&#x1F393; Your smart way to learn driving</span>
+    <div class="hero-content scroll-reveal">
+      <span class="trust-badge">
+        <span class="material-icons badge-icon">school</span>
+        Your smart way to learn driving
+      </span>
 
-        <h1 class="hero-title">
-          Pass Your Driving Test
-          <span class="text-accent">With Confidence</span>
-        </h1>
+      <h1 class="hero-title">
+        Pass Your Driving Test
+        <span class="gradient-text">With Confidence</span>
+      </h1>
 
-        <p class="hero-subtitle">
-          Master traffic laws, road signs, and driving safety through interactive
-          lessons, AI-powered explanations, and exam-ready practice quizzes.
-        </p>
+      <p class="hero-subtitle">
+        Master traffic laws, road signs, and driving safety through interactive
+        lessons, AI-powered explanations, and exam-ready practice quizzes.
+      </p>
 
-        <div class="hero-ctas">
-          <a routerLink="/register" class="btn-cta-primary">
-            &#x1F680; Start Learning Free
-          </a>
-          <a routerLink="/login" class="btn-cta-secondary">
-            Sign In &rarr;
-          </a>
+      <div class="hero-ctas">
+        <a routerLink="/register" class="btn-primary-glow">
+          <span class="material-icons">rocket_launch</span>
+          Start Learning Free
+        </a>
+        <a routerLink="/login" class="btn-secondary-outline">
+          Sign In
+          <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
+        </a>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-number">5</span>
+          <span class="stat-label">Chapters</span>
         </div>
-
-        <div class="stats-row">
-          <div class="stat-item">
-            <span class="stat-number">5</span>
-            <span class="stat-label">Chapters</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">50+</span>
-            <span class="stat-label">Lessons</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">100+</span>
-            <span class="stat-label">Quiz Questions</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">AI</span>
-            <span class="stat-label">Powered Assistant</span>
-          </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">50+</span>
+          <span class="stat-label">Lessons</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">100+</span>
+          <span class="stat-label">Quiz Questions</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number gradient-text">AI</span>
+          <span class="stat-label">Powered</span>
         </div>
       </div>
     </div>
@@ -72,103 +61,96 @@
 
   <!-- Features -->
   <section class="features-section">
-    <div class="container">
-      <h2 class="section-title text-center scroll-reveal">Everything You Need to Pass</h2>
-      <p class="section-subtitle text-center scroll-reveal">
-        A complete learning platform designed to get you road-ready
-      </p>
+    <h2 class="section-heading scroll-reveal">Everything You Need to Pass</h2>
+    <p class="section-subheading scroll-reveal">
+      A complete learning platform designed to get you road-ready
+    </p>
 
-      <div class="features-grid">
-        <div class="feature-card scroll-reveal">
-          <div class="feature-square sq-accent-indigo" aria-hidden="true"></div>
-          <div class="feature-icon">&#x1F4DA;</div>
-          <h3 class="feature-title">Structured Lessons</h3>
-          <p class="feature-desc">
-            5 chapters covering traffic laws, road signs, vehicle safety, and defensive driving with progressive difficulty.
-          </p>
+    <div class="features-grid">
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon-wrap icon-violet">
+          <span class="material-icons">menu_book</span>
         </div>
+        <h3 class="feature-title">Structured Lessons</h3>
+        <p class="feature-desc">
+          5 chapters covering traffic laws, road signs, vehicle safety, and defensive driving with progressive difficulty.
+        </p>
+      </div>
 
-        <div class="feature-card scroll-reveal">
-          <div class="feature-square sq-accent-green" aria-hidden="true"></div>
-          <div class="feature-icon">&#x1F4DD;</div>
-          <h3 class="feature-title">Practice Quizzes</h3>
-          <p class="feature-desc">
-            100+ questions modeled after the real exam. Take chapter quizzes or full exam simulations.
-          </p>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon-wrap icon-green">
+          <span class="material-icons">assignment</span>
         </div>
+        <h3 class="feature-title">Practice Quizzes</h3>
+        <p class="feature-desc">
+          100+ questions modeled after the real exam. Take chapter quizzes or full exam simulations.
+        </p>
+      </div>
 
-        <div class="feature-card scroll-reveal">
-          <div class="feature-square sq-accent-amber" aria-hidden="true"></div>
-          <div class="feature-icon">&#x1F916;</div>
-          <h3 class="feature-title">AI Assistant</h3>
-          <p class="feature-desc">
-            A Gemini-powered tutor that knows your progress and answers driving-related questions instantly.
-          </p>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon-wrap icon-blue">
+          <span class="material-icons">smart_toy</span>
         </div>
+        <h3 class="feature-title">AI Assistant</h3>
+        <p class="feature-desc">
+          A Gemini-powered tutor that knows your progress and answers driving-related questions instantly.
+        </p>
+      </div>
 
-        <div class="feature-card scroll-reveal">
-          <div class="feature-square sq-accent-rose" aria-hidden="true"></div>
-          <div class="feature-icon">&#x1F4CA;</div>
-          <h3 class="feature-title">Progress Tracking</h3>
-          <p class="feature-desc">
-            See exactly where you stand with detailed per-chapter progress, quiz scores, and overall readiness.
-          </p>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon-wrap icon-orange">
+          <span class="material-icons">insights</span>
         </div>
+        <h3 class="feature-title">Progress Tracking</h3>
+        <p class="feature-desc">
+          See exactly where you stand with detailed per-chapter progress, quiz scores, and overall readiness.
+        </p>
       </div>
     </div>
   </section>
 
   <!-- How it works -->
   <section class="steps-section">
-    <div class="container">
-      <h2 class="section-title text-center scroll-reveal">How It Works</h2>
-      <p class="section-subtitle text-center scroll-reveal">Three simple steps to your driving license</p>
+    <h2 class="section-heading scroll-reveal">How It Works</h2>
+    <p class="section-subheading scroll-reveal">Three simple steps to your driving license</p>
 
-      <div class="steps-row">
-        <div class="step-card scroll-reveal">
-          <div class="step-number">1</div>
-          <div class="step-square" aria-hidden="true"></div>
-          <h3 class="step-title">Create Your Account</h3>
-          <p class="step-desc">Sign up in seconds. No credit card required, completely free to use.</p>
-        </div>
+    <div class="steps-row">
+      <div class="step-card scroll-reveal">
+        <div class="step-number">1</div>
+        <h3 class="step-title">Create Your Account</h3>
+        <p class="step-desc">Sign up in seconds. No credit card required, completely free to use.</p>
+      </div>
 
-        <div class="step-connector scroll-reveal" aria-hidden="true">
-          <div class="connector-line"></div>
-        </div>
+      <div class="step-connector scroll-reveal" aria-hidden="true">
+        <div class="connector-line"></div>
+      </div>
 
-        <div class="step-card scroll-reveal">
-          <div class="step-number">2</div>
-          <div class="step-square" aria-hidden="true"></div>
-          <h3 class="step-title">Learn &amp; Practice</h3>
-          <p class="step-desc">Study lessons at your pace, quiz yourself, and ask the AI when you're stuck.</p>
-        </div>
+      <div class="step-card scroll-reveal">
+        <div class="step-number">2</div>
+        <h3 class="step-title">Learn &amp; Practice</h3>
+        <p class="step-desc">Study lessons at your pace, quiz yourself, and ask the AI when you're stuck.</p>
+      </div>
 
-        <div class="step-connector scroll-reveal" aria-hidden="true">
-          <div class="connector-line"></div>
-        </div>
+      <div class="step-connector scroll-reveal" aria-hidden="true">
+        <div class="connector-line"></div>
+      </div>
 
-        <div class="step-card scroll-reveal">
-          <div class="step-number">3</div>
-          <div class="step-square" aria-hidden="true"></div>
-          <h3 class="step-title">Ace the Exam</h3>
-          <p class="step-desc">Walk into your driving test with confidence and pass on your first try.</p>
-        </div>
+      <div class="step-card scroll-reveal">
+        <div class="step-number">3</div>
+        <h3 class="step-title">Ace the Exam</h3>
+        <p class="step-desc">Walk into your driving test with confidence and pass on your first try.</p>
       </div>
     </div>
   </section>
 
   <!-- CTA -->
   <section class="cta-section scroll-reveal">
-    <div class="container text-center">
-      <div class="cta-squares" aria-hidden="true">
-        <div class="cta-sq cta-sq-1"></div>
-        <div class="cta-sq cta-sq-2"></div>
-      </div>
-      <h2 class="cta-title">Ready to Start Your Journey?</h2>
-      <p class="cta-subtitle">Join DriveWise and start your journey to becoming a confident driver.</p>
-      <a routerLink="/register" class="btn-cta-primary btn-cta-lg">
-        &#x1F680; Get Started Free
-      </a>
-    </div>
+    <div class="cta-glow" aria-hidden="true"></div>
+    <h2 class="cta-title">Ready to Start Your Journey?</h2>
+    <p class="cta-subtitle">Join DriveWise and start your journey to becoming a confident driver.</p>
+    <a routerLink="/register" class="btn-primary-glow btn-lg">
+      <span class="material-icons">rocket_launch</span>
+      Get Started Free
+    </a>
   </section>
 </div>

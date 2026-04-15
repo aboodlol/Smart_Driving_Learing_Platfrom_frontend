@@ -5,7 +5,6 @@ import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { matchValidator } from '../../../core/validators/match.validator';
@@ -18,7 +17,6 @@ import { matchValidator } from '../../../core/validators/match.validator';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',

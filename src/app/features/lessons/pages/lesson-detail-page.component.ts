@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
@@ -11,7 +10,7 @@ import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-lesson-detail-page',
-  imports: [RouterLink, MatProgressSpinnerModule],
+  imports: [RouterLink],
   templateUrl: './lesson-detail-page.component.html',
   styleUrl: './lesson-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

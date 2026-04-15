@@ -1,215 +1,228 @@
-<div class="container py-4">
-  <div class="page-header mb-3">
-    <h1>AI Assistant</h1>
-    <p class="text-muted">Ask me anything about driving rules, traffic signs, or exam preparation.</p>
-  </div>
+<div class="assistant-layout" [class.sidebar-collapsed]="!sidebarOpen()">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="sidebar-top">
+      <button type="button" class="btn-new-chat" (click)="createNewConversation()" [disabled]="creatingConversation() || loading()">
+        <span class="material-icons">add</span>
+        @if (creatingConversation()) {
+          Creating...
+        } @else {
+          New Chat
+        }
+      </button>
+    </div>
 
-  <div class="assistant-layout">
-    <aside class="conversation-sidebar" aria-label="Conversation history">
-      <div class="sidebar-header">
-        <h2>Chats</h2>
-        <button
-          type="button"
-          class="btn-new-chat"
-          (click)="createNewConversation()"
-          [disabled]="creatingConversation() || loading()"
-        >
-          @if (creatingConversation()) {
-            Creating...
+    @if (sidebarError()) {
+      <div class="sidebar-feedback" role="alert">{{ sidebarError() }}</div>
+    }
+
+    @if (conversationsLoading()) {
+      <div class="sidebar-feedback">
+        <div class="custom-spinner custom-spinner-sm"></div>
+        Loading...
+      </div>
+    } @else if (conversations().length === 0) {
+      <div class="sidebar-feedback">No conversations yet.</div>
+    } @else {
+      <div class="conversation-list">
+        @for (conversation of conversations(); track conversation._id) {
+          <button
+            type="button"
+            class="conversation-item"
+            [class.active]="conversation._id === activeConversationId()"
+            (click)="selectConversation(conversation._id)"
+          >
+            <span class="material-icons conv-icon">chat_bubble_outline</span>
+            <div class="conv-text">
+              <span class="conv-title">{{ getConversationTitle(conversation) }}</span>
+              @if (conversation.updatedAt || conversation.createdAt) {
+                <span class="conv-date">{{ formatConversationDate(conversation.updatedAt || conversation.createdAt) }}</span>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </aside>
+
+  <!-- Sidebar Toggle -->
+  <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-label]="sidebarOpen() ? 'Close sidebar' : 'Open sidebar'">
+    <span class="material-icons">{{ sidebarOpen() ? 'chevron_left' : 'chevron_right' }}</span>
+  </button>
+
+  <!-- Chat Area -->
+  <div class="chat-area">
+    <div class="chat-messages" #chatContainer>
+      @if (conversationLoading()) {
+        <div class="chat-loading">
+          <div class="custom-spinner"></div>
+          <span>Loading conversation...</span>
+        </div>
+      } @else {
+        @if (pageError()) {
+          <div class="chat-error" role="alert">
+            <span class="material-icons">error_outline</span>
+            {{ pageError() }}
+          </div>
+        }
+
+        @if (messages().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon-wrap">
+              <span class="material-icons">smart_toy</span>
+            </div>
+            <h2 class="gradient-text">Welcome to DriveWise AI</h2>
+            @if (activeConversationId()) {
+              <p>This chat is empty. Send a message, image, or PDF to begin.</p>
+            } @else {
+              <p>I'm here to help you learn about driving. Ask me about traffic signs, road rules, exam tips, or anything driving-related!</p>
+            }
+            <div class="example-grid">
+              <button type="button" class="example-card hover-lift" (click)="inputText.set('Explain traffic signs'); sendMessage()">
+                <span class="material-icons example-icon">traffic</span>
+                <span>Explain traffic signs</span>
+              </button>
+              <button type="button" class="example-card hover-lift" (click)="inputText.set('Give me a driving test quiz'); sendMessage()">
+                <span class="material-icons example-icon">quiz</span>
+                <span>Give me a driving test quiz</span>
+              </button>
+              <button type="button" class="example-card hover-lift" (click)="inputText.set('Parallel parking guide'); sendMessage()">
+                <span class="material-icons example-icon">local_parking</span>
+                <span>Parallel parking guide</span>
+              </button>
+              <button type="button" class="example-card hover-lift" (click)="inputText.set('Highway merging rules'); sendMessage()">
+                <span class="material-icons example-icon">merge_type</span>
+                <span>Highway merging rules</span>
+              </button>
+            </div>
+          </div>
+        }
+
+        @for (msg of messages(); track msg._id || $index) {
+          <div class="message" [class.user-msg]="msg.role === 'user'" [class.assistant-msg]="msg.role === 'assistant'">
+            <div class="message-avatar">
+              @if (msg.role === 'user') {
+                <span class="material-icons">person</span>
+              } @else {
+                <span class="material-icons">smart_toy</span>
+              }
+            </div>
+            <div class="message-bubble">
+              @if (msg.content) {
+                <div class="message-text">{{ msg.content }}</div>
+              }
+              @if (msg.imageUrl) {
+                <a class="message-image-link" [href]="msg.imageUrl" target="_blank" rel="noopener noreferrer">
+                  <img class="message-image" [src]="msg.imageUrl" alt="Uploaded image" />
+                </a>
+              }
+              @if (msg.fileUrl) {
+                <a class="file-link" [href]="msg.fileUrl" target="_blank" rel="noopener noreferrer" [attr.download]="msg.fileName || null">
+                  <span class="material-icons" style="font-size: 16px;">attach_file</span>
+                  {{ msg.fileName || 'Download attachment' }}
+                </a>
+              }
+              @if (msg.createdAt) {
+                <div class="message-time">{{ formatMessageTime(msg.createdAt) }}</div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      @if (loading()) {
+        <div class="message assistant-msg">
+          <div class="message-avatar">
+            <span class="material-icons">smart_toy</span>
+          </div>
+          <div class="message-bubble typing-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <!-- Hidden file inputs -->
+      <input #imageInput type="file" accept="image/*" class="file-input" (change)="onImageSelected($event)" [disabled]="composerDisabled()" />
+      <input #pdfInput type="file" accept="application/pdf,.pdf" class="file-input" (change)="onPdfSelected($event)" [disabled]="composerDisabled()" />
+
+      @if (selectedImage() || selectedPdf()) {
+        <div class="attachment-previews">
+          @if (selectedImage(); as imageFile) {
+            <div class="attachment-chip">
+              @if (selectedImagePreviewUrl(); as url) {
+                <img class="attachment-thumb" [src]="url" [alt]="imageFile.name" />
+              }
+              <div class="attachment-info">
+                <span class="attachment-name">{{ imageFile.name }}</span>
+                <span class="attachment-size">{{ formatSize(imageFile.size) }}</span>
+              </div>
+              <button type="button" class="btn-remove" (click)="removeSelectedImage()" [disabled]="composerDisabled()">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+          }
+          @if (selectedPdf(); as pdfFile) {
+            <div class="attachment-chip">
+              <div class="pdf-badge">PDF</div>
+              <div class="attachment-info">
+                <span class="attachment-name">{{ pdfFile.name }}</span>
+                <span class="attachment-size">{{ formatSize(pdfFile.size) }}</span>
+              </div>
+              <button type="button" class="btn-remove" (click)="removeSelectedPdf()" [disabled]="composerDisabled()">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (composerError()) {
+        <div class="composer-error" role="alert">{{ composerError() }}</div>
+      }
+
+      <div class="input-row">
+        <div class="attach-wrapper">
+          <button type="button" class="btn-attach-plus" (click)="toggleAttachMenu()" [disabled]="composerDisabled()">
+            <span class="material-icons">add</span>
+          </button>
+          @if (attachMenuOpen()) {
+            <div class="attach-menu">
+              <button type="button" class="attach-menu-item" (click)="triggerImagePicker()">
+                <span class="material-icons">image</span>
+                Image
+              </button>
+              <button type="button" class="attach-menu-item" (click)="triggerPdfPicker()">
+                <span class="material-icons">picture_as_pdf</span>
+                PDF
+              </button>
+            </div>
+          }
+        </div>
+        <input
+          type="text"
+          class="chat-input"
+          placeholder="Ask me anything about driving..."
+          [ngModel]="inputText()"
+          (ngModelChange)="inputText.set($event)"
+          (keydown)="onKeyDown($event)"
+          [disabled]="composerDisabled()"
+        />
+        <button class="btn-send" type="button" [disabled]="!canSend()" (click)="sendMessage()">
+          @if (loading()) {
+            <div class="custom-spinner custom-spinner-sm" style="border-top-color: #fff;"></div>
           } @else {
-            + New Chat
+            <span class="material-icons">send</span>
           }
         </button>
       </div>
 
-      @if (sidebarError()) {
-        <div class="sidebar-feedback" role="alert">{{ sidebarError() }}</div>
-      }
-
-      @if (conversationsLoading()) {
-        <div class="sidebar-feedback">Loading conversations...</div>
-      } @else if (conversations().length === 0) {
-        <div class="sidebar-feedback">No conversations yet. Start your first chat.</div>
-      } @else {
-        <div class="conversation-list">
-          @for (conversation of conversations(); track conversation._id) {
-            <button
-              type="button"
-              class="conversation-item"
-              [class.active]="conversation._id === activeConversationId()"
-              (click)="selectConversation(conversation._id)"
-            >
-              <span class="conversation-title">{{ getConversationTitle(conversation) }}</span>
-              @if (conversation.updatedAt || conversation.createdAt) {
-                <span class="conversation-date">{{ formatConversationDate(conversation.updatedAt || conversation.createdAt) }}</span>
-              }
-            </button>
-          }
-        </div>
-      }
-    </aside>
-
-    <div class="chat-wrapper">
-      <div class="chat-messages" #chatContainer>
-        @if (conversationLoading()) {
-          <div class="chat-loading-state">Loading conversation...</div>
-        } @else {
-          @if (pageError()) {
-            <div class="assistant-error" role="alert">{{ pageError() }}</div>
-          }
-
-          @if (messages().length === 0) {
-            <div class="empty-state">
-              <div class="empty-icon">&#x1F697;</div>
-              <h3>DriveWise Assistant</h3>
-              @if (activeConversationId()) {
-                <p>This chat is empty. Send a message, image, or PDF to begin.</p>
-              } @else {
-                <p>
-                  I'm here to help you learn about driving. Ask me about traffic signs, road rules,
-                  exam tips, or anything driving-related!
-                </p>
-              }
-            </div>
-          }
-
-          @for (msg of messages(); track msg._id || $index) {
-            <div class="message" [class.user-message]="msg.role === 'user'" [class.assistant-message]="msg.role === 'assistant'">
-              <div class="message-bubble">
-                @if (msg.content) {
-                  <div class="message-text">{{ msg.content }}</div>
-                }
-
-                @if (msg.imageUrl) {
-                  <a class="message-image-link" [href]="msg.imageUrl" target="_blank" rel="noopener noreferrer">
-                    <img class="message-image" [src]="msg.imageUrl" alt="Uploaded image" />
-                  </a>
-                }
-
-                @if (msg.fileUrl) {
-                  <a
-                    class="file-attachment-link"
-                    [href]="msg.fileUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    [attr.download]="msg.fileName || null"
-                  >
-                    {{ msg.fileName || 'Download attachment' }}
-                  </a>
-                }
-
-                @if (msg.createdAt) {
-                  <div class="message-time">{{ formatMessageTime(msg.createdAt) }}</div>
-                }
-              </div>
-            </div>
-          }
-        }
-
-        @if (loading()) {
-          <div class="message assistant-message">
-            <div class="message-bubble typing-indicator">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-            </div>
-          </div>
-        }
-      </div>
-
-      <div class="chat-input-bar">
-        <div class="composer-tools">
-          <input
-            #imageInput
-            type="file"
-            accept="image/*"
-            class="file-input"
-            (change)="onImageSelected($event)"
-            [disabled]="composerDisabled()"
-          />
-          <input
-            #pdfInput
-            type="file"
-            accept="application/pdf,.pdf"
-            class="file-input"
-            (change)="onPdfSelected($event)"
-            [disabled]="composerDisabled()"
-          />
-
-          <button type="button" class="btn-attach" (click)="triggerImagePicker()" [disabled]="composerDisabled()">
-            Add image
-          </button>
-          <button type="button" class="btn-attach" (click)="triggerPdfPicker()" [disabled]="composerDisabled()">
-            Add PDF
-          </button>
-        </div>
-
-        @if (selectedImage() || selectedPdf()) {
-          <div class="attachment-preview-panel">
-            @if (selectedImage(); as imageFile) {
-              <div class="attachment-chip">
-                @if (selectedImagePreviewUrl(); as imagePreviewUrl) {
-                  <img class="image-thumb" [src]="imagePreviewUrl" [alt]="'Selected image ' + imageFile.name" />
-                }
-                <div class="attachment-meta">
-                  <div class="attachment-name" [title]="imageFile.name">{{ imageFile.name }}</div>
-                  <div class="attachment-size">{{ formatSize(imageFile.size) }}</div>
-                </div>
-                <button
-                  type="button"
-                  class="btn-remove-attachment"
-                  (click)="removeSelectedImage()"
-                  [disabled]="composerDisabled()"
-                >
-                  Remove
-                </button>
-              </div>
-            }
-
-            @if (selectedPdf(); as pdfFile) {
-              <div class="attachment-chip">
-                <div class="pdf-badge" aria-hidden="true">PDF</div>
-                <div class="attachment-meta">
-                  <div class="attachment-name" [title]="pdfFile.name">{{ pdfFile.name }}</div>
-                  <div class="attachment-size">{{ formatSize(pdfFile.size) }}</div>
-                </div>
-                <button
-                  type="button"
-                  class="btn-remove-attachment"
-                  (click)="removeSelectedPdf()"
-                  [disabled]="composerDisabled()"
-                >
-                  Remove
-                </button>
-              </div>
-            }
-          </div>
-        }
-
-        @if (composerError()) {
-          <div class="composer-error" role="alert">
-            {{ composerError() }}
-          </div>
-        }
-
-        <div class="composer-main-row">
-          <input
-            type="text"
-            class="chat-input"
-            placeholder="Type your message or attach an image/PDF..."
-            [ngModel]="inputText()"
-            (ngModelChange)="inputText.set($event)"
-            (keydown)="onKeyDown($event)"
-            [disabled]="composerDisabled()"
-          />
-          <button class="btn-send" type="button" [disabled]="!canSend()" (click)="sendMessage()">
-            @if (loading()) {
-              <mat-spinner diameter="18"></mat-spinner>
-            } @else {
-              Send
-            }
-          </button>
-        </div>
+      <div class="input-footer">
+        DriveWise AI can make mistakes. Verify important information.
       </div>
     </div>
   </div>

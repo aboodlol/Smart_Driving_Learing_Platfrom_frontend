@@ -1,10 +1,10 @@
 <div class="admin-documents">
   <div class="container py-4">
     <div class="page-header mb-4">
-      <div class="d-flex align-items-center gap-2 mb-2">
+      <div class="header-back mb-2">
         <a routerLink="/admin" class="back-link">&larr; Dashboard</a>
       </div>
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="header-row">
         <div>
           <h1 class="page-title">Document Management</h1>
           <p class="page-subtitle">Upload and manage AI knowledge base documents</p>
@@ -14,16 +14,16 @@
             #fileInput
             type="file"
             accept=".pdf,.doc,.docx,.txt"
-            class="d-none"
+            class="hidden-input"
             (change)="onFileSelected($event)"
           />
           <button
-            class="btn btn-upload"
+            class="btn-upload"
             (click)="triggerUpload()"
             [disabled]="uploading()"
           >
             @if (uploading()) {
-              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <div class="custom-spinner-sm"></div>
               Uploading...
             } @else {
               📤 Upload Document
@@ -35,22 +35,20 @@
 
     @if (loading()) {
       <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+        <div class="custom-spinner"></div>
       </div>
     } @else if (error()) {
-      <div class="alert alert-danger">{{ error() }}</div>
+      <div class="error-alert">{{ error() }}</div>
     } @else if (documents().length === 0) {
       <div class="empty-state">
         <div class="empty-icon">📄</div>
         <h3>No documents yet</h3>
         <p>Upload PDF, DOCX, or TXT files to enrich the AI assistant's knowledge base.</p>
-        <button class="btn btn-upload" (click)="triggerUpload()">📤 Upload Your First Document</button>
+        <button class="btn-upload" (click)="triggerUpload()">📤 Upload Your First Document</button>
       </div>
     } @else {
       <div class="doc-count mb-3">
-        <span class="badge bg-primary-subtle text-primary-emphasis">{{ documents().length }} document(s)</span>
+        <span class="count-badge">{{ documents().length }} document(s)</span>
       </div>
 
       <div class="doc-grid">
@@ -78,7 +76,7 @@
               </div>
             </div>
             <div class="doc-actions">
-              <button class="btn btn-sm btn-outline-danger w-100" (click)="deleteDocument(doc)">
+              <button class="btn-delete-doc" (click)="deleteDocument(doc)">
                 Delete
               </button>
             </div>

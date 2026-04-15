@@ -1,37 +1,65 @@
-<div class="container py-4">
-  <div class="page-header mb-4">
-    <h1>Quizzes</h1>
-    <p class="text-muted">Test your driving knowledge with chapter quizzes or a full exam simulation.</p>
+<div class="page-wrapper">
+  <div class="page-header fade-in-up">
+    <h1 class="page-title">Quizzes</h1>
+    <p class="page-subtitle">Test your driving knowledge with chapter quizzes or a full exam simulation.</p>
   </div>
 
   @if (loading()) {
-    <div class="text-center py-5">
-      <mat-spinner diameter="42"></mat-spinner>
-      <p class="mt-3 text-muted">Loading quizzes...</p>
+    <div class="loading-state">
+      <div class="custom-spinner"></div>
+      <p class="loading-text">Loading quizzes...</p>
     </div>
   } @else {
-    <div class="exam-hero-card mb-4">
+    <!-- Exam Hero -->
+    <div class="exam-hero fade-in-up">
+      <div class="exam-glow" aria-hidden="true"></div>
       <div class="exam-hero-content">
-        <div class="exam-icon">&#x1F3AF;</div>
-        <div>
+        <div class="exam-icon">
+          <span class="material-icons">emoji_events</span>
+        </div>
+        <div class="exam-text">
           <h2>Exam Simulation</h2>
           <p>10 random questions from all chapters. No answers shown until you submit. Just like the real exam!</p>
         </div>
       </div>
-      <a routerLink="/quiz/exam" class="btn-start-exam">Start Exam</a>
+      <a routerLink="/quiz/exam" class="btn-start-exam">
+        <span class="material-icons">play_arrow</span>
+        Start Exam
+      </a>
     </div>
 
-    <h2 class="section-title">Chapter Quizzes</h2>
-    <div class="row g-3">
-      @for (chapter of chapters(); track chapter._id) {
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="quiz-card">
-            <h3>{{ chapter.title }}</h3>
-            <p>{{ chapter.description }}</p>
-            <a [routerLink]="['/quiz/chapter', chapter.title]" class="btn-start-quiz">Start Quiz &rarr;</a>
+    <!-- Chapter Quizzes -->
+    <h2 class="section-title fade-in-up" style="animation-delay: 0.1s;">Chapter Quizzes</h2>
+    <div class="quiz-grid">
+      @for (chapter of chapters(); track chapter._id; let i = $index) {
+        <div class="quiz-card hover-lift fade-in-up" [style.animation-delay]="((i + 2) * 0.06) + 's'">
+          <div class="quiz-card-icon">
+            <span class="material-icons">quiz</span>
           </div>
+          <h3>{{ chapter.title }}</h3>
+          <p>{{ chapter.description }}</p>
+          <a [routerLink]="['/quiz/chapter', chapter.title]" class="btn-start-quiz">
+            Start Quiz
+            <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
+          </a>
         </div>
       }
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-card fade-in-up" style="animation-delay: 0.3s;">
+      <div class="tips-icon">
+        <span class="material-icons">lightbulb</span>
+      </div>
+      <div>
+        <h3>Tips for Success</h3>
+        <ul class="tips-list">
+          <li>Review the lesson material before taking a quiz</li>
+          <li>Read each question carefully before answering</li>
+          <li>Use the AI Assistant if you need help understanding a concept</li>
+          <li>Retake quizzes to improve your score</li>
+        </ul>
+      </div>
     </div>
   }
 </div>

@@ -4,15 +4,22 @@
 
 .back-link {
   display: inline-block;
-  color: var(--dr-primary);
+  color: #a78bfa;
   font-weight: 500;
   font-size: 0.9rem;
   text-decoration: none;
   margin-bottom: 1.5rem;
+  transition: color 0.2s;
 }
 
 .back-link:hover {
+  color: #c4b5fd;
   text-decoration: underline;
+}
+
+.loading-text {
+  color: var(--dr-text-muted);
+  font-size: 0.9rem;
 }
 
 .chapter-header {
@@ -22,8 +29,14 @@
 .chapter-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--dr-text);
+  color: #fff;
   margin-bottom: 0.5rem;
+}
+
+.chapter-desc {
+  color: var(--dr-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .sub-lessons-list {
@@ -35,16 +48,22 @@
 .sub-lesson-card {
   display: flex;
   gap: 1.25rem;
-  background: #ffffff;
-  border: 1px solid var(--dr-border);
-  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
   padding: 1.5rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.sub-lesson-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .sub-lesson-card.completed {
-  border-left: 3px solid #059669;
-  background: #f0fdf4;
+  border-left: 3px solid #10b981;
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .sub-lesson-number {
@@ -52,8 +71,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(67, 56, 202, 0.08);
-  color: var(--dr-primary);
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
   font-weight: 700;
   font-size: 0.9rem;
   display: flex;
@@ -68,7 +87,7 @@
 .sub-lesson-body h3 {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--dr-text);
+  color: #fff;
   margin: 0 0 0.5rem;
 }
 
@@ -84,26 +103,26 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--dr-primary);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--dr-primary);
+  border: none;
+  border-radius: 12px;
+  background: var(--dr-gradient-primary);
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: opacity 0.15s, transform 0.15s;
 }
 
 .btn-mark-complete:hover:not(:disabled) {
-  background: var(--dr-primary);
-  color: #ffffff;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .btn-mark-complete:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  border-color: #059669;
-  color: #059669;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
 }
 
 @media (max-width: 576px) {

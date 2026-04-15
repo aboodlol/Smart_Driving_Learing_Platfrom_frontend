@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { ProgressSummary } from '../../../core/models/progress.models';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
@@ -9,7 +7,7 @@ import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-progress-page',
-  imports: [MatProgressBarModule, MatProgressSpinnerModule],
+  imports: [],
   templateUrl: './progress-page.component.html',
   styleUrl: './progress-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

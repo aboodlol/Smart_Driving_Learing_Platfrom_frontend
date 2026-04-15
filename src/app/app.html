@@ -1,61 +1,89 @@
 @if (isAuthenticated()) {
   <header class="app-header" [class.header-hidden]="headerHidden()">
-    <div class="container-fluid header-shell py-2 px-4 px-md-5">
+    <div class="header-shell">
       <div class="header-main">
-        <a routerLink="/home" class="brand text-decoration-none d-flex align-items-center gap-2">
-          <span class="brand-icon">&#x1F697;</span>
-          DriveWise
+        <a routerLink="/home" class="brand">
+          <span class="brand-icon">
+            <span class="material-icons">smart_toy</span>
+          </span>
+          <span class="brand-text gradient-text">DriveWise</span>
         </a>
 
         <button
-          class="menu-toggle btn btn-light border"
+          class="menu-toggle"
           type="button"
           (click)="toggleMobileMenu()"
           [attr.aria-expanded]="mobileMenuOpen()"
           aria-controls="primary-nav"
           aria-label="Toggle navigation menu"
         >
-          <span class="material-icons" aria-hidden="true">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+          <span class="material-icons">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
         </button>
       </div>
 
       <nav id="primary-nav" class="nav-links" [class.mobile-open]="mobileMenuOpen()">
         @if (!isAdminPage()) {
           <a routerLink="/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
-             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Home</a>
+             class="nav-link-item" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">home</span>
+            Home
+          </a>
           <a routerLink="/lessons" routerLinkActive="active-link"
-             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Lessons</a>
+             class="nav-link-item" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">menu_book</span>
+            Lessons
+          </a>
           <a routerLink="/quiz" routerLinkActive="active-link"
-             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Quiz</a>
+             class="nav-link-item" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">quiz</span>
+            Quiz
+          </a>
           <a routerLink="/progress" routerLinkActive="active-link"
-             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Progress</a>
+             class="nav-link-item" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">trending_up</span>
+            Progress
+          </a>
           <a routerLink="/assistant" routerLinkActive="active-link"
-             class="nav-link-item text-decoration-none" (click)="closeMobileMenu()">Assistant</a>
+             class="nav-link-item" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">assistant</span>
+            Assistant
+          </a>
         }
 
         @if (currentUser()?.role === 'admin') {
           <a routerLink="/admin" routerLinkActive="active-link"
-             class="nav-link-item admin-link text-decoration-none" (click)="closeMobileMenu()">Admin</a>
+             class="nav-link-item admin-link" (click)="closeMobileMenu()">
+            <span class="material-icons nav-icon">admin_panel_settings</span>
+            Admin
+          </a>
         }
 
         <div class="nav-user-section">
-          <span class="user-chip">{{ currentUser()?.name }}</span>
-          <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 nav-logout-btn" type="button" (click)="logout()">Logout</button>
+          <span class="user-chip">
+            <span class="material-icons user-icon">person</span>
+            {{ currentUser()?.name }}
+          </span>
+          <button class="btn-logout" type="button" (click)="logout()">
+            <span class="material-icons" style="font-size: 16px;">logout</span>
+            Logout
+          </button>
         </div>
       </nav>
     </div>
   </header>
 } @else {
   <header class="app-header public-header" [class.header-hidden]="headerHidden()">
-    <div class="container-fluid header-shell py-2 px-4 px-md-5">
+    <div class="header-shell">
       <div class="header-main">
-        <a routerLink="/landing" class="brand text-decoration-none d-flex align-items-center gap-2">
-          <span class="brand-icon">&#x1F697;</span>
-          DriveWise
+        <a routerLink="/landing" class="brand">
+          <span class="brand-icon">
+            <span class="material-icons">smart_toy</span>
+          </span>
+          <span class="brand-text gradient-text">DriveWise</span>
         </a>
-        <nav class="public-nav d-flex align-items-center gap-4">
-          <a routerLink="/login" routerLinkActive="selected-theme disabled" ariaCurrentWhenActive="page" class="text-decoration-none public-signin-link">Sign In</a>
-          <a routerLink="/register" class="btn btn-primary-dr rounded-pill px-4 py-2 text-decoration-none">Get Started Free</a>
+        <nav class="public-nav">
+          <a routerLink="/login" routerLinkActive="public-link-active" ariaCurrentWhenActive="page" class="public-signin-link">Sign In</a>
+          <a routerLink="/register" class="btn-cta-nav">Get Started Free</a>
         </nav>
       </div>
     </div>
@@ -67,7 +95,7 @@
 </main>
 
 <footer class="app-footer">
-  <div class="container text-center text-muted app-footer-inner">
-    <small class="m-0 d-block lh-1">&copy; 2026 DriveWise</small>
+  <div class="footer-inner">
+    <small>&copy; 2026 DriveWise &mdash; Your smart way to learn driving</small>
   </div>
 </footer>

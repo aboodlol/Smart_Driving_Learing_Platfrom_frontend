@@ -10,7 +10,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import {
   ChapterReport,
@@ -29,7 +28,7 @@ export interface MergedActivity {
 @Component({
   selector: 'app-admin-dashboard-page',
   standalone: true,
-  imports: [DecimalPipe, RouterLink, MatProgressBarModule],
+  imports: [DecimalPipe, RouterLink],
   templateUrl: './admin-dashboard-page.component.html',
   styleUrl: './admin-dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { QuizQuestion, QuizMode, QuizResult } from '../../../core/models/quiz.models';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
@@ -10,7 +8,7 @@ import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-quiz-session-page',
-  imports: [RouterLink, MatProgressBarModule, MatProgressSpinnerModule],
+  imports: [RouterLink],
   templateUrl: './quiz-session-page.component.html',
   styleUrl: './quiz-session-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
