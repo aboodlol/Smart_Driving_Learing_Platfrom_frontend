@@ -2,6 +2,11 @@
   display: block;
 }
 
+.container {
+  max-width: 1020px;
+  margin: 0 auto;
+}
+
 .back-link {
   display: inline-block;
   color: #a78bfa;
@@ -37,6 +42,7 @@
   color: var(--dr-text-muted);
   font-size: 0.95rem;
   line-height: 1.6;
+  max-width: 88ch;
 }
 
 .sub-lessons-list {
@@ -126,8 +132,15 @@
 }
 
 @media (max-width: 576px) {
+  .container {
+    max-width: 100%;
+    padding-right: 0.9rem;
+    padding-left: 0.9rem;
+  }
+
   .sub-lesson-card {
     flex-direction: column;
     gap: 0.75rem;
+    padding: 1.1rem;
   }
 }

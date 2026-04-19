@@ -50,6 +50,12 @@ export class AssistantApiService {
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 
+  deleteConversation(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.baseUrl}/${id}`)
+      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+  }
+
   private mapApiError(error: HttpErrorResponse): Observable<never> {
     if (error.error && typeof error.error === 'object' && 'message' in error.error) {
       return throwError(() => new Error(String((error.error as { message: unknown }).message)));

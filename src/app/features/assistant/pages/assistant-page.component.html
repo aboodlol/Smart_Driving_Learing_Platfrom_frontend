@@ -26,8 +26,7 @@
     } @else {
       <div class="conversation-list">
         @for (conversation of conversations(); track conversation._id) {
-          <button
-            type="button"
+          <div
             class="conversation-item"
             [class.active]="conversation._id === activeConversationId()"
             (click)="selectConversation(conversation._id)"
@@ -39,7 +38,15 @@
                 <span class="conv-date">{{ formatConversationDate(conversation.updatedAt || conversation.createdAt) }}</span>
               }
             </div>
-          </button>
+            <button
+              type="button"
+              class="btn-delete-conv"
+              title="Delete conversation"
+              (click)="deleteConversation(conversation._id, $event)"
+            >
+              <span class="material-icons">delete_outline</span>
+            </button>
+          </div>
         }
       </div>
     }

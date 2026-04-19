@@ -105,6 +105,35 @@ export class AssistantPageComponent implements OnInit {
       });
   }
 
+  protected deleteConversation(conversationId: string, event: Event): void {
+    event.stopPropagation();
+
+    this.assistantApi
+      .deleteConversation(conversationId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.conversations.update((list) => list.filter((c) => c._id !== conversationId));
+
+          if (this.activeConversationId() === conversationId) {
+            const remaining = this.conversations();
+            if (remaining.length > 0) {
+              this.activeConversationId.set(remaining[0]._id);
+              this.persistLastConversationId(remaining[0]._id);
+              this.loadConversationById(remaining[0]._id);
+            } else {
+              this.activeConversationId.set(null);
+              this.messages.set([]);
+              this.clearPersistedConversationId();
+            }
+          }
+        },
+        error: (error: unknown) => {
+          this.sidebarError.set(this.toErrorMessage(error, 'Failed to delete conversation.'));
+        },
+      });
+  }
+
   protected selectConversation(conversationId: string): void {
     if (conversationId === this.activeConversationId()) return;
 
@@ -210,6 +239,8 @@ export class AssistantPageComponent implements OnInit {
     const previousMessages = this.messages();
     const optimisticMessage = this.buildOptimisticUserMessage(text, image, file);
     this.messages.set([...previousMessages, optimisticMessage]);
+    this.inputText.set('');
+    this.clearAttachments();
     this.loading.set(true);
 
     this.scrollToBottom();
@@ -327,8 +358,6 @@ export class AssistantPageComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.inputText.set('');
-          this.clearAttachments();
           this.pageError.set('');
           this.loadConversationById(conversationId, false);
           this.reloadConversationsSilently();
