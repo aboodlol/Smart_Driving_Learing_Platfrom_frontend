@@ -5,10 +5,12 @@ import { finalize } from 'rxjs/operators';
 import { QuizQuestion, QuizMode, QuizResult } from '../../../core/models/quiz.models';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-quiz-session-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './quiz-session-page.component.html',
   styleUrl: './quiz-session-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +20,7 @@ export class QuizSessionPageComponent {
   private readonly router = inject(Router);
   private readonly quizApi = inject(QuizApiService);
   private readonly toast = inject(ToastService);
+  private readonly i18n = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
@@ -58,7 +61,7 @@ export class QuizSessionPageComponent {
         });
     } else {
       this.mode.set('exam');
-      this.chapterTitle.set('Exam Simulation');
+      this.chapterTitle.set(this.i18n.t('quiz.examSimulationTitle'));
       this.quizApi
         .getExamQuestions()
         .pipe(

@@ -4,10 +4,11 @@ import { finalize } from 'rxjs/operators';
 import { ProgressSummary } from '../../../core/models/progress.models';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-progress-page',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './progress-page.component.html',
   styleUrl: './progress-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +45,12 @@ export class ProgressPageComponent {
     if (status === 'Completed') return 'badge-completed';
     if (status === 'In Progress') return 'badge-in-progress';
     return 'badge-not-started';
+  }
+
+  protected getStatusKey(status: string): string {
+    if (status === 'Completed') return 'progress.statusCompleted';
+    if (status === 'In Progress') return 'progress.statusInProgress';
+    return 'progress.statusNotStarted';
   }
 
   protected getChapterPercent(totalSubLessons: number, completedSubLessons: number): number {

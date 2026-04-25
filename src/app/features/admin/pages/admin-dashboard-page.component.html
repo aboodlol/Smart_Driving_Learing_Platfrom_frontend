@@ -1,8 +1,8 @@
 <div class="admin-dashboard">
   <div class="container pt-4 pb-2">
     <div class="page-header mb-4">
-      <h1 class="page-title">Admin Dashboard</h1>
-      <p class="page-subtitle">Overview of platform statistics and activity</p>
+      <h1 class="page-title">{{ 'admin.dashboard.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.dashboard.subtitle' | translate }}</p>
     </div>
 
     @if (loading()) {
@@ -17,22 +17,22 @@
         <div class="stat-card">
           <div class="stat-icon users-icon">👥</div>
           <div class="stat-value">{{ stats()?.users?.total ?? 0 }}</div>
-          <div class="stat-label">Total Users</div>
+          <div class="stat-label">{{ 'admin.dashboard.totalUsers' | translate }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon chapters-icon">📚</div>
           <div class="stat-value">{{ stats()?.content?.totalChapters ?? 0 }}</div>
-          <div class="stat-label">Chapters</div>
+          <div class="stat-label">{{ 'admin.dashboard.chapters' | translate }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon lessons-icon">📝</div>
           <div class="stat-value">{{ stats()?.content?.totalSubLessons ?? 0 }}</div>
-          <div class="stat-label">Sub-Lessons</div>
+          <div class="stat-label">{{ 'admin.dashboard.subLessons' | translate }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon docs-icon">📄</div>
           <div class="stat-value">{{ stats()?.documents?.totalDocuments ?? 0 }}</div>
-          <div class="stat-label">Documents</div>
+          <div class="stat-label">{{ 'admin.dashboard.documents' | translate }}</div>
         </div>
       </div>
 
@@ -40,9 +40,9 @@
         <!-- Chapter Completion Chart -->
         <div class="main-col">
           <div class="panel">
-            <h2 class="panel-title">Chapter Completion Rates</h2>
+            <h2 class="panel-title">{{ 'admin.dashboard.chapterCompletionRates' | translate }}</h2>
             @if (chapters().length === 0) {
-              <p class="empty-text">No chapter data available.</p>
+              <p class="empty-text">{{ 'admin.dashboard.noChapterData' | translate }}</p>
             } @else {
               <div class="chart-bars">
                 @for (ch of chapters(); track ch.chapterTitle) {
@@ -66,15 +66,15 @@
 
           <!-- Quiz Questions per Chapter -->
           <div class="panel mt-4">
-            <h2 class="panel-title">Content per Chapter</h2>
+            <h2 class="panel-title">{{ 'admin.dashboard.contentPerChapter' | translate }}</h2>
             <div class="table-wrap">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Chapter</th>
-                    <th class="text-center">Sub-Lessons</th>
-                    <th class="text-center">Quiz Questions</th>
-                    <th>Completion</th>
+                    <th>{{ 'admin.dashboard.tableChapter' | translate }}</th>
+                    <th class="text-center">{{ 'admin.dashboard.tableSubLessons' | translate }}</th>
+                    <th class="text-center">{{ 'admin.dashboard.tableQuizQuestions' | translate }}</th>
+                    <th>{{ 'admin.dashboard.tableCompletion' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -99,9 +99,9 @@
         <!-- Recent Activity -->
         <div class="side-col">
           <div class="panel">
-            <h2 class="panel-title">Recent Activity</h2>
+            <h2 class="panel-title">{{ 'admin.dashboard.recentActivity' | translate }}</h2>
             @if (activities().length === 0) {
-              <p class="empty-text">No recent activity.</p>
+              <p class="empty-text">{{ 'admin.dashboard.noRecentActivity' | translate }}</p>
             } @else {
               <div class="activity-feed">
                 @for (a of activities(); track a.id) {
@@ -121,13 +121,13 @@
 
           <!-- Quick Links -->
           <div class="panel mt-4">
-            <h2 class="panel-title">Quick Links</h2>
+            <h2 class="panel-title">{{ 'admin.dashboard.quickLinks' | translate }}</h2>
             <div class="quick-links-grid">
               <a routerLink="/admin/users" class="quick-link-btn">
-                👥 Manage Users
+                👥 {{ 'admin.dashboard.manageUsers' | translate }}
               </a>
               <a routerLink="/admin/documents" class="quick-link-btn">
-                📄 Manage Documents
+                📄 {{ 'admin.dashboard.manageDocuments' | translate }}
               </a>
             </div>
           </div>

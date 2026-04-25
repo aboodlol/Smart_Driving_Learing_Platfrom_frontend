@@ -6,7 +6,7 @@
           <span class="brand-icon">
             <span class="material-icons">smart_toy</span>
           </span>
-          <span class="brand-text gradient-text">DriveWise</span>
+          <span class="brand-text gradient-text">{{ 'brand' | translate }}</span>
         </a>
 
         <button
@@ -26,27 +26,27 @@
           <a routerLink="/home" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
              class="nav-link-item" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">home</span>
-            Home
+            {{ 'nav.home' | translate }}
           </a>
           <a routerLink="/lessons" routerLinkActive="active-link"
              class="nav-link-item" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">menu_book</span>
-            Lessons
+            {{ 'nav.lessons' | translate }}
           </a>
           <a routerLink="/quiz" routerLinkActive="active-link"
              class="nav-link-item" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">quiz</span>
-            Quiz
+            {{ 'nav.quiz' | translate }}
           </a>
           <a routerLink="/progress" routerLinkActive="active-link"
              class="nav-link-item" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">trending_up</span>
-            Progress
+            {{ 'nav.progress' | translate }}
           </a>
           <a routerLink="/assistant" routerLinkActive="active-link"
              class="nav-link-item" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">assistant</span>
-            Assistant
+            {{ 'nav.assistant' | translate }}
           </a>
         }
 
@@ -54,7 +54,7 @@
           <a routerLink="/admin" routerLinkActive="active-link"
              class="nav-link-item admin-link" (click)="closeMobileMenu()">
             <span class="material-icons nav-icon">admin_panel_settings</span>
-            Admin
+            {{ 'nav.admin' | translate }}
           </a>
         }
 
@@ -63,9 +63,26 @@
             <span class="material-icons user-icon">person</span>
             {{ currentUser()?.name }}
           </span>
+          <button
+            type="button"
+            class="btn-lang"
+            (click)="i18n.toggle()"
+            [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'"
+          >
+            {{ i18n.isRtl() ? 'EN' : 'عربي' }}
+          </button>
+          <button
+            type="button"
+            class="btn-theme"
+            (click)="toggleTheme()"
+            [attr.aria-label]="theme.isDark() ? ('nav.switchToLight' | translate) : ('nav.switchToDark' | translate)"
+            [attr.title]="theme.isDark() ? ('nav.switchToLight' | translate) : ('nav.switchToDark' | translate)"
+          >
+            <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+          </button>
           <button class="btn-logout" type="button" (click)="logout()">
             <span class="material-icons" style="font-size: 16px;">logout</span>
-            Logout
+            {{ 'nav.logout' | translate }}
           </button>
         </div>
       </nav>
@@ -79,11 +96,30 @@
           <span class="brand-icon">
             <span class="material-icons">smart_toy</span>
           </span>
-          <span class="brand-text gradient-text">DriveWise</span>
+          <span class="brand-text gradient-text">{{ 'brand' | translate }}</span>
         </a>
         <nav class="public-nav">
-          <a routerLink="/login" routerLinkActive="public-link-active" ariaCurrentWhenActive="page" class="public-signin-link">Sign In</a>
-          <a routerLink="/register" class="btn-cta-nav">Get Started Free</a>
+          <button
+            type="button"
+            class="btn-lang"
+            (click)="i18n.toggle()"
+            [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'"
+          >
+            {{ i18n.isRtl() ? 'EN' : 'عربي' }}
+          </button>
+          <button
+            type="button"
+            class="btn-theme"
+            (click)="toggleTheme()"
+            [attr.aria-label]="theme.isDark() ? ('nav.switchToLight' | translate) : ('nav.switchToDark' | translate)"
+            [attr.title]="theme.isDark() ? ('nav.switchToLight' | translate) : ('nav.switchToDark' | translate)"
+          >
+            <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+          </button>
+          <a routerLink="/login" routerLinkActive="public-link-active" ariaCurrentWhenActive="page" class="public-signin-link">
+            {{ 'nav.signIn' | translate }}
+          </a>
+          <a routerLink="/register" class="btn-cta-nav">{{ 'nav.getStarted' | translate }}</a>
         </nav>
       </div>
     </div>
@@ -96,6 +132,6 @@
 
 <footer class="app-footer">
   <div class="footer-inner">
-    <small>&copy; 2026 DriveWise &mdash; Your smart way to learn driving</small>
+    <small>&copy; 2026 {{ 'brand' | translate }} &mdash; {{ 'tagline' | translate }}</small>
   </div>
 </footer>

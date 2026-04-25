@@ -3,12 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { ProgressSummary } from '../../../core/models/progress.models';
+import { I18nService } from "../../../core/services/i18n.service";
+import { TranslatePipe } from "../../../core/pipes/translate.pipe";
 import { AuthService } from '../../../core/services/auth.service';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +23,7 @@ export class HomePageComponent {
   protected readonly loading = signal(true);
   protected readonly summary = signal<ProgressSummary | null>(null);
   protected readonly currentUser = this.authService.currentUser;
+  protected i18n = inject(I18nService);
 
   constructor() {
     this.loadDashboard();

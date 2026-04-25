@@ -2,10 +2,10 @@
   @if (loading()) {
     <div class="text-center py-5">
       <div class="custom-spinner"></div>
-      <p class="mt-3 loading-text">Loading chapter...</p>
+      <p class="mt-3 loading-text">{{ 'lessons.loadingChapter' | translate }}</p>
     </div>
   } @else if (chapter(); as ch) {
-    <a routerLink="/lessons" class="back-link">&larr; Back to Lessons</a>
+    <a routerLink="/lessons" class="back-link">&larr; {{ 'lessons.backToLessons' | translate }}</a>
 
     <div class="chapter-header">
       <h1>{{ ch.title }}</h1>
@@ -27,9 +27,9 @@
               @if (completing() === sub.title) {
                 <div class="custom-spinner-sm"></div>
               } @else if (isCompleted(sub.title)) {
-                &#x2705; Completed
+                &#x2705; {{ 'lessons.completed' | translate }}
               } @else {
-                Mark as Complete
+                {{ 'lessons.markAsComplete' | translate }}
               }
             </button>
           </div>

@@ -11,6 +11,7 @@ import { forkJoin } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../../../core/services/admin-api.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import {
   ChapterReport,
   DashboardStats,
@@ -28,7 +29,7 @@ export interface MergedActivity {
 @Component({
   selector: 'app-admin-dashboard-page',
   standalone: true,
-  imports: [DecimalPipe, RouterLink],
+  imports: [DecimalPipe, RouterLink, TranslatePipe],
   templateUrl: './admin-dashboard-page.component.html',
   styleUrl: './admin-dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

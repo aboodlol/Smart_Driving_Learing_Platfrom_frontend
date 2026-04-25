@@ -25,6 +25,27 @@
   --dr-gradient-blue: linear-gradient(135deg, #3b82f6, #06b6d4);
   --dr-gradient-green: linear-gradient(135deg, #10b981, #34d399);
   --dr-gradient-orange: linear-gradient(135deg, #f97316, #ef4444);
+  --dr-header-bg: rgba(2, 6, 23, 0.85);
+  --dr-footer-bg: rgba(2, 6, 23, 0.9);
+}
+
+/* ─── Light Theme Design Tokens ─── */
+[data-theme='light'] {
+  --dr-bg-dark: #f1f5f9;
+  --dr-bg-card: #ffffff;
+  --dr-bg-card-hover: #f8fafc;
+  --dr-text: #0f172a;
+  --dr-text-muted: #475569;
+  --dr-text-dim: #94a3b8;
+  --dr-surface: #e2e8f0;
+  --dr-border: rgba(0, 0, 0, 0.08);
+  --dr-border-light: rgba(0, 0, 0, 0.12);
+  --dr-glass-bg: rgba(255, 255, 255, 0.85);
+  --dr-glass-border: rgba(0, 0, 0, 0.08);
+  --dr-glow-violet: rgba(139, 92, 246, 0.15);
+  --dr-glow-fuchsia: rgba(217, 70, 239, 0.12);
+  --dr-header-bg: rgba(255, 255, 255, 0.92);
+  --dr-footer-bg: rgba(241, 245, 249, 0.95);
 }
 
 * {
@@ -52,6 +73,16 @@ html::-webkit-scrollbar-thumb {
   border-radius: 3px;
 }
 
+[data-theme='light'] html::-webkit-scrollbar-thumb,
+[data-theme='light'] html::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+}
+
+/* ─── Light theme: progress track ─── */
+[data-theme='light'] .progress-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
 app-root {
   display: block;
   min-height: 100dvh;
@@ -61,6 +92,25 @@ body {
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: var(--dr-text);
   background: var(--dr-bg-dark);
+}
+
+/* ─── Arabic / RTL font stack ─── */
+[dir='rtl'] body,
+[dir='rtl'] {
+  font-family: 'Segoe UI', 'Noto Sans Arabic', 'Helvetica Neue', system-ui, sans-serif;
+}
+
+/* ─── RTL logical-property helpers ─── */
+[dir='rtl'] .hover-lift:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+[dir='rtl'] .scroll-reveal {
+  transform: translateY(30px);
+}
+
+[dir='rtl'] .scroll-reveal.visible {
+  transform: translateY(0);
 }
 
 a {
@@ -182,4 +232,184 @@ a {
 
 .mat-mdc-form-field .mdc-text-field__input {
   color: var(--dr-text) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT THEME — COMPONENT OVERRIDES
+   Using html[data-theme='light'] (specificity 0,2,1) to
+   override component-scoped hardcoded #fff values (0,2,0).
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Landing Page Background ─── */
+html[data-theme='light'] .landing-wrapper {
+  background: linear-gradient(180deg, #f8faff 0%, #eef2ff 50%, #f8faff 100%);
+}
+
+html[data-theme='light'] .blob {
+  opacity: 0.06;
+}
+
+/* ─── Landing: Floating Cards ─── */
+html[data-theme='light'] .float-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* ─── Landing: Feature Cards ─── */
+html[data-theme='light'] .feature-card {
+  background: var(--dr-bg-card);
+  border-color: var(--dr-border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Quiz Session / Result Cards ─── */
+html[data-theme='light'] .quiz-session-card,
+html[data-theme='light'] .result-card,
+html[data-theme='light'] .review-item {
+  background: var(--dr-bg-card);
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .option-btn {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .option-btn:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+html[data-theme='light'] .review-number {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Lesson Detail: Sub-lesson Cards ─── */
+html[data-theme='light'] .sub-lesson-card {
+  background: var(--dr-bg-card);
+  border-color: var(--dr-border-light);
+}
+
+/* ─── White Text → var(--dr-text) for all pages ─── */
+html[data-theme='light'] .hero-title,
+html[data-theme='light'] .stat-number,
+html[data-theme='light'] .section-heading,
+html[data-theme='light'] .feature-title,
+html[data-theme='light'] .step-title,
+html[data-theme='light'] .cta-title,
+html[data-theme='light'] .page-title,
+html[data-theme='light'] .section-title,
+html[data-theme='light'] .card-heading,
+html[data-theme='light'] .welcome-title,
+html[data-theme='light'] .action-title,
+html[data-theme='light'] .quiz-stat-value,
+html[data-theme='light'] .stat-value,
+html[data-theme='light'] .overall-percent,
+html[data-theme='light'] .lesson-title,
+html[data-theme='light'] .review-heading,
+html[data-theme='light'] .question-text,
+html[data-theme='light'] .result-header h2,
+html[data-theme='light'] .review-body h4,
+html[data-theme='light'] .quiz-title-bar h2,
+html[data-theme='light'] .quiz-card h3,
+html[data-theme='light'] .exam-text h2,
+html[data-theme='light'] .tips-card h3,
+html[data-theme='light'] .overall-text h2,
+html[data-theme='light'] .chapter-card h3,
+html[data-theme='light'] .reset-content h3,
+html[data-theme='light'] .ql-content h3,
+html[data-theme='light'] .chapter-header h1,
+html[data-theme='light'] .sub-lesson-body h3 {
+  color: var(--dr-text);
+}
+
+/* ─── Header Sign In link ─── */
+html[data-theme='light'] .public-signin-link {
+  color: var(--dr-text);
+}
+
+/* ─── Nav active link ─── */
+html[data-theme='light'] .nav-link-item.active-link {
+  color: #7c3aed;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+html[data-theme='light'] .nav-link-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Light theme Material form field ─── */
+html[data-theme='light'] .mat-mdc-text-field-wrapper {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+html[data-theme='light'] .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT THEME — ASSISTANT (AI CHAT) PAGE OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+
+html[data-theme='light'] .assistant-shell {
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .sidebar {
+  background: #ffffff;
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .sidebar-header {
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .sidebar-toggle {
+  background: #ffffff;
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .chat-main {
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .composer {
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .composer-row {
+  background: #ffffff;
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .attach-menu {
+  background: #ffffff;
+  border-color: var(--dr-border-light);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme='light'] .suggestion-card {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .suggestion-card:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+html[data-theme='light'] .msg-bubble--assistant {
+  background: #ffffff;
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .conv-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme='light'] .attachment-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--dr-border-light);
+}
+
+html[data-theme='light'] .welcome-state {
+  background: transparent;
 }

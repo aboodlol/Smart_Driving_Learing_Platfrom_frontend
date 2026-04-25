@@ -1,13 +1,13 @@
 <div class="page-wrapper">
   <div class="page-header fade-in-up">
-    <h1 class="page-title">Lessons</h1>
-    <p class="page-subtitle">Master driving theory through structured chapters and sub-lessons.</p>
+    <h1 class="page-title">{{ 'lessons.title' | translate }}</h1>
+    <p class="page-subtitle">{{ 'lessons.subtitle' | translate }}</p>
   </div>
 
   @if (loading()) {
     <div class="loading-state">
       <div class="custom-spinner"></div>
-      <p class="loading-text">Loading lessons...</p>
+      <p class="loading-text">{{ 'lessons.loading' | translate }}</p>
     </div>
   } @else {
     <div class="lessons-grid">
@@ -17,13 +17,13 @@
             <div class="lesson-icon">
               <span class="material-icons">menu_book</span>
             </div>
-            <span class="status-badge" [class]="getStatusClass(chapter)">{{ getStatus(chapter) }}</span>
+            <span class="status-badge" [class]="getStatusClass(chapter)">{{ getStatusKey(chapter) | translate }}</span>
           </div>
           <h3 class="lesson-title">{{ chapter.title }}</h3>
           <p class="lesson-desc">{{ chapter.description }}</p>
           <div class="lesson-footer">
             <div class="lesson-progress-info">
-              <span class="lesson-count">{{ getCompletedCount(chapter) }} / {{ chapter.lessons.length }} lessons</span>
+              <span class="lesson-count">{{ getCompletedCount(chapter) }} / {{ chapter.lessons.length }} {{ 'lessons.title' | translate | lowercase }}</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" [style.width.%]="getChapterPercent(chapter)"></div>

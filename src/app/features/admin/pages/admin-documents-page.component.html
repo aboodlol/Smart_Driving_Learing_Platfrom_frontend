@@ -2,12 +2,12 @@
   <div class="container py-4">
     <div class="page-header mb-4">
       <div class="header-back mb-2">
-        <a routerLink="/admin" class="back-link">&larr; Dashboard</a>
+        <a routerLink="/admin" class="back-link">&larr; {{ 'admin.documents.backToDashboard' | translate }}</a>
       </div>
       <div class="header-row">
         <div>
-          <h1 class="page-title">Document Management</h1>
-          <p class="page-subtitle">Upload and manage AI knowledge base documents</p>
+          <h1 class="page-title">{{ 'admin.documents.title' | translate }}</h1>
+          <p class="page-subtitle">{{ 'admin.documents.subtitle' | translate }}</p>
         </div>
         <div>
           <input
@@ -24,9 +24,9 @@
           >
             @if (uploading()) {
               <div class="custom-spinner-sm"></div>
-              Uploading...
+              {{ 'admin.documents.uploading' | translate }}
             } @else {
-              📤 Upload Document
+              📤 {{ 'admin.documents.uploadDocument' | translate }}
             }
           </button>
         </div>
@@ -42,13 +42,13 @@
     } @else if (documents().length === 0) {
       <div class="empty-state">
         <div class="empty-icon">📄</div>
-        <h3>No documents yet</h3>
-        <p>Upload PDF, DOCX, or TXT files to enrich the AI assistant's knowledge base.</p>
-        <button class="btn-upload" (click)="triggerUpload()">📤 Upload Your First Document</button>
+        <h3>{{ 'admin.documents.noDocumentsYet' | translate }}</h3>
+        <p>{{ 'admin.documents.noDocumentsDesc' | translate }}</p>
+        <button class="btn-upload" (click)="triggerUpload()">📤 {{ 'admin.documents.uploadFirstDocument' | translate }}</button>
       </div>
     } @else {
       <div class="doc-count mb-3">
-        <span class="count-badge">{{ documents().length }} document(s)</span>
+        <span class="count-badge">{{ documents().length }} {{ 'admin.documents.documentCount' | translate }}</span>
       </div>
 
       <div class="doc-grid">
@@ -63,21 +63,21 @@
             </div>
             <div class="doc-meta">
               <div class="meta-row">
-                <span class="meta-label">Uploaded by</span>
+                <span class="meta-label">{{ 'admin.documents.uploadedBy' | translate }}</span>
                 <span class="meta-value">{{ doc.uploadedBy.name }}</span>
               </div>
               <div class="meta-row">
-                <span class="meta-label">Date</span>
+                <span class="meta-label">{{ 'admin.documents.date' | translate }}</span>
                 <span class="meta-value">{{ formatDate(doc.createdAt) }}</span>
               </div>
               <div class="meta-row">
-                <span class="meta-label">Type</span>
+                <span class="meta-label">{{ 'admin.documents.type' | translate }}</span>
                 <span class="meta-value">{{ doc.mimetype }}</span>
               </div>
             </div>
             <div class="doc-actions">
               <button class="btn-delete-doc" (click)="deleteDocument(doc)">
-                Delete
+                {{ 'admin.documents.delete' | translate }}
               </button>
             </div>
           </div>

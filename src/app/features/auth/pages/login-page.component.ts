@@ -7,6 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
+import { I18nService } from '../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-login-page',
@@ -16,6 +18,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    TranslatePipe,
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
@@ -28,6 +31,7 @@ export class LoginPageComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
+  protected readonly i18n = inject(I18nService);
   protected readonly hidePassword = signal(true);
 
   protected readonly loginForm = this.formBuilder.nonNullable.group({

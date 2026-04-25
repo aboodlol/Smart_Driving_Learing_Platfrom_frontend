@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from './core/services/auth.service';
+import { I18nService } from './core/services/i18n.service';
+import { ThemeService } from './core/services/theme.service';
+import { TranslatePipe } from './core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +13,7 @@ import { AuthService } from './core/services/auth.service';
     RouterLink,
     RouterLinkActive,
     MatSnackBarModule,
+    TranslatePipe,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -21,6 +25,8 @@ import { AuthService } from './core/services/auth.service';
 export class App {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly i18n = inject(I18nService);
+  protected readonly theme = inject(ThemeService);
   private lastScrollY = 0;
 
   protected readonly title = 'DriveWise';
@@ -70,5 +76,9 @@ export class App {
   protected logout(): void {
     this.closeMobileMenu();
     this.authService.logout();
+  }
+
+  protected toggleTheme(): void {
+    this.theme.toggle();
   }
 }

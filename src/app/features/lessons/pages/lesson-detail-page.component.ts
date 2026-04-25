@@ -7,10 +7,11 @@ import { Chapter } from '../../../core/models/lesson.models';
 import { LessonApiService } from '../../../core/services/lesson-api.service';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-lesson-detail-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './lesson-detail-page.component.html',
   styleUrl: './lesson-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

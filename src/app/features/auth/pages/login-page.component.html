@@ -3,13 +3,13 @@
     <div class="auth-left-icon">
       <span class="material-icons">directions_car</span>
     </div>
-    <h2>Welcome Back,<br>Driver!</h2>
-    <p>Continue your journey to becoming a confident, safe driver. Your progress is waiting for you.</p>
+    <h2 [innerHTML]="'auth.welcomeBack' | translate"></h2>
+    <p>{{ 'auth.continueJourney' | translate }}</p>
     <ul class="auth-left-features">
-      <li><span class="material-icons">menu_book</span> Rich lessons across 5 chapters</li>
-      <li><span class="material-icons">smart_toy</span> AI explains every mistake you make</li>
-      <li><span class="material-icons">emoji_events</span> Real exam-style quiz questions</li>
-      <li><span class="material-icons">insights</span> Visual progress tracking</li>
+      <li><span class="material-icons">menu_book</span> {{ 'auth.richLessons' | translate }}</li>
+      <li><span class="material-icons">smart_toy</span> {{ 'auth.aiExplains' | translate }}</li>
+      <li><span class="material-icons">emoji_events</span> {{ 'auth.realExam' | translate }}</li>
+      <li><span class="material-icons">insights</span> {{ 'auth.visualProgress' | translate }}</li>
     </ul>
   </div>
 
@@ -19,22 +19,22 @@
         <span class="auth-brand-icon">
           <span class="material-icons">smart_toy</span>
         </span>
-        <span class="auth-brand-text">DriveWise</span>
+        <span class="auth-brand-text">{{ 'brand' | translate }}</span>
       </div>
 
-      <h2>Sign In</h2>
+      <h2>{{ 'auth.signInBtn' | translate }}</h2>
       <span class="auth-toggle-link">
-        No account? <a routerLink="/register">Register free</a>
+        {{ 'auth.noAccount' | translate }} <a routerLink="/register">{{ 'auth.registerFree' | translate }}</a>
       </span>
 
       <form class="auth-form-stack" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
         <mat-form-field appearance="outline">
-          <mat-label>Email Address</mat-label>
-          <input matInput formControlName="email" type="email" autocomplete="email" placeholder="you@example.com" />
+          <mat-label>{{ 'auth.email' | translate }}</mat-label>
+          <input matInput formControlName="email" type="email" autocomplete="email" [placeholder]="'auth.emailPlaceholder' | translate" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
+          <mat-label>{{ 'auth.password' | translate }}</mat-label>
           <input
             matInput
             formControlName="password"
@@ -51,14 +51,14 @@
             <div class="custom-spinner custom-spinner-sm" style="border-top-color: #fff;"></div>
           }
           <span class="material-icons" style="font-size: 18px;">login</span>
-          Sign In
+          {{ 'auth.signInBtn' | translate }}
         </button>
       </form>
 
       <div class="auth-back-link">
         <a routerLink="/landing">
           <span class="material-icons" style="font-size: 16px; vertical-align: middle;">arrow_back</span>
-          Back to Home
+          {{ 'auth.backToHome' | translate }}
         </a>
       </div>
     </div>

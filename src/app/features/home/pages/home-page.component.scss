@@ -53,7 +53,7 @@
 .welcome-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.5rem;
 }
 
@@ -107,7 +107,7 @@
 .action-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.4rem;
 }
 
@@ -144,7 +144,7 @@
 .card-heading {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 1.25rem;
 }
 
@@ -223,7 +223,7 @@
 .quiz-stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--dr-text);
 }
 
 .quiz-stat-label {
@@ -274,7 +274,7 @@
 .ql-content h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.2rem;
 }
 

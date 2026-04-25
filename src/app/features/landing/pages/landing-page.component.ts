@@ -9,10 +9,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { I18nService } from '../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +22,7 @@ import { RouterLink } from '@angular/router';
 export class LandingPageComponent implements AfterViewInit {
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly animWrapper = viewChild<ElementRef<HTMLElement>>('animWrapper');
 

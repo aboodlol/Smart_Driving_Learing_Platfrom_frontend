@@ -19,12 +19,14 @@ import {
   ConversationSummary,
 } from '../../../core/models/assistant.models';
 import { AssistantApiService } from '../../../core/services/assistant-api.service';
+import { I18nService } from '../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
 
 @Component({
   selector: 'app-assistant-page',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './assistant-page.component.html',
   styleUrl: './assistant-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +37,7 @@ export class AssistantPageComponent implements OnInit {
   private readonly chatContainer = viewChild<ElementRef<HTMLDivElement>>('chatContainer');
   private readonly imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   private readonly pdfInput = viewChild<ElementRef<HTMLInputElement>>('pdfInput');
+  protected readonly i18n = inject(I18nService);
 
   protected readonly conversations = signal<ConversationSummary[]>([]);
   protected readonly activeConversationId = signal<string | null>(null);

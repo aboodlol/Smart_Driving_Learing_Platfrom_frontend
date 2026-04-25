@@ -78,29 +78,47 @@
   align-items: center;
   justify-content: center;
   padding: 6rem 1.5rem 4rem;
+  gap: 3rem;
 }
 
 .hero-content {
   text-align: center;
   max-width: 720px;
+  flex: 1;
+}
+
+/* ─── Bilingual Badge ─── */
+.lang-badge-row {
+  margin-bottom: 1.5rem;
 }
 
 .trust-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 999px;
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #a78bfa;
   font-size: 0.82rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+}
+
+.badge-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
 }
 
 .badge-icon {
   font-size: 18px;
+}
+
+/* ─── Bilingual Hero Title ─── */
+.hero-title-block {
+  margin-bottom: 1.25rem;
 }
 
 .hero-title {
@@ -108,11 +126,19 @@
   font-weight: 800;
   line-height: 1.15;
   color: #fff;
-  margin: 0 0 1.25rem;
+  margin: 0 0 0.35rem;
   letter-spacing: -0.02em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
 }
 
-.hero-title .gradient-text {
+.hero-title-line1 {
+  display: block;
+}
+
+.hero-title-highlight {
   display: block;
 }
 
@@ -132,6 +158,65 @@
   gap: 1rem;
   margin-bottom: 3rem;
   flex-wrap: wrap;
+}
+
+/* ─── Floating Bilingual Cards ─── */
+.floating-cards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.float-card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  animation: floatDrift 8s ease-in-out infinite;
+}
+
+.float-card-1 {
+  top: 18%;
+  left: 4%;
+  animation-delay: 0s;
+}
+
+.float-card-2 {
+  top: 55%;
+  right: 4%;
+  animation-delay: -3s;
+}
+
+.float-card-3 {
+  bottom: 12%;
+  left: 8%;
+  animation-delay: -5.5s;
+}
+
+@keyframes floatDrift {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.float-icon {
+  font-size: 22px;
+  color: #a78bfa;
+}
+
+.float-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--dr-text);
+  white-space: nowrap;
 }
 
 /* ─── Buttons ─── */
@@ -400,6 +485,10 @@
   .hero-section {
     min-height: auto;
     padding: 5rem 1rem 3rem;
+  }
+
+  .floating-cards {
+    display: none;
   }
 
   .stats-row {

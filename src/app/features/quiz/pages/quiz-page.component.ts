@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
 import { LessonApiService } from '../../../core/services/lesson-api.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-quiz-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './quiz-page.component.html',
   styleUrl: './quiz-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

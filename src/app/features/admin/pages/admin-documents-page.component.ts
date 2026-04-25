@@ -13,11 +13,12 @@ import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { AdminDocument } from '../../../core/models/admin.models';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin-documents-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './admin-documents-page.component.html',
   styleUrl: './admin-documents-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

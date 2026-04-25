@@ -2,10 +2,10 @@
   <div class="container py-4">
     <div class="page-header mb-4">
       <div class="header-back mb-2">
-        <a routerLink="/admin" class="back-link">&larr; Dashboard</a>
+        <a routerLink="/admin" class="back-link">&larr; {{ 'admin.users.backToDashboard' | translate }}</a>
       </div>
-      <h1 class="page-title">User Management</h1>
-      <p class="page-subtitle">View, edit, and manage platform users</p>
+      <h1 class="page-title">{{ 'admin.users.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'admin.users.subtitle' | translate }}</p>
     </div>
 
     @if (loading()) {
@@ -20,30 +20,30 @@
         <input
           type="text"
           class="search-input"
-          placeholder="Search by name, email, or role..."
+          [placeholder]="'admin.users.searchPlaceholder' | translate"
           [ngModel]="searchQuery()"
           (ngModelChange)="searchQuery.set($event)"
         />
       </div>
 
       <div class="users-count mb-3">
-        <span class="count-badge">{{ filteredUsers.length }} user(s)</span>
+        <span class="count-badge">{{ filteredUsers.length }} {{ 'admin.users.userCount' | translate }}</span>
       </div>
 
       @if (filteredUsers.length === 0) {
         <div class="empty-state">
-          <p>No users found.</p>
+          <p>{{ 'admin.users.noUsersFound' | translate }}</p>
         </div>
       } @else {
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th class="text-end">Actions</th>
+                <th>{{ 'admin.users.tableName' | translate }}</th>
+                <th>{{ 'admin.users.tableEmail' | translate }}</th>
+                <th>{{ 'admin.users.tableRole' | translate }}</th>
+                <th>{{ 'admin.users.tableJoined' | translate }}</th>
+                <th class="text-end">{{ 'admin.users.tableActions' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -72,14 +72,14 @@
                         [ngModel]="editForm().role"
                         (ngModelChange)="editForm.update(f => ({ ...f, role: $event }))"
                       >
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
+                        <option value="student">{{ 'admin.users.roleStudent' | translate }}</option>
+                        <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
                       </select>
                     </td>
                     <td class="date-cell">{{ formatDate(user.createdAt) }}</td>
                     <td class="text-end">
-                      <button class="btn-save" (click)="saveEdit(user._id)">Save</button>
-                      <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+                      <button class="btn-save" (click)="saveEdit(user._id)">{{ 'admin.users.save' | translate }}</button>
+                      <button class="btn-cancel" (click)="cancelEdit()">{{ 'admin.users.cancel' | translate }}</button>
                     </td>
                   </tr>
                 } @else {
@@ -93,8 +93,8 @@
                     </td>
                     <td class="date-cell">{{ formatDate(user.createdAt) }}</td>
                     <td class="text-end">
-                      <button class="btn-edit" (click)="startEdit(user)">Edit</button>
-                      <button class="btn-delete" (click)="deleteUser(user)">Delete</button>
+                      <button class="btn-edit" (click)="startEdit(user)">{{ 'admin.users.edit' | translate }}</button>
+                      <button class="btn-delete" (click)="deleteUser(user)">{{ 'admin.users.delete' | translate }}</button>
                     </td>
                   </tr>
                 }

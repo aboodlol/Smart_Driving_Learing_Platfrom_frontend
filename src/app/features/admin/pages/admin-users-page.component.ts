@@ -12,11 +12,12 @@ import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { AdminUser, UpdateUserPayload } from '../../../core/models/admin.models';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin-users-page',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   templateUrl: './admin-users-page.component.html',
   styleUrl: './admin-users-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

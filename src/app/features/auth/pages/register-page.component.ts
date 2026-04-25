@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { finalize } from 'rxjs/operators';
+import { I18nService } from "../../../core/services/i18n.service";
+import { TranslatePipe } from "../../../core/pipes/translate.pipe";
 import { AuthService } from '../../../core/services/auth.service';
 import { matchValidator } from '../../../core/validators/match.validator';
 
@@ -17,6 +19,7 @@ import { matchValidator } from '../../../core/validators/match.validator';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    TranslatePipe,
   ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',
@@ -29,6 +32,7 @@ export class RegisterPageComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
+  protected readonly i18n = inject(I18nService);
   protected readonly hidePassword = signal(true);
   protected readonly hideConfirmPassword = signal(true);
 

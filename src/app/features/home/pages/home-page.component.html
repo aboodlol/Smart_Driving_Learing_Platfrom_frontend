@@ -2,15 +2,15 @@
   @if (loading()) {
     <div class="loading-state">
       <div class="custom-spinner"></div>
-      <p class="loading-text">Loading dashboard...</p>
+      <p class="loading-text">{{ 'home.loading' | translate }}</p>
     </div>
   } @else {
     <!-- Welcome Hero -->
     <div class="welcome-card fade-in-up">
       <div class="welcome-glow" aria-hidden="true"></div>
       <div class="welcome-content">
-        <h1 class="welcome-title">Welcome back, <span class="gradient-text">{{ currentUser()?.name }}</span>!</h1>
-        <p class="welcome-subtitle">Your driving learning dashboard. Continue your journey to becoming a confident, safe driver.</p>
+        <h1 class="welcome-title">{{ 'home.welcome' | translate }} <span class="gradient-text">{{ currentUser()?.name }}</span>!</h1>
+        <p class="welcome-subtitle">{{ 'home.subtitle' | translate }}</p>
       </div>
     </div>
 
@@ -20,8 +20,8 @@
         <div class="action-icon icon-violet">
           <span class="material-icons">menu_book</span>
         </div>
-        <h3 class="action-title">Start Learning</h3>
-        <p class="action-desc">Begin your lessons on traffic rules and signs.</p>
+        <h3 class="action-title">{{ 'home.startLearning' | translate }}</h3>
+        <p class="action-desc">{{ 'home.startLearningDesc' | translate }}</p>
         <span class="action-arrow">
           <span class="material-icons">arrow_forward</span>
         </span>
@@ -30,8 +30,8 @@
         <div class="action-icon icon-green">
           <span class="material-icons">assignment</span>
         </div>
-        <h3 class="action-title">Take a Quiz</h3>
-        <p class="action-desc">Test your knowledge with interactive quizzes.</p>
+        <h3 class="action-title">{{ 'home.takeQuiz' | translate }}</h3>
+        <p class="action-desc">{{ 'home.takeQuizDesc' | translate }}</p>
         <span class="action-arrow">
           <span class="material-icons">arrow_forward</span>
         </span>
@@ -40,8 +40,8 @@
         <div class="action-icon icon-blue">
           <span class="material-icons">insights</span>
         </div>
-        <h3 class="action-title">View Progress</h3>
-        <p class="action-desc">Track your learning journey and achievements.</p>
+        <h3 class="action-title">{{ 'home.viewProgress' | translate }}</h3>
+        <p class="action-desc">{{ 'home.trackJourneyDesc' | translate }}</p>
         <span class="action-arrow">
           <span class="material-icons">arrow_forward</span>
         </span>
@@ -52,9 +52,9 @@
       <!-- Progress Section -->
       <div class="content-grid fade-in-up" style="animation-delay: 0.2s;">
         <div class="progress-card glass-card">
-          <h2 class="card-heading">Quick Progress Overview</h2>
+          <h2 class="card-heading">{{ 'home.quickProgressOverview' | translate }}</h2>
           <div class="overall-progress-row">
-            <span class="progress-label">Overall Completion</span>
+            <span class="progress-label">{{ 'home.overallCompletion' | translate }}</span>
             <span class="progress-percent gradient-text">{{ s.overallProgress }}%</span>
           </div>
           <div class="progress-track" style="height: 10px; border-radius: 5px;">
@@ -77,19 +77,19 @@
         </div>
 
         <div class="quiz-stats-card glass-card">
-          <h2 class="card-heading">Quiz Performance</h2>
+          <h2 class="card-heading">{{ 'home.quizPerformance' | translate }}</h2>
           <div class="quiz-stats-grid">
             <div class="quiz-stat-item">
               <span class="quiz-stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
-              <span class="quiz-stat-label">Last Score</span>
+              <span class="quiz-stat-label">{{ 'home.lastScore' | translate }}</span>
             </div>
             <div class="quiz-stat-item">
               <span class="quiz-stat-value">{{ s.quizStats.totalAttempts }}</span>
-              <span class="quiz-stat-label">Attempts</span>
+              <span class="quiz-stat-label">{{ 'home.attempts' | translate }}</span>
             </div>
             <div class="quiz-stat-item">
               <span class="quiz-stat-value">{{ s.quizStats.averageScore }}%</span>
-              <span class="quiz-stat-label">Average</span>
+              <span class="quiz-stat-label">{{ 'home.average' | translate }}</span>
             </div>
           </div>
         </div>
@@ -102,8 +102,8 @@
             <span class="material-icons">smart_toy</span>
           </div>
           <div class="ql-content">
-            <h3>AI Assistant</h3>
-            <p>Ask driving questions or get help with quiz mistakes</p>
+            <h3>{{ 'home.askAiTutor' | translate }}</h3>
+            <p>{{ 'home.askAiTutorDesc' | translate }}</p>
           </div>
           <span class="material-icons ql-arrow">arrow_forward</span>
         </a>
@@ -112,8 +112,8 @@
             <span class="material-icons">emoji_events</span>
           </div>
           <div class="ql-content">
-            <h3>Exam Simulation</h3>
-            <p>Practice with a real exam-style test</p>
+            <h3>{{ 'home.examSimulation' | translate }}</h3>
+            <p>{{ 'home.examSimulationDesc' | translate }}</p>
           </div>
           <span class="material-icons ql-arrow">arrow_forward</span>
         </a>

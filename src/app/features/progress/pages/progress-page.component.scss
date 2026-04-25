@@ -15,7 +15,7 @@
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.4rem;
 }
 
@@ -94,13 +94,13 @@
   justify-content: center;
   font-size: 1.4rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--dr-text);
 }
 
 .overall-text h2 {
   font-size: 1.15rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.3rem;
 }
 
@@ -148,7 +148,7 @@
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--dr-text);
 }
 
 .stat-label {
@@ -161,7 +161,7 @@
 .section-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 1.25rem;
 }
 
@@ -188,7 +188,7 @@
 .chapter-card h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0;
 }
 
@@ -271,7 +271,7 @@
 .reset-content h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--dr-text);
   margin: 0 0 0.4rem;
 }
 

@@ -1,13 +1,13 @@
 <div class="page-wrapper">
   <div class="page-header fade-in-up">
-    <h1 class="page-title">Your Progress</h1>
-    <p class="page-subtitle">Track your learning journey and quiz performance.</p>
+    <h1 class="page-title">{{ 'progress.title' | translate }}</h1>
+    <p class="page-subtitle">{{ 'progress.subtitle' | translate }}</p>
   </div>
 
   @if (loading()) {
     <div class="loading-state">
       <div class="custom-spinner"></div>
-      <p class="loading-text">Loading progress...</p>
+      <p class="loading-text">{{ 'progress.loading' | translate }}</p>
     </div>
   } @else if (summary(); as s) {
     <!-- Overall Progress -->
@@ -23,8 +23,8 @@
           <span class="overall-percent">{{ s.overallProgress }}%</span>
         </div>
         <div class="overall-text">
-          <h2>Overall Completion</h2>
-          <p>{{ s.overallProgress }}% of all chapters completed</p>
+          <h2>{{ 'progress.overallCompletion' | translate }}</h2>
+          <p>{{ s.overallProgress }}% {{ 'progress.ofAllChaptersCompleted' | translate }}</p>
         </div>
       </div>
     </div>
@@ -36,32 +36,32 @@
           <span class="material-icons">scoreboard</span>
         </div>
         <span class="stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
-        <span class="stat-label">Last Quiz Score</span>
+        <span class="stat-label">{{ 'progress.lastQuizScore' | translate }}</span>
       </div>
       <div class="stat-card glass-card">
         <div class="stat-icon icon-blue">
           <span class="material-icons">repeat</span>
         </div>
         <span class="stat-value">{{ s.quizStats.totalAttempts }}</span>
-        <span class="stat-label">Total Attempts</span>
+        <span class="stat-label">{{ 'progress.totalAttempts' | translate }}</span>
       </div>
       <div class="stat-card glass-card">
         <div class="stat-icon icon-green">
           <span class="material-icons">analytics</span>
         </div>
         <span class="stat-value">{{ s.quizStats.averageScore }}%</span>
-        <span class="stat-label">Average Score</span>
+        <span class="stat-label">{{ 'progress.averageScore' | translate }}</span>
       </div>
     </div>
 
     <!-- Chapter Progress -->
-    <h2 class="section-title fade-in-up" style="animation-delay: 0.15s;">Chapter Progress</h2>
+    <h2 class="section-title fade-in-up" style="animation-delay: 0.15s;">{{ 'progress.chapterProgress' | translate }}</h2>
     <div class="chapters-grid fade-in-up" style="animation-delay: 0.2s;">
       @for (lesson of s.lessons; track lesson.chapterId) {
         <div class="chapter-card glass-card">
           <div class="chapter-card-header">
             <h3>{{ lesson.title }}</h3>
-            <span class="status-badge" [class]="getStatusClass(lesson.status)">{{ lesson.status }}</span>
+            <span class="status-badge" [class]="getStatusClass(lesson.status)">{{ getStatusKey(lesson.status) | translate }}</span>
           </div>
           <p class="chapter-desc">{{ lesson.description }}</p>
           <div class="chapter-progress-row">
@@ -80,13 +80,13 @@
         <span class="material-icons">warning</span>
       </div>
       <div class="reset-content">
-        <h3>Reset Progress</h3>
-        <p>This will clear all your completed lessons, quiz results, and overall progress. This action cannot be undone.</p>
+        <h3>{{ 'progress.resetProgress' | translate }}</h3>
+        <p>{{ 'progress.resetDescription' | translate }}</p>
         <button class="btn-reset" [disabled]="resetting()" (click)="resetProgress()">
           @if (resetting()) {
             <div class="custom-spinner custom-spinner-sm"></div>
           }
-          Reset All Progress
+          {{ 'progress.resetAllProgress' | translate }}
         </button>
       </div>
     </div>
