@@ -1,9 +1,14 @@
 {
-  // For more information, visit: https://angular.dev/ai/mcp
   "servers": {
-    "angular-cli": {
-      "command": "npx",
-      "args": ["-y", "@angular/cli", "mcp"]
+    "vscode-orchestrator": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "server"],
+      "cwd": "C:/Tools/vscode-orchestrator/mcp_server",
+      "env": {
+        "AIDOCS_ROOT": "C:/aidocs",
+        "PYTHONPATH": "C:/Tools/vscode-orchestrator/mcp_server"
+      }
     }
   }
 }

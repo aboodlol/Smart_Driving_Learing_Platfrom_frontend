@@ -1,0 +1,37 @@
+# Context-window protection. Keep Copilot's index sharp.
+# (Mirrors .gitignore patterns for files Copilot should never read.)
+node_modules/
+dist/
+build/
+out/
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.idea/
+.vs/
+.vscode/
+coverage/
+*.log
+*.sqlite
+*.db
+*.bak
+*.zip
+*.7z
+*.tar.gz
+*.mp4
+*.mov
+*.psd
+*.sketch
+# Large generated assets
+**/*.min.js
+**/*.min.css
+**/*.map
+# SQL dumps
+**/*.sql
