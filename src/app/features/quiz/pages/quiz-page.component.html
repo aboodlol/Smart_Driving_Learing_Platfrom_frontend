@@ -22,29 +22,53 @@
           <p>{{ 'quiz.examSimulationDesc' | translate }}</p>
         </div>
       </div>
-      <a routerLink="/quiz/exam" class="btn-start-exam">
-        <span class="material-icons">play_arrow</span>
-        {{ 'quiz.startExam' | translate }}
-      </a>
+      <div class="exam-actions">
+        @if (!checkingActive() && hasActiveAttempt()) {
+          <button type="button" class="btn-continue-exam" (click)="continueExam()">
+            <span class="material-icons">play_circle</span>
+            {{ 'quiz.continueExam' | translate }}
+          </button>
+        }
+        <button
+          type="button"
+          class="btn-start-exam"
+          [disabled]="startingExam()"
+          (click)="startNewExam()"
+        >
+          @if (startingExam()) {
+            <div class="custom-spinner-sm"></div>
+          } @else {
+            <span class="material-icons">play_arrow</span>
+          }
+          {{ 'quiz.startNewExam' | translate }}
+        </button>
+      </div>
     </div>
 
     <!-- Chapter Quizzes -->
     <h2 class="section-title fade-in-up" style="animation-delay: 0.1s;">{{ 'quiz.chapterQuizzes' | translate }}</h2>
-    <div class="quiz-grid">
-      @for (chapter of chapters(); track chapter._id; let i = $index) {
-        <div class="quiz-card hover-lift fade-in-up" [style.animation-delay]="((i + 2) * 0.06) + 's'">
-          <div class="quiz-card-icon">
-            <span class="material-icons">quiz</span>
+    @if (hasChapters()) {
+      <div class="quiz-grid">
+        @for (chapter of chapters(); track chapter.chapterTitle; let i = $index) {
+          <div class="quiz-card hover-lift fade-in-up" [style.animation-delay]="((i + 2) * 0.06) + 's'">
+            <div class="quiz-card-icon">
+              <span class="material-icons">quiz</span>
+            </div>
+            <h3 [attr.dir]="getChapterTextDirection(chapter)">{{ getChapterDisplayTitle(chapter) }}</h3>
+            <p [attr.dir]="getChapterTextDirection(chapter)">{{ getChapterDisplayDescription(chapter) }}</p>
+            <a [routerLink]="['/quiz/chapter', chapter.chapterTitle]" class="btn-start-quiz">
+              {{ 'quiz.startQuiz' | translate }}
+              <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
+            </a>
           </div>
-          <h3>{{ chapter.title }}</h3>
-          <p>{{ chapter.description }}</p>
-          <a [routerLink]="['/quiz/chapter', chapter.title]" class="btn-start-quiz">
-            {{ 'quiz.startQuiz' | translate }}
-            <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
-          </a>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    } @else {
+      <div class="quiz-empty-state fade-in-up" [attr.dir]="getEmptyStateDirection()">
+        <h3>{{ getEmptyStateTitle() }}</h3>
+        <p>{{ getEmptyStateDescription() }}</p>
+      </div>
+    }
 
     <!-- Tips -->
     <div class="tips-card fade-in-up" style="animation-delay: 0.3s;">

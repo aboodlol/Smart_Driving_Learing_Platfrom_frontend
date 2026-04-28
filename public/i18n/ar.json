@@ -167,8 +167,10 @@
     "subtitle": "اختبر معلوماتك عن القيادة باختبارات الفصول أو محاكاة الامتحان الكامل.",
     "loading": "جاري تحميل الاختبارات...",
     "examSimulationTitle": "محاكاة الامتحان",
-    "examSimulationDesc": "10 أسئلة عشوائية من جميع الفصول. لا تظهر الإجابات حتى الإرسال. تماماً مثل الامتحان الحقيقي!",
+    "examSimulationDesc": "60 سؤال عشوائي من جميع الفصول. لا تظهر الإجابات حتى الإرسال. تماماً مثل الامتحان الحقيقي!",
     "startExam": "بدء الامتحان",
+    "continueExam": "أكمل الامتحان السابق",
+    "startNewExam": "ابدأ امتحان جديد",
     "chapterQuizzes": "اختبارات الفصول",
     "startQuiz": "بدء الاختبار",
     "tipsTitle": "نصائح للنجاح",
@@ -190,12 +192,19 @@
     "of": "من",
     "previous": "السابق",
     "next": "التالي",
-    "submitQuiz": "إرسال الاختبار"
+    "submitQuiz": "إرسال الاختبار",
+    "correct": "إجابة صحيحة!",
+    "incorrect": "إجابة خاطئة",
+    "correctAnswerLabel": "الإجابة الصحيحة:",
+    "explanationLabel": "التفسير:",
+    "continueBtn": "متابعة"
   },
   "progress": {
     "title": "تقدمك",
     "subtitle": "تابع مسيرتك التعليمية وأداء اختباراتك.",
     "loading": "جاري تحميل التقدم...",
+    "loadingHistory": "جاري تحميل سجل الامتحانات...",
+    "loadingHistoryDetails": "جاري تحميل تفاصيل المحاولة...",
     "overallCompletion": "الإنجاز الكلي",
     "ofAllChaptersCompleted": "من إجمالي الفصول مكتملة",
     "lastQuizScore": "آخر نتيجة اختبار",
@@ -207,7 +216,11 @@
     "resetAllProgress": "إعادة ضبط كل التقدم",
     "statusCompleted": "مكتمل",
     "statusInProgress": "قيد التنفيذ",
-    "statusNotStarted": "لم يبدأ بعد"
+    "statusNotStarted": "لم يبدأ بعد",
+    "statusLabel": "الحالة",
+    "selectedAnswer": "الإجابة المختارة",
+    "correctAnswer": "الإجابة الصحيحة",
+    "explanation": "الشرح"
   },
   "admin": {
     "dashboard": {

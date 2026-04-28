@@ -16,9 +16,14 @@
         <div class="overall-circle" [class.circle-done]="s.overallProgress >= 100">
           <svg viewBox="0 0 120 120" class="progress-ring">
             <circle cx="60" cy="60" r="52" class="ring-bg" />
-            <circle cx="60" cy="60" r="52" class="ring-fill"
+            <circle
+              cx="60"
+              cy="60"
+              r="52"
+              class="ring-fill"
               [style.stroke-dasharray]="(2 * 3.14159 * 52)"
-              [style.stroke-dashoffset]="(2 * 3.14159 * 52) * (1 - s.overallProgress / 100)" />
+              [style.stroke-dashoffset]="(2 * 3.14159 * 52) * (1 - s.overallProgress / 100)"
+            />
           </svg>
           <span class="overall-percent">{{ s.overallProgress }}%</span>
         </div>
@@ -54,9 +59,161 @@
       </div>
     </div>
 
+    <!-- Exam History -->
+    <h2 class="section-title fade-in-up" style="animation-delay: 0.15s;">{{ getHistorySectionTitle() }}</h2>
+    <div class="history-card glass-card fade-in-up" style="animation-delay: 0.2s;">
+      <div class="history-header">
+        <h3>{{ getHistorySectionTitle() }}</h3>
+        <p>{{ getHistorySectionSubtitle() }}</p>
+      </div>
+
+      @if (historyLoading()) {
+        <div class="loading-state history-loading">
+          <div class="custom-spinner"></div>
+          <p class="loading-text">{{ 'progress.loadingHistory' | translate }}</p>
+        </div>
+      } @else if (historyError()) {
+        <div class="history-empty-state error-state">
+          <h4>{{ getHistoryDetailsErrorTitle() }}</h4>
+          <p>{{ getHistoryDetailsErrorDescription() }}</p>
+        </div>
+      } @else if (hasHistory()) {
+        <div class="history-grid">
+          @for (attempt of history(); track attempt._id) {
+            <article class="history-item" [class.active]="selectedAttemptId() === attempt._id">
+              <div class="history-item-top">
+                <div>
+                  <span class="history-date-label">{{ getHistoryDateLabel() }}</span>
+                  <h4>{{ formatHistoryDate(attempt.rawDate) }}</h4>
+                </div>
+                <span class="status-badge" [class]="getHistoryStatusClass(attempt.status)">
+                  {{ getHistoryStatusLabel(attempt.status) }}
+                </span>
+              </div>
+
+              <div class="history-meta">
+                <div>
+                  <span>{{ getHistoryScoreLabel() }}</span>
+                  <strong>{{ attempt.score !== null ? attempt.score + '%' : '--' }}</strong>
+                </div>
+                <div>
+                  <span>{{ getHistoryQuestionsLabel() }}</span>
+                  <strong>{{ attempt.totalQuestions !== null ? attempt.totalQuestions : '--' }}</strong>
+                </div>
+              </div>
+
+              <div class="history-submitted">
+                <span>{{ getHistoryTimestampLabel(attempt.timestampSource) }}</span>
+                <strong>{{ formatHistoryDate(attempt.rawDate) }}</strong>
+              </div>
+
+              <button type="button" class="btn-history-view" (click)="viewAttemptDetails(attempt._id)">
+                {{ getHistoryButtonLabel() }}
+              </button>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="history-empty-state">
+          <h4>{{ getHistoryEmptyTitle() }}</h4>
+          <p>{{ getHistoryEmptyDescription() }}</p>
+        </div>
+      }
+
+      @if (selectedAttemptLoading()) {
+        <div class="loading-state history-loading detail-loading">
+          <div class="custom-spinner"></div>
+          <p class="loading-text">{{ 'progress.loadingHistoryDetails' | translate }}</p>
+        </div>
+      } @else if (selectedAttemptError()) {
+        <div class="history-empty-state error-state detail-empty">
+          <h4>{{ getHistoryDetailsErrorTitle() }}</h4>
+          <p>{{ getHistoryDetailsErrorDescription() }}</p>
+        </div>
+      } @else if (selectedAttempt(); as selectedAttempt) {
+        <div class="history-details">
+          <div class="history-details-header">
+            <div>
+              <h3>{{ getSelectedAttemptTitle() }}</h3>
+              <p>{{ selectedAttemptTimestampLabel() }}: {{ selectedAttemptTimestamp() }}</p>
+            </div>
+            <button type="button" class="btn-history-close" (click)="closeAttemptDetails()">
+              {{ getCloseLabel() }}
+            </button>
+          </div>
+
+          <div class="history-details-stats">
+            <div>
+              <span>{{ 'progress.statusLabel' | translate }}</span>
+              <strong [class]="selectedAttemptStatusClass()">{{ selectedAttemptStatusLabel() }}</strong>
+            </div>
+            <div>
+              <span>{{ getHistoryScoreLabel() }}</span>
+              <strong>{{ selectedAttemptScore() }}</strong>
+            </div>
+            <div>
+              <span>{{ getHistoryQuestionsLabel() }}</span>
+              <strong>{{ selectedAttemptTotalQuestions() }}</strong>
+            </div>
+            <div>
+              <span>{{ selectedAttemptTimestampLabel() }}</span>
+              <strong>{{ selectedAttemptTimestamp() }}</strong>
+            </div>
+          </div>
+
+          <div class="history-review-list">
+            @for (item of reviewItems(); track item.questionId; let i = $index) {
+              <article class="review-item" [class.correct]="item.isCorrect" [class.wrong]="!item.isCorrect">
+                <div class="review-number">{{ i + 1 }}</div>
+                <div class="review-body">
+                  <h4>{{ item.question }}</h4>
+
+                  @if (item.image) {
+                    <div class="question-media question-media-image">
+                      <img [src]="item.image" [alt]="item.question" loading="lazy" />
+                    </div>
+                  }
+
+                  @if (item.video) {
+                    <div class="question-media question-media-video">
+                      <video [src]="item.video" controls preload="metadata"></video>
+                    </div>
+                  }
+
+                  <div class="review-answer">
+                    <span class="review-label">{{ 'progress.selectedAnswer' | translate }}</span>
+                    <span [class.answer-correct]="item.isCorrect" [class.answer-incorrect]="!item.isCorrect">
+                      {{ item.selectedAnswer }}
+                    </span>
+                  </div>
+
+                  <div class="review-answer">
+                    <span class="review-label">{{ 'progress.correctAnswer' | translate }}</span>
+                    <span>{{ item.correctAnswer }}</span>
+                  </div>
+
+                  @if (item.explanation) {
+                    <div class="review-explanation">
+                      <span class="review-label">{{ 'progress.explanation' | translate }}</span>
+                      <p>{{ item.explanation }}</p>
+                    </div>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="history-empty-state detail-empty">
+          <h4>{{ getHistoryDetailsEmptyTitle() }}</h4>
+          <p>{{ getHistoryDetailsEmptyDescription() }}</p>
+        </div>
+      }
+    </div>
+
     <!-- Chapter Progress -->
-    <h2 class="section-title fade-in-up" style="animation-delay: 0.15s;">{{ 'progress.chapterProgress' | translate }}</h2>
-    <div class="chapters-grid fade-in-up" style="animation-delay: 0.2s;">
+    <h2 class="section-title fade-in-up" style="animation-delay: 0.25s;">{{ 'progress.chapterProgress' | translate }}</h2>
+    <div class="chapters-grid fade-in-up" style="animation-delay: 0.3s;">
       @for (lesson of s.lessons; track lesson.chapterId) {
         <div class="chapter-card glass-card">
           <div class="chapter-card-header">
@@ -75,7 +232,7 @@
     </div>
 
     <!-- Reset -->
-    <div class="reset-section fade-in-up" style="animation-delay: 0.25s;">
+    <div class="reset-section fade-in-up" style="animation-delay: 0.35s;">
       <div class="reset-icon">
         <span class="material-icons">warning</span>
       </div>

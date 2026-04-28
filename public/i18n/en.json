@@ -167,8 +167,10 @@
     "subtitle": "Test your driving knowledge with chapter quizzes or a full exam simulation.",
     "loading": "Loading quizzes...",
     "examSimulationTitle": "Exam Simulation",
-    "examSimulationDesc": "10 random questions from all chapters. No answers shown until you submit. Just like the real exam!",
+    "examSimulationDesc": "60 random questions from all chapters. Answers are hidden until submission, just like the real exam!",
     "startExam": "Start Exam",
+    "continueExam": "Continue Previous Exam",
+    "startNewExam": "Start New Exam",
     "chapterQuizzes": "Chapter Quizzes",
     "startQuiz": "Start Quiz",
     "tipsTitle": "Tips for Success",
@@ -190,12 +192,19 @@
     "of": "of",
     "previous": "Previous",
     "next": "Next",
-    "submitQuiz": "Submit Quiz"
+    "submitQuiz": "Submit Quiz",
+    "correct": "Correct!",
+    "incorrect": "Incorrect",
+    "correctAnswerLabel": "Correct Answer:",
+    "explanationLabel": "Explanation:",
+    "continueBtn": "Continue"
   },
   "progress": {
     "title": "Your Progress",
     "subtitle": "Track your learning journey and quiz performance.",
     "loading": "Loading progress...",
+    "loadingHistory": "Loading exam history...",
+    "loadingHistoryDetails": "Loading attempt details...",
     "overallCompletion": "Overall Completion",
     "ofAllChaptersCompleted": "of all chapters completed",
     "lastQuizScore": "Last Quiz Score",
@@ -207,7 +216,17 @@
     "resetAllProgress": "Reset All Progress",
     "statusCompleted": "Completed",
     "statusInProgress": "In Progress",
-    "statusNotStarted": "Not Started"
+    "statusNotStarted": "Not Started",
+    "loadingHistory": "Loading exam history...",
+    "loadingHistoryDetails": "Loading attempt details...",
+    "statusLabel": "Status",
+    "selectedAnswer": "Your answer:",
+    "correctAnswer": "Correct answer:",
+    "explanation": "Explanation:",
+    "statusLabel": "Status",
+    "selectedAnswer": "Selected Answer",
+    "correctAnswer": "Correct Answer",
+    "explanation": "Explanation"
   },
   "admin": {
     "dashboard": {
