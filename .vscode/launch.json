@@ -1,20 +1,97 @@
 {
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    // ─── Angular (Chrome) ─────────────────────────────────────────────────────
     {
-      "name": "ng serve",
+      "name": "ng: serve + Chrome debug",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200/"
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "ng: serve",
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      },
+      "presentation": { "hidden": false, "group": "frontend", "order": 1 }
     },
     {
-      "name": "ng test",
+      "name": "ng: attach to Chrome (port 9222)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "presentation": { "hidden": false, "group": "frontend", "order": 2 }
+    },
+    {
+      "name": "ng: serve + Edge debug",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "ng: serve",
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*"
+      },
+      "presentation": { "hidden": false, "group": "frontend", "order": 3 }
+    },
+    // ─── .NET / Backend ───────────────────────────────────────────────────────
+    // NOTE: Update "program" path to match actual API project output DLL.
+    //       Run `dotnet build` first to confirm the output path.
+    {
+      "name": "dotnet: Launch Daleel-API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "dotnet: build (API)",
+      "program": "C:/TFS/Daleel-API/src/Daleel.API/bin/Debug/net8.0/Daleel.API.dll",
+      "args": [],
+      "cwd": "C:/TFS/Daleel-API/src/Daleel.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "presentation": { "hidden": false, "group": "backend", "order": 1 }
+    },
+    {
+      "name": "dotnet: Attach to running process",
+      "type": "coreclr",
+      "request": "attach",
+      "presentation": { "hidden": false, "group": "backend", "order": 2 }
+    },
+    // ─── Karma / Jest unit tests ──────────────────────────────────────────────
+    {
+      "name": "ng: debug tests in Chrome",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: test",
-      "url": "http://localhost:9876/debug.html"
+      "url": "http://localhost:9876/debug.html",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*"
+      },
+      "presentation": { "hidden": false, "group": "test", "order": 1 }
+    }
+  ],
+  // ─── Compounds — start multiple configs at once ────────────────────────────
+  "compounds": [
+    {
+      "name": "Full Stack: Angular + .NET",
+      "configurations": [
+        "ng: serve + Chrome debug",
+        "dotnet: Launch Daleel-API"
+      ],
+      "stopAll": true,
+      "presentation": { "hidden": false, "group": "compound", "order": 1 }
     }
   ]
 }

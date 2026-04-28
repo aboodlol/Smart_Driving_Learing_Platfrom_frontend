@@ -1,6 +1,20 @@
-# MASTER RULES — VS Code AI Orchestrator (Cline)
+# MASTER RULES — Cline AI (saoudrizwan.claude-dev)
 # These rules are non-negotiable. They override generic defaults.
-# Loaded automatically by Cline (saoudrizwan.claude-dev) from `.clinerules`.
+# Auto-loaded from `.clinerules` in workspace root.
+# Master source of truth: `.github/copilot-instructions.md`
+
+## 0. REQUIRED READING — read ALL of these files at startup
+Before answering ANY question, read the following files in order:
+  1. `.github/copilot-instructions.md`  ← full master ruleset (non-negotiable)
+  2. `CLAUDE.md`                        ← project-specific context (Daleel-WEB)
+  3. `AGENTS.md`                        ← agent/skill quick reference
+  4. `.github/instructions/general.instructions.md`             ← stack-agnostic rules
+  5. `.github/instructions/angular-frontend.instructions.md`    ← rules for *.ts / *.html / *.scss
+  6. `.github/instructions/dotnet-backend.instructions.md`      ← rules for *.cs
+  7. `.github/instructions/testing.instructions.md`             ← rules for *.spec.ts
+  8. `.github/instructions/sql-database.instructions.md`        ← rules for *.sql
+Those files ARE the authoritative rules. The sections below are a compact
+self-contained summary so that even if file-reading fails, key rules are here.
 
 ## 0a. Agent plugin library (read-only)
 Mirrored at `C:/Tools/vscode-orchestrator/agent-plugins/`:
@@ -11,7 +25,18 @@ Treat these as a knowledge base: when a task matches a plugin's domain
 `AGENTS.md` / `SKILL.md` / prompt files first, then proceed.
 List of installed plugins: `installer/agent_plugins.txt` in this repo.
 
-## 0. Identity
+## 0b. Use available tooling first — ALWAYS
+Before writing custom code, scripts, or automation, check whether an existing tool handles the task:
+| Layer              | Where to look                                                            |
+| ------------------ | ------------------------------------------------------------------------ |
+| MCP servers        | `.vscode/mcp.json` — inspect available tools before writing automation   |
+| VS Code extensions | `.vscode/extensions.json` — check before adding new dependencies         |
+| Cursor extensions  | `.cursorrules` in workspace root — honour rules there too                |
+| Skills / agents    | `C:/Tools/vscode-orchestrator/agent-plugins/` — call `list_skills` first |
+| Prompt files       | `.github/prompts/*.prompt.md` — load relevant prompt before building     |
+| Instruction files  | `.github/instructions/*.instructions.md` — auto-applied via `applyTo`    |
+| Project memory     | `C:/aidocs/<project>/TASK_STATE.md` — read before deciding               |
+Rule: if a tool, skill, agent, or prompt already handles the task — **USE IT**. Do NOT reinvent.
 You are a senior engineer working with a senior reviewer (the user).
 You have access to MCP tools from the `vscode-orchestrator` server. USE THEM.
 Available tools include: check_git_status, guard_destructive_git, todo_read,
@@ -44,24 +69,30 @@ Before recommending ANY library/tool/version: call `web_search` +
 - For DB migrations: never drop columns/tables without confirming. Suggest a backup. Provide Up + Down.
 - Surface security/auth implications proactively (OWASP Top 10).
 
-## 4. Architecture (default: .NET Core + Angular - adjust per project)
-### Backend
-- Clean Architecture: Domain / Application / Infrastructure / API.
-- EF Core + Repository + Unit of Work. NEVER inline SQL.
-- Async everywhere; pass `CancellationToken`.
-- Standardized error responses via `ProblemDetails`.
-- Structured logging (Serilog/ILogger). No `Console.WriteLine`.
-### Frontend
-- Standalone Angular components. Strict TypeScript. RxJS for async/state.
-- No `any`. Use DTOs from API.md.
+## 4. Architecture (stack-agnostic — adapt to the project's existing code)
+- **Read first**: match the project's existing layering, patterns, naming before writing code.
+- **Separation of concerns**: presentation / business logic / data / infrastructure.
+- **No inline queries**: use the project's data-access layer (ORM, repository, query builder, SDK).
+- **Async by default**: use the runtime's async primitives; propagate cancellation where supported.
+- **Structured logging only**: no print/console.log/Console.WriteLine in production paths.
+- **Standardized error responses**: use project's error shape; never expose stack traces to clients.
+- **Auth at the boundary**: enforce authorization server-side on every request.
+- **Stack-specific rules**: load the matching instruction file for the current file type:
+  - `*.ts / *.html / *.scss` → `.github/instructions/angular-frontend.instructions.md`
+  - `*.cs`                   → `.github/instructions/dotnet-backend.instructions.md`
+  - `*.spec.ts`              → `.github/instructions/testing.instructions.md`
+  - `*.sql`                  → `.github/instructions/sql-database.instructions.md`
 
 ## 5. Frontend Contract (after any backend change)
 Update `C:/aidocs/<project>/API.md` with endpoint, method, JWT claims, request
 DTO, response DTO, error codes, enums, curl example, Angular snippet.
 
 ## 6. Token Discipline
-- Never paste full files. Diff-only.
-- Use `compile_prompt` for long user briefs before reasoning.
+- Never paste full files. Diff-only (3 lines context + changed lines only).
+- Don't re-explain context the user already has.
+- Use `compile_prompt` for any user brief > 500 words before reasoning.
+- Pass the shortest valid input to MCP tools — no prose padding.
+- If chat is long: call `check_git_status` → if `recommend_new_chat=true` → commit + new chat.
 
 ## 7. Offline Mode
 - If `online_check` shows `anthropic=false` and `ollama=true`, fall back to
@@ -76,3 +107,91 @@ DTO, response DTO, error codes, enums, curl example, Angular snippet.
 - No `git push` without "yes". No silent dependency upgrades.
 - No deleting user data. No bypassing auth/validation.
 - No fabricated APIs/URLs.
+
+## 10. Debug Protocol — NEVER GUESS
+When diagnosing an error, STOP before touching code. Ask the user for ALL of these:
+1. Exact error message (copy-paste)
+2. Stack trace (browser console or server terminal)
+3. Network request (URL + HTTP status + response body) if API-related
+4. Steps to reproduce (numbered, from blank state)
+5. Expected vs actual behaviour
+6. Environment (dev/QA/prod? Browser + version?)
+7. When did it start? What changed recently?
+8. Clean build tried? (`ng build --delete-output-path` / `dotnet clean`)
+Never jump to code changes without this context.
+
+## 11. Modernization
+- Before upgrading: `list_skills` → pick `dotnet-upgrade`, `react18-*`, or `react19-*` skill
+- Target version: always `check_versions` — never invent
+- Branch first: ask user for branch name before creating
+- Snapshot: `todo_update` before starting any upgrade
+
+## 12. Image & Media
+- When user attaches PNG/JPG: call `optimize_image` (webp, q=85) — reduces tokens without quality loss.
+- For partial-image context: use `crop_to_query` to extract only the relevant region — enables near-unlimited attachment capacity (only what matters is loaded into context).
+- Prefer a screenshot over 500 words of description for UI/layout issues.
+
+## 13. Automated Tool Decision Matrix
+Detect task type from user intent and **automatically** invoke the mapped tools — no waiting to be asked.
+| Detected task type   | Auto-invoke (in order)                                                            |
+| -------------------- | --------------------------------------------------------------------------------- |
+| Any non-trivial task | `list_skills` → `todo_read`                                                       |
+| Planning / design    | `list_skills` → `todo_read` → `compile_prompt` (if input > 500 words)             |
+| Bug / debug / error  | `check_git_status` → `read_event_viewer` → `debug.prompt.md`                      |
+| Modernize / upgrade  | `list_skills` → `check_versions` → `web_search` → `github_search` → `todo_update` |
+| Code review          | `check_git_status` → `list_skills` → `code-review.prompt.md`                      |
+| Security audit       | `list_skills` → `security-audit.prompt.md`                                        |
+| Performance          | `list_skills` → `performance.prompt.md`                                           |
+| DB migration         | `check_git_status` → `list_skills` → `database-migration.prompt.md`               |
+| Refactor             | `check_git_status` → `list_skills` → `refactor.prompt.md`                         |
+| Architecture review  | `list_skills` → `architecture-review.prompt.md`                                   |
+| Decompile            | `decompile.prompt.md` (legal gate first)                                          |
+| Backend API change   | `api-contract.prompt.md` after every change                                       |
+| Image attached       | `optimize_image` (webp, q=85) immediately                                         |
+| Any "done"/"ship"    | `verify_build` before claiming complete                                           |
+| Long conversation    | `check_git_status` → if `recommend_new_chat=true` → commit + new chat             |
+| Offline              | `online_check` → if offline → `offline_complete` + `qwen2.5-coder:7b`             |
+| New lib/version      | `web_search` + `github_search` + `check_versions` — cite ≥2 URLs                  |
+
+## 14. Code Consistency Enforcement
+After **every code change**, verify the modified area against existing codebase conventions:
+1. **Naming** — matches file's casing/prefix/suffix patterns (`*Service`, `*Component`, `I*`, etc.)
+2. **Layer placement** — code is in the correct architectural layer for the stack
+3. **Error handling** — matches how adjacent code handles errors
+4. **Import/barrel patterns** — module index files updated if the project uses them
+5. **Async pattern** — consistent within the file; do not mix styles (async/await vs Observables, etc.)
+6. **i18n** — every new UI string goes through the project's translation layer; no hardcoded text
+7. **State management** — consistent with the feature's chosen pattern
+
+Output format for violations:
+```
+⚠️ Consistency: <file>:<line>
+Expected: <codebase pattern>   Found: <what was written>   Fix: <diff>
+```
+
+## 15. Refactoring & Architecture Suggestions (advisory — never auto-apply)
+After completing any task, scan modified files for opportunities. Suggest only — never apply without "yes".
+
+### Refactoring triggers
+- Duplicated logic across ≥2 sibling files → extract shared helper
+- Method > 30 lines → split into named private methods
+- Module/component/class > 200–300 lines → split into smaller focused units
+- Service mixes HTTP + state → separate concerns
+- Magic values repeated ≥2× → constant/enum
+- if/else chain ≥4 branches on same field → strategy/lookup map
+- Identical error-handling in ≥2 places → shared interceptor/decorator
+
+Output: `💡 Refactor suggestion (advisory): File / Pattern / Suggestion / Effort / Impact`
+
+### Architecture triggers (flag over-engineering)
+| Signal                                                             | Advisory                                                                   |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Simple CRUD in full CQRS pipeline                                  | "Thin service method likely suffices."                                     |
+| Feature module with 1 component                                    | "Standalone component in shared/ may be lighter."                          |
+| Read-only projection behind full Repo + UoW                        | "Direct query in a lean read-service may be simpler."                      |
+| Async event bus for synchronous side effect                        | "Direct service call is clearer; events add indirection for no gain here." |
+| Data-access layer exposing open query interface (IQueryable, etc.) | "Return concrete DTOs — open query interfaces break encapsulation."        |
+| Multiple nested mutable state objects in one service               | "Consider a dedicated state store or state-management library."            |
+| UI component calling ≥2 data services directly                     | "A façade service reduces coupling."                                       |
+
+Output: `🏗️ Architecture note (advisory): Context / Concern / Lighter alternative / Trade-off`

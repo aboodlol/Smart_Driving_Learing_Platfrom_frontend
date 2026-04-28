@@ -1,4 +1,54 @@
 {
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=827846
-  "recommendations": ["angular.ng-template"]
+  "recommendations": [
+    // ─── Formatting & linting ────────────────────────────────────────────────
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "editorconfig.editorconfig",
+
+    // ─── Angular ─────────────────────────────────────────────────────────────
+    "angular.ng-template",
+    "johnpapa.angular2",
+
+    // ─── .NET / C# ───────────────────────────────────────────────────────────
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "ms-dotnettools.csdevkit",
+
+    // ─── Database / SQL ───────────────────────────────────────────────────────
+    "ms-mssql.mssql",
+
+    // ─── Git ─────────────────────────────────────────────────────────────────
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // ─── AI / Copilot ────────────────────────────────────────────────────────
+    "github.copilot",
+    "github.copilot-chat",
+
+    // ─── API / HTTP testing ───────────────────────────────────────────────────
+    "humao.rest-client",
+
+    // ─── Testing & coverage ───────────────────────────────────────────────────
+    "ryanluker.vscode-coverage-gutters",
+    "ms-playwright.playwright",
+
+    // ─── Diagnostics ─────────────────────────────────────────────────────────
+    "usernamehw.errorlens",
+
+    // ─── Infrastructure / DevOps ──────────────────────────────────────────────
+    "ms-azuretools.vscode-docker",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "redhat.vscode-yaml",
+
+    // ─── Productivity ────────────────────────────────────────────────────────
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "pkief.material-icon-theme",
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    "yzhang.markdown-all-in-one",
+    "mechatroner.rainbow-csv"
+  ]
 }
