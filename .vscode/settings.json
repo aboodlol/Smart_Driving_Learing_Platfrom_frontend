@@ -1,5 +1,5 @@
 {
-  "// Copilot": "Make sure Copilot Chat reads our master rules + AGENTS.md.",
+  // ─── AI / Copilot ─────────────────────────────────────────────────────────
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "chat.instructionsFilesLocations": {
     ".github/instructions": true
@@ -8,5 +8,116 @@
     ".github/prompts": true
   },
   "chat.agent.enabled": true,
-  "chat.mcp.access": "all"
+  "chat.mcp.enabled": true,
+  "chat.mcp.access": "all",
+
+  // ─── Editor ───────────────────────────────────────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [120],
+  "editor.bracketPairColorization.enabled": true,
+  "editor.inlayHints.enabled": "on",
+  "editor.suggestSelection": "first",
+  "editor.snippetSuggestions": "top",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.linkedEditing": true,
+
+  // ─── Language-specific formatters ─────────────────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "ms-mssql.mssql"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.wordWrap": "on"
+  },
+
+  // ─── TypeScript ───────────────────────────────────────────────────────────
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "typescript.inlayHints.variableTypes.enabled": false,
+
+  // ─── ESLint ───────────────────────────────────────────────────────────────
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "eslint.probe": ["typescript"],
+  "eslint.rules.customizations": [],
+
+  // ─── Search & Explorer — exclude generated / vendor dirs ──────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/*.min.js": true,
+    "**/*.min.css": true,
+    "**/*.map": true,
+    "**/.angular": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.angular": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true,
+    "**/.angular/**": true
+  },
+
+  // ─── Git ──────────────────────────────────────────────────────────────────
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.postCommitCommand": "none",
+  "gitlens.codeLens.enabled": false,
+  "gitlens.hovers.currentLine.over": "line",
+
+  // ─── Terminal ─────────────────────────────────────────────────────────────
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.scrollback": 5000,
+
+  // ─── Test coverage gutters ────────────────────────────────────────────────
+  "coverage-gutters.showLineCoverage": true,
+  "coverage-gutters.showRulerCoverage": true,
+  "coverage-gutters.coverageBaseDir": "coverage",
+
+  // ─── Error Lens ───────────────────────────────────────────────────────────
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+  "errorLens.followCursor": "activeLine",
+
+  // ─── TODO Tree ────────────────────────────────────────────────────────────
+  "todo-tree.highlights.enabled": true,
+  "todo-tree.general.tags": ["TODO", "FIXME", "HACK", "NOTE", "BUG", "SECURITY"],
+  "todo-tree.highlights.customHighlight": {
+    "SECURITY": { "background": "#ff0000", "foreground": "#ffffff" },
+    "BUG": { "background": "#cc0000", "foreground": "#ffffff" }
+  }
 }

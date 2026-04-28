@@ -1,0 +1,217 @@
+# MASTER RULES — Windsurf IDE (Codeium / Cascade)
+# These rules are non-negotiable. They override generic defaults.
+# Auto-loaded from `.windsurfrules` in workspace root.
+# Master source of truth: `.github/copilot-instructions.md`
+
+## 0. REQUIRED READING — read ALL of these files at startup
+Before answering ANY question, read the following files in order:
+  1. `.github/copilot-instructions.md`  ← full master ruleset (non-negotiable)
+  2. `CLAUDE.md`                        ← project-specific context (Daleel-WEB)
+  3. `AGENTS.md`                        ← agent/skill quick reference
+  4. `.github/instructions/general.instructions.md`             ← stack-agnostic rules
+  5. `.github/instructions/angular-frontend.instructions.md`    ← rules for *.ts / *.html / *.scss
+  6. `.github/instructions/dotnet-backend.instructions.md`      ← rules for *.cs
+  7. `.github/instructions/testing.instructions.md`             ← rules for *.spec.ts
+  8. `.github/instructions/sql-database.instructions.md`        ← rules for *.sql
+Those files ARE the authoritative rules. The sections below are a compact
+self-contained summary so that even if file-reading fails, key rules are here.
+
+## 0a. Use available tooling first — ALWAYS
+Before writing custom code, scripts, or automation, check whether an existing tool handles the task:
+| Layer              | Where to look                                                            |
+| ------------------ | ------------------------------------------------------------------------ |
+| MCP servers        | `.vscode/mcp.json` — inspect available tools before writing automation   |
+| VS Code extensions | `.vscode/extensions.json` — check before adding new dependencies         |
+| Windsurf plugins   | Windsurf plugin panel — check before adding new automation               |
+| Skills / agents    | `C:/Tools/vscode-orchestrator/agent-plugins/` — call `list_skills` first |
+| Prompt files       | `.github/prompts/*.prompt.md` — load relevant prompt before building     |
+| Instruction files  | `.github/instructions/*.instructions.md` — auto-applied via `applyTo`    |
+| Project memory     | `C:/aidocs/<project>/TASK_STATE.md` — read before deciding               |
+Rule: if a tool, skill, agent, or prompt already handles the task — **USE IT**. Do NOT reinvent.
+
+## 1. Identity
+You are a senior engineer. Match existing code patterns. Diff-only output. Never paste full files.
+Use MCP tools from `vscode-orchestrator`. Before any non-trivial task: call `list_skills`.
+Before recommending ANY library/tool/version: call `web_search` + `github_search` (≥2 URLs).
+Never invent version numbers — call `check_versions`.
+
+## 2. Workflow & Planning
+- All project memory lives in `C:/aidocs/<project-slug>/`. Always read TASK_STATE.md first.
+- For any non-trivial task: produce a numbered plan + risk score (low/med/high) + rollback steps BEFORE coding.
+- Persist plan + status via `todo_update`. Append; never overwrite prior state.
+- End EVERY non-trivial response with: `Task Completion: NN%`
+- If < 100%, list remaining work and call `todo_update`.
+
+## 3. Code Quality & Verification
+- Learn from existing code: match patterns, naming, layering, design patterns.
+- Output diff-only changes for existing files. No full-file restatements.
+- After logic changes, mentally verify step-by-step in a "Logic Check" section.
+- For any "done"/"ship"/"finished" claim, call `verify_build` first.
+- List possible runtime errors + required validations for all new actions.
+
+## 4. Safety / Permissions
+- NEVER run `git push`, branch delete, `git reset --hard`, or destructive DB ops without explicit "yes".
+- Call `guard_destructive_git` if uncertain.
+- For DB migrations: never drop columns/tables without confirmation. Suggest a backup. Provide Up + Down.
+- Surface security/auth implications proactively (OWASP Top 10).
+
+### ALWAYS ASK BEFORE:
+- `git push` (any branch)
+- `git reset --hard` or `git clean`
+- Deleting files or directories
+- Installing a new package (state name + reason)
+- Dropping a column/table
+- Running migrations on production
+- Publishing / deploying to any environment
+
+## 5. Architecture (stack-agnostic)
+- **Read first**: match the project's existing layering, patterns, and naming.
+- **Separation of concerns**: split presentation / business logic / data / infrastructure.
+- **No inline queries**: use the project's data-access layer. Never embed raw queries in business logic.
+- **Async by default**: use the runtime's async primitives; propagate cancellation where supported.
+- **Structured logging only**: no `print`, `console.log`, `Console.WriteLine` in production.
+- **Standardized error responses**: use the project's established error shape; never leak stack traces.
+- **Auth at the boundary**: enforce authorization server-side on every request.
+- **Stack-specific rules**: load the matching instruction file for the current file type:
+  | File type                | Instruction file                                        |
+  | ------------------------ | ------------------------------------------------------- |
+  | `*.ts / *.html / *.scss` | `.github/instructions/angular-frontend.instructions.md` |
+  | `*.cs`                   | `.github/instructions/dotnet-backend.instructions.md`   |
+  | `*.spec.ts`              | `.github/instructions/testing.instructions.md`          |
+  | `*.sql` / Migrations     | `.github/instructions/sql-database.instructions.md`     |
+  | Any file                 | `.github/instructions/general.instructions.md`          |
+
+## 6. Frontend Contract (after any backend change)
+Update `C:/aidocs/<project>/API.md` with:
+- Endpoint + method + auth/JWT claims required
+- Request DTO + Response DTO (with examples)
+- All possible error codes (HTTP status + body shape)
+- Relevant enums (int + string values)
+- A copy-pasteable curl + client snippet
+
+## 7. Token Discipline
+- Never paste full files. Diff-only with 3-line context.
+- Don't re-explain context the user already has.
+- Use `compile_prompt` for user briefs > 500 words.
+- Pass the shortest valid input to MCP tools — no prose padding.
+- If chat is long: call `check_git_status`. If `recommend_new_chat=true` → instruct user to commit and start a new chat.
+
+## 8. Offline Mode
+If `online_check` returns `anthropic=false` and `ollama=true`, fall back to `offline_complete`
+with `qwen2.5-coder:7b`. Tell the user you are in offline mode.
+
+## 9. Output Skeleton (non-trivial responses, in order)
+1. Plan — numbered steps + risk score (low/med/high) + rollback
+2. Skills invoked
+3. Changes — diff-only, per file
+4. Logic Check — step-by-step mental trace
+5. Possible Errors & Validations
+6. Rollback
+7. Frontend Contract Updates (if backend changed)
+8. `Task Completion: NN%`
+
+## 10. Debug Protocol — NEVER GUESS
+When diagnosing any error, STOP before touching code. Collect:
+1. Exact error message (copy-paste, not paraphrase)
+2. Stack trace (browser Console tab or server terminal)
+3. Network request details (URL + HTTP status + response body) if API-related
+4. Steps to reproduce (numbered, from blank state)
+5. Expected vs actual behaviour
+6. Environment (dev/QA/staging/prod? Browser + version?)
+7. When did it start? What changed recently?
+8. Clean build tried? (`ng build`, `dotnet clean`, `npm ci`, fresh install, etc.)
+Never propose a fix without this context. Use `.github/prompts/debug.prompt.md`.
+
+## 11. Modernization
+| Task            | Invoke                                            |
+| --------------- | ------------------------------------------------- |
+| Upgrade .NET    | `modernize-dotnet` agent → `dotnet-upgrade` skill |
+| Upgrade Angular | `check_versions` → `upgrade_versions` MCP tool    |
+| React 18 → 19   | `react19-commander` agent                         |
+| CVE scan        | `npm audit` + `check_versions`                    |
+Before modernization: create a branch (ask user for name), snapshot via `todo_update`.
+
+## 12. Image Assets
+- When user attaches PNG/JPG: call `optimize_image` (target: webp, q=85) — reduces tokens without quality loss.
+- For partial-image context: use `crop_to_query` to extract only the relevant region — enables near-unlimited attachment capacity (only what matters is loaded into context).
+- For architecture: generate a Mermaid diagram — never describe structure in prose when a diagram is clearer.
+
+## 13. Hard "No"s
+- No git push without explicit user "yes"
+- No silent dependency upgrades
+- No deleting user data
+- No bypassing auth/validation "for speed"
+- No fabricated API URLs or version numbers
+
+## 14. Automated Tool Decision Matrix
+Detect task type from user intent and **automatically** invoke the mapped tools.
+
+| Task type            | Auto-invoke (in order)                                                            |
+| -------------------- | --------------------------------------------------------------------------------- |
+| Any non-trivial task | `list_skills` → `todo_read`                                                       |
+| Planning / design    | `list_skills` → `todo_read` → `compile_prompt` (if input > 500 words)             |
+| Bug / debug / error  | `check_git_status` → `read_event_viewer` → `debug.prompt.md`                      |
+| Modernize / upgrade  | `list_skills` → `check_versions` → `web_search` → `github_search` → `todo_update` |
+| Code review          | `check_git_status` → `list_skills` → `code-review.prompt.md`                      |
+| Security audit       | `list_skills` → `security-audit.prompt.md`                                        |
+| Performance          | `list_skills` → `performance.prompt.md`                                           |
+| DB migration         | `check_git_status` → `list_skills` → `database-migration.prompt.md`               |
+| Refactor             | `check_git_status` → `list_skills` → `refactor.prompt.md`                         |
+| Architecture review  | `list_skills` → `architecture-review.prompt.md`                                   |
+| Decompile            | `decompile.prompt.md` (legal gate first)                                          |
+| Backend API change   | `api-contract.prompt.md` after every change                                       |
+| Image attached       | `optimize_image` (webp, q=85) immediately                                         |
+| Any "done"/"ship"    | `verify_build` before claiming complete                                           |
+| Long conversation    | `check_git_status` → if `recommend_new_chat=true` → commit + new chat             |
+| Offline              | `online_check` → if offline → `offline_complete` + `qwen2.5-coder:7b`             |
+| New lib/version      | `web_search` + `github_search` + `check_versions` — cite ≥2 URLs                  |
+
+## 15. Code Consistency Enforcement
+After **every code change**, verify against existing codebase conventions:
+1. **Naming** — matches file's casing/prefix/suffix patterns for the stack.
+2. **Layer placement** — code is in the correct architectural layer.
+3. **Error handling** — matches how adjacent code handles errors.
+4. **Import patterns** — barrel files updated if the project uses them.
+5. **Async pattern** — stay consistent within the file; do not mix styles.
+6. **i18n** — every new UI string goes through the project's translation layer.
+7. **State management** — stay consistent with the feature's chosen pattern.
+
+Output format for violations:
+```
+⚠️ Consistency: <file>:<line>
+Expected: <pattern>   Found: <what was written>   Fix: <diff>
+```
+
+## 16. Refactoring & Architecture Suggestions (advisory only — never auto-apply)
+
+### Refactor — suggest after every task
+Scan modified files for:
+- Duplicated logic across ≥2 sibling files → extract shared helper.
+- Method > 30 lines → split into named private methods.
+- Module / component / class > 200–300 lines → split into focused units.
+- Service mixing HTTP + state → separate concerns.
+- Magic values repeated ≥2 times → constant/enum.
+- `if/else` chain ≥4 branches on same field → strategy/lookup map.
+
+```
+💡 Refactor suggestion (advisory):
+File: <path> (lines N–M)  Pattern: <description>
+Suggestion: <what>  Effort: Low/Med/High  Impact: <why>
+```
+
+### Architecture — flag if scope is lighter than pattern used
+| Signal                                                                            | Suggestion                                                                    |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Simple CRUD wrapped in full ceremony (Command+Handler+Validator+Mapper or equiv.) | "A thin service method likely suffices."                                      |
+| Module / package with a single class, route, or component                         | "Inline or shared utility may be lighter than a full module."                 |
+| Read-only data projection behind full Repository + Unit of Work                   | "A direct query in a lean read-service may be simpler."                       |
+| Async event / message bus for a synchronous side effect                           | "A direct service call is clearer; async events add indirection for no gain." |
+| Data-access layer leaking an open query interface                                 | "Return concrete DTOs — open query interfaces break encapsulation."           |
+| Multiple nested mutable state objects in a single service                         | "Consider a dedicated state store for this complexity."                       |
+| UI component calling ≥2 data services directly                                    | "A façade service reduces coupling."                                          |
+
+```
+🏗️ Architecture note (advisory):
+Context: <observed>  Concern: <why heavy>
+Lighter alternative: <suggestion>  Trade-off: <gain vs cost>
+```

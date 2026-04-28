@@ -4,10 +4,10 @@
       "type": "stdio",
       "command": "python",
       "args": ["-m", "server"],
-      "cwd": "C:/Tools/vscode-orchestrator/mcp_server",
+      "cwd": "C:/Tools/vscode-orchestrator",
       "env": {
         "AIDOCS_ROOT": "C:/aidocs",
-        "PYTHONPATH": "C:/Tools/vscode-orchestrator/mcp_server"
+        "PYTHONPATH": "C:/Tools/vscode-orchestrator"
       }
     }
   }
