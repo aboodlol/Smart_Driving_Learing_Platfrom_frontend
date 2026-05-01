@@ -263,6 +263,11 @@
   border-color: rgba(139, 92, 246, 0.35);
 }
 
+.btn-start-quiz.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ─── Tips ─── */
 .tips-card {
   display: flex;

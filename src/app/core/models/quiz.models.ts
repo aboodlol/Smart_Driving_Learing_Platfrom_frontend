@@ -6,6 +6,7 @@ export interface QuizQuestion {
   optionsAR?: string[];
   correctAnswer?: string;
   correctAnswerAR?: string;
+  chapterKey: string;
   chapterTitle: string;
   chapterTitleAR?: string;
   explanation?: string;
@@ -46,6 +47,16 @@ export interface QuizResult {
   totalQuestions: number;
   correct: number;
   results: QuizQuestionResult[];
+}
+
+export interface SaveAnswerResponse {
+  isCorrect?: boolean;
+  correctCount?: number;
+  wrongCount?: number;
+  answeredCount?: number;
+  remainingCount?: number;
+  earlyFailed?: boolean;
+  result?: QuizResult;
 }
 
 export type QuizMode = 'chapter' | 'exam';

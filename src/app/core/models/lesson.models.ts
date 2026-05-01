@@ -1,12 +1,18 @@
 export interface SubLesson {
   title: string;
+  titleAR?: string;
   content: string;
+  contentAR?: string;
+  image?: string;
 }
 
 export interface Chapter {
   _id: string;
+  chapterKey: string;
   title: string;
+  titleAR?: string;
   description: string;
+  descriptionAR?: string;
   image: string;
   order: number;
   isPublished: boolean;
@@ -17,6 +23,15 @@ export interface Chapter {
 
 export interface CompleteSubLessonResponse {
   message: string;
-  identifier: string;
+  completedLesson: {
+    chapterId: string;
+    subLessonIndex: number;
+    completedAt: string;
+  };
+  completedLessons: {
+    chapterId: string;
+    subLessonIndex: number;
+    completedAt: string;
+  }[];
   overallProgress: number;
 }

@@ -13,17 +13,20 @@
     <div class="lessons-grid">
       @for (chapter of chapters(); track chapter._id; let i = $index) {
         <a [routerLink]="['/lessons', chapter._id]" class="lesson-card hover-lift fade-in-up" [style.animation-delay]="(i * 0.06) + 's'">
+          @if (chapter.image) {
+            <img class="lesson-image" [src]="chapter.image" [alt]="getChapterTitle(chapter)" loading="lazy">
+          }
           <div class="lesson-card-top">
             <div class="lesson-icon">
               <span class="material-icons">menu_book</span>
             </div>
             <span class="status-badge" [class]="getStatusClass(chapter)">{{ getStatusKey(chapter) | translate }}</span>
           </div>
-          <h3 class="lesson-title">{{ chapter.title }}</h3>
-          <p class="lesson-desc">{{ chapter.description }}</p>
+          <h3 class="lesson-title" [attr.dir]="getTextDirection()">{{ getChapterTitle(chapter) }}</h3>
+          <p class="lesson-desc" [attr.dir]="getTextDirection()">{{ getChapterDescription(chapter) }}</p>
           <div class="lesson-footer">
             <div class="lesson-progress-info">
-              <span class="lesson-count">{{ getCompletedCount(chapter) }} / {{ chapter.lessons.length }} {{ 'lessons.title' | translate | lowercase }}</span>
+              <span class="lesson-count">{{ getCompletedCount(chapter) }} / {{ chapter.lessons.length }} {{ 'admin.dashboard.subLessons' | translate | lowercase }}</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" [style.width.%]="getChapterPercent(chapter)"></div>

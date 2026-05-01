@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { QuizResult } from '../models/quiz.models';
+import { QuizResult, SaveAnswerResponse } from '../models/quiz.models';
 import { ExamAttempt, ExamAttemptAnswer, ExamAttemptHistoryItem } from '../models/exam-attempt.models';
 
 @Injectable({
@@ -48,10 +48,13 @@ export class ExamAttemptApiService {
       );
   }
 
-  saveAnswer(attemptId: string, payload: ExamAttemptAnswer): Observable<void> {
+  saveAnswer(attemptId: string, payload: ExamAttemptAnswer): Observable<SaveAnswerResponse> {
     return this.http
-      .patch<void>(`${this.baseUrl}/${attemptId}/answer`, payload)
-      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+      .patch<unknown>(`${this.baseUrl}/${attemptId}/answer`, payload)
+      .pipe(
+        map((response) => this.normalizeSaveAnswerResponse(response)),
+        catchError((error: HttpErrorResponse) => this.mapApiError(error)),
+      );
   }
 
   submitAttempt(attemptId: string): Observable<QuizResult> {
@@ -126,6 +129,69 @@ export class ExamAttemptApiService {
       ...historyItem,
       _id: historyItem._id || historyItem.id || '',
     };
+  }
+
+  private normalizeSaveAnswerResponse(response: unknown): SaveAnswerResponse {
+    if (!response || typeof response !== 'object') {
+      return {};
+    }
+
+    const payload = response as {
+      data?: unknown;
+      earlyFailed?: boolean;
+      result?: unknown;
+      isCorrect?: boolean;
+      correctCount?: unknown;
+      wrongCount?: unknown;
+      answeredCount?: unknown;
+      remainingCount?: unknown;
+    };
+    const source = payload.data && typeof payload.data === 'object' ? (payload.data as Record<string, unknown>) : (response as Record<string, unknown>);
+    const resultPayload = payload.result ?? source['result'] ?? (source['earlyFailed'] === true ? source : source['data']);
+
+    const normalized: SaveAnswerResponse = {};
+
+    if (typeof source['isCorrect'] === 'boolean') {
+      normalized.isCorrect = source['isCorrect'];
+    } else if (typeof payload.isCorrect === 'boolean') {
+      normalized.isCorrect = payload.isCorrect;
+    }
+
+    if (typeof source['correctCount'] === 'number') {
+      normalized.correctCount = source['correctCount'];
+    } else if (typeof payload.correctCount === 'number') {
+      normalized.correctCount = payload.correctCount;
+    }
+
+    if (typeof source['wrongCount'] === 'number') {
+      normalized.wrongCount = source['wrongCount'];
+    } else if (typeof payload.wrongCount === 'number') {
+      normalized.wrongCount = payload.wrongCount;
+    }
+
+    if (typeof source['answeredCount'] === 'number') {
+      normalized.answeredCount = source['answeredCount'];
+    } else if (typeof payload.answeredCount === 'number') {
+      normalized.answeredCount = payload.answeredCount;
+    }
+
+    if (typeof source['remainingCount'] === 'number') {
+      normalized.remainingCount = source['remainingCount'];
+    } else if (typeof payload.remainingCount === 'number') {
+      normalized.remainingCount = payload.remainingCount;
+    }
+
+    if (typeof source['earlyFailed'] === 'boolean') {
+      normalized.earlyFailed = source['earlyFailed'];
+    } else if (typeof payload.earlyFailed === 'boolean') {
+      normalized.earlyFailed = payload.earlyFailed;
+    }
+
+    if (resultPayload) {
+      normalized.result = this.normalizeResultResponse(resultPayload);
+    }
+
+    return normalized;
   }
 
   private normalizeResultResponse(response: unknown): QuizResult {

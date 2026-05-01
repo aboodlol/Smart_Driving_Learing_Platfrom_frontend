@@ -7,6 +7,7 @@ export interface ChapterQuizAnswer {
 }
 
 export interface ChapterQuizProgress {
+  chapterKey?: string;
   chapterTitle?: string;
   currentQuestionIndex?: number;
   answers?: ChapterQuizAnswer[];

@@ -105,6 +105,7 @@ export class QuizApiService {
         const quiz = item as QuizQuestion;
         quizzes.push({
           ...quiz,
+          chapterKey: quiz.chapterKey ?? chapterTitle,
           chapterTitle: quiz.chapterTitle ?? chapterTitle,
         });
       }

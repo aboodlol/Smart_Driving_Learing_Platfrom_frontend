@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, interval, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { QuizQuestion, QuizMode, QuizQuestionResult, QuizResult } from '../../../core/models/quiz.models';
+import { QuizQuestion, QuizMode, QuizQuestionResult, QuizResult, SaveAnswerResponse } from '../../../core/models/quiz.models';
 import { ExamAttempt, ExamAttemptAnswer } from '../../../core/models/exam-attempt.models';
 import { ChapterQuizAnswer, ChapterQuizProgress } from '../../../core/models/chapter-quiz-progress.models';
 import { ExamAttemptApiService } from '../../../core/services/exam-attempt-api.service';
@@ -19,6 +19,8 @@ interface ChapterAnswerFeedback {
   selectedOptionIndex: number;
   isLastQuestion: boolean;
 }
+
+type ChapterQuestionNavState = 'current' | 'correct' | 'wrong' | 'unanswered';
 
 @Component({
   selector: 'app-quiz-session-page',
@@ -52,6 +54,13 @@ export class QuizSessionPageComponent {
   protected readonly savedChapterAnswerIds = signal<Set<string>>(new Set());
   protected readonly chapterAnswerFeedback = signal<ChapterAnswerFeedback | null>(null);
   protected readonly savingChapterAnswer = signal(false);
+  protected readonly skippedIds = signal<Set<string>>(new Set());
+  protected readonly examQuestionStates = signal<Map<string, boolean>>(new Map());
+  protected readonly examCorrectCount = signal(0);
+  protected readonly examWrongCount = signal(0);
+  protected readonly examSavingAnswer = signal(false);
+  protected readonly examLocked = signal(false);
+  protected readonly examPendingAdvanceQuestionId = signal<string | null>(null);
 
   protected readonly currentQuestion = computed(() => this.questions()[this.currentIndex()]);
   protected readonly progressPercent = computed(() => {
@@ -158,6 +167,78 @@ export class QuizSessionPageComponent {
     return total > 0 ? Math.round((this.localizedCorrectCount() / total) * 100) : 0;
   });
 
+  protected readonly skipsRemaining = computed(() => Math.max(0, 4 - this.skippedIds().size));
+
+  protected readonly questionNavStates = computed<
+    Array<'current' | 'correct' | 'wrong' | 'skipped' | 'unanswered'>
+  >(() => {
+    const qs = this.questions();
+    const skipped = this.skippedIds();
+    const current = this.currentIndex();
+    const states = this.examQuestionStates();
+    const result = this.result();
+
+    if (result) {
+      // After result: use backend isCorrect exclusively
+      const resultMap = new Map<string, boolean>(
+        result.results.map((item) => [item.questionId, item.isCorrect]),
+      );
+      return qs.map((q) => {
+        if (resultMap.has(q._id)) return resultMap.get(q._id) ? 'correct' : 'wrong';
+        return 'unanswered';
+      });
+    }
+
+    // During running exam: use backend correctness immediately for navigator colors.
+    return qs.map((q, i) => {
+      if (i === current) return 'current';
+      if (states.has(q._id)) return states.get(q._id) ? 'correct' : 'wrong';
+      if (skipped.has(q._id)) return 'skipped';
+      return 'unanswered';
+    });
+  });
+  protected readonly chapterQuestionNavStates = computed<ChapterQuestionNavState[]>(() => {
+    const qs = this.questions();
+    const answers = this.answers();
+    const savedIds = this.savedChapterAnswerIds();
+    const current = this.currentIndex();
+    const feedback = this.chapterAnswerFeedback();
+
+    return qs.map((q, i) => {
+      const selectedIndex = answers.get(q._id);
+      const isSaved = savedIds.has(q._id) || feedback?.question._id === q._id;
+
+      if (isSaved && selectedIndex !== undefined) {
+        return this.isQuestionAnsweredCorrectly(q, selectedIndex) ? 'correct' : 'wrong';
+      }
+
+      if (i === current) {
+        return 'current';
+      }
+
+      return 'unanswered';
+    });
+  });
+
+  protected readonly examRemainingCount = computed(() => {
+    if (!this.isExamMode()) return 0;
+    return this.questions().length - this.answers().size;
+  });
+
+  protected readonly examPassed = computed(() => {
+    const result = this.result();
+    if (!result) return false;
+    return typeof result.correct === 'number' ? result.correct >= 51 : (result.score ?? 0) >= 85;
+  });
+
+  protected readonly resultWrongCount = computed(() =>
+    this.localizedReviewItems().filter((i) => !i.isCorrect && !!i.selectedAnswer?.trim()).length,
+  );
+
+  protected readonly resultEmptyCount = computed(() =>
+    this.localizedReviewItems().filter((i) => !i.selectedAnswer?.trim()).length,
+  );
+
   constructor() {
     const snapshot = this.route.snapshot;
     const chapterTitle = snapshot.paramMap.get('chapterTitle');
@@ -193,15 +274,16 @@ export class QuizSessionPageComponent {
   }
 
   protected selectAnswer(questionId: string, optionIndex: number): void {
+    if (this.isExamMode() && (this.examLocked() || this.result())) {
+      return;
+    }
+
     this.answers.update((map) => {
       const newMap = new Map(map);
       newMap.set(questionId, optionIndex);
       return newMap;
     });
 
-    if (this.isExamMode()) {
-      this.saveExamAnswer(questionId, optionIndex);
-    }
   }
 
   protected getSelectedAnswer(questionId: string): number | undefined {
@@ -220,12 +302,20 @@ export class QuizSessionPageComponent {
         return;
       }
     }
+    if (this.isExamMode()) {
+      this.advanceExamAfterSave();
+      return;
+    }
     if (this.currentIndex() < this.questions().length - 1) {
       this.currentIndex.update((i) => i + 1);
     }
   }
 
   protected previousQuestion(): void {
+    if (this.isExamMode()) {
+      return;
+    }
+
     if (this.currentIndex() > 0) {
       this.currentIndex.update((i) => i - 1);
     }
@@ -272,12 +362,121 @@ export class QuizSessionPageComponent {
     }
   }
 
+  protected skipQuestion(): void {
+    if (!this.isExamMode() || this.examLocked() || this.result() || this.skipsRemaining() <= 0) return;
+    const q = this.currentQuestion();
+    if (!q) return;
+    this.skippedIds.update((prev) => {
+      const next = new Set(prev);
+      next.add(q._id);
+      return next;
+    });
+    this.navigateToNextFlowQuestion();
+  }
+
+  protected navigateToQuestion(index: number): void {
+    if (this.isExamMode()) {
+      return;
+    }
+
+    if (index >= 0 && index < this.questions().length) {
+      this.currentIndex.set(index);
+    }
+  }
+
+  protected navigateToChapterQuestion(index: number): void {
+    if (
+      !this.isChapterMode() ||
+      this.savingChapterAnswer() ||
+      index < 0 ||
+      index >= this.questions().length ||
+      index === this.currentIndex()
+    ) {
+      return;
+    }
+
+    this.chapterAnswerFeedback.set(null);
+    this.currentIndex.set(index);
+
+    const chapterTitle = this.chapterTitle();
+    if (chapterTitle) {
+      this.chapterProgressApi
+        .savePosition(chapterTitle, index)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
+    }
+  }
+
+  protected getNavBtnClass(index: number): string {
+    const state = this.questionNavStates()[index] ?? 'unanswered';
+    return `nav-q-btn nq-${state}`;
+  }
+
+  protected getChapterNavBtnClass(index: number): string {
+    const state = this.chapterQuestionNavStates()[index] ?? 'unanswered';
+    const currentClass = index === this.currentIndex() ? ' chapter-nav-current' : '';
+    return `nav-q-btn nq-${state}${currentClass}`;
+  }
+
   protected getCorrectOptionIndex(question: QuizQuestion): number {
     const correct = this.normalizeText(question.correctAnswer)?.toLowerCase() ?? '';
     if (!correct) return -1;
     return (question.options ?? []).findIndex(
       (opt) => (this.normalizeText(opt)?.toLowerCase() ?? '') === correct,
     );
+  }
+
+  private navigateToNextFlowQuestion(): void {
+    this.currentIndex.set(this.findNextFlowIndex(this.currentIndex()));
+  }
+
+  private advanceExamAfterSave(): void {
+    if (!this.isExamMode() || this.examLocked() || this.result()) {
+      return;
+    }
+
+    const currentQuestion = this.currentQuestion();
+    if (!currentQuestion) {
+      return;
+    }
+
+    const selectedIndex = this.answers().get(currentQuestion._id);
+    if (selectedIndex === undefined) {
+      return;
+    }
+
+    const savedState = this.examQuestionStates().get(currentQuestion._id);
+    if (typeof savedState === 'boolean') {
+      this.navigateToNextFlowQuestion();
+      return;
+    }
+
+    if (this.examSavingAnswer()) {
+      this.examPendingAdvanceQuestionId.set(currentQuestion._id);
+      return;
+    }
+
+    this.examPendingAdvanceQuestionId.set(currentQuestion._id);
+    this.saveExamAnswer(currentQuestion._id, selectedIndex);
+  }
+
+  private findNextFlowIndex(from: number): number {
+    const qs = this.questions();
+    const answers = this.answers();
+    const skipped = this.skippedIds();
+    // Pass 1: unanswered + non-skipped after current
+    for (let i = from + 1; i < qs.length; i++) {
+      if (!answers.has(qs[i]._id) && !skipped.has(qs[i]._id)) return i;
+    }
+    // Pass 2: unanswered + non-skipped before current
+    for (let i = 0; i < from; i++) {
+      if (!answers.has(qs[i]._id) && !skipped.has(qs[i]._id)) return i;
+    }
+    // Pass 3: skipped + unanswered in order
+    for (let i = 0; i < qs.length; i++) {
+      if (!answers.has(qs[i]._id) && skipped.has(qs[i]._id)) return i;
+    }
+    return from;
   }
 
   private performChapterSubmit(): void {
@@ -412,6 +611,13 @@ export class QuizSessionPageComponent {
     this.currentIndex.set(0);
     this.savedChapterAnswerIds.set(new Set());
     this.chapterAnswerFeedback.set(null);
+    this.skippedIds.set(new Set());
+    this.examQuestionStates.set(new Map());
+    this.examCorrectCount.set(0);
+    this.examWrongCount.set(0);
+    this.examSavingAnswer.set(false);
+    this.examLocked.set(false);
+    this.examPendingAdvanceQuestionId.set(null);
     this.loading.set(true);
 
     if (this.isExamMode()) {
@@ -495,6 +701,12 @@ export class QuizSessionPageComponent {
 
     this.attemptId.set(resolvedId);
     this.questions.set(questions);
+    this.examQuestionStates.set(new Map());
+    this.examCorrectCount.set(0);
+    this.examWrongCount.set(0);
+    this.examSavingAnswer.set(false);
+    this.examLocked.set(false);
+    this.examPendingAdvanceQuestionId.set(null);
 
     const mappedAnswers = this.mapAttemptAnswers(attempt, questions);
     this.answers.set(mappedAnswers);
@@ -562,7 +774,7 @@ export class QuizSessionPageComponent {
         continue;
       }
 
-      const resolvedIndex = this.resolveAnswerIndex(question, answer.selectedAnswer);
+      const resolvedIndex = this.resolveAnswerIndex(question, answer);
       if (resolvedIndex !== undefined) {
         mapped.set(answer.questionId, resolvedIndex);
       }
@@ -586,7 +798,12 @@ export class QuizSessionPageComponent {
     return [];
   }
 
-  private resolveAnswerIndex(question: QuizQuestion, selectedAnswer: string): number | undefined {
+  private resolveAnswerIndex(question: QuizQuestion, answer: ExamAttemptAnswer): number | undefined {
+    if (typeof answer.selectedIndex === 'number') {
+      return answer.selectedIndex;
+    }
+
+    const selectedAnswer = answer.selectedAnswer ?? answer.selectedAnswerAR ?? '';
     const preferredOptions = this.getQuestionOptions(question);
     let index = preferredOptions.indexOf(selectedAnswer);
     if (index >= 0) {
@@ -614,24 +831,79 @@ export class QuizSessionPageComponent {
       return;
     }
 
+    if (this.examLocked() || this.result()) {
+      return;
+    }
+
+    if (this.examSavingAnswer()) {
+      return;
+    }
+
     const question = this.questions().find((item) => item._id === questionId);
     if (!question) {
       return;
     }
 
-    const options = this.getQuestionOptions(question);
-    const selectedAnswer = options[optionIndex];
-    if (!selectedAnswer) {
+    const englishOptions = question.options ?? [];
+    const arabicOptions = question.optionsAR ?? [];
+    const selectedAnswer = englishOptions[optionIndex] ?? '';
+    const selectedAnswerAR = arabicOptions[optionIndex] ?? '';
+    if (!selectedAnswer && !selectedAnswerAR) {
       return;
     }
 
-    const payload: ExamAttemptAnswer = { questionId, selectedAnswer };
+    const payload: ExamAttemptAnswer = {
+      questionId,
+      selectedIndex: optionIndex,
+      selectedAnswer,
+      selectedAnswerAR,
+    };
+
+    this.examSavingAnswer.set(true);
 
     this.examAttemptApi
       .saveAnswer(attemptId, payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.examSavingAnswer.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
+        next: (response: SaveAnswerResponse) => {
+          if (typeof response.isCorrect === 'boolean') {
+            const isCorrect = response.isCorrect;
+            this.examQuestionStates.update((prev) => {
+              const next = new Map(prev);
+              next.set(questionId, isCorrect);
+              return next;
+            });
+          }
+
+          if (typeof response.correctCount === 'number') {
+            this.examCorrectCount.set(response.correctCount);
+          }
+
+          if (typeof response.wrongCount === 'number') {
+            this.examWrongCount.set(response.wrongCount);
+          }
+
+          if (response.earlyFailed) {
+            this.timerSub?.unsubscribe();
+            this.timerSub = null;
+            this.examLocked.set(true);
+            this.examPendingAdvanceQuestionId.set(null);
+            if (response.result) {
+              this.result.set(response.result);
+            }
+            return;
+          }
+
+          if (this.examPendingAdvanceQuestionId() === questionId) {
+            this.examPendingAdvanceQuestionId.set(null);
+            this.navigateToNextFlowQuestion();
+          }
+        },
         error: (err: Error) => {
+          this.examPendingAdvanceQuestionId.set(null);
           this.toast.error(err.message);
         },
       });

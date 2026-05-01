@@ -13,7 +13,11 @@ export interface ExamAttemptHistoryItem {
 
 export interface ExamAttemptAnswer {
   questionId: string;
-  selectedAnswer: string;
+  selectedAnswer?: string;
+  selectedAnswerAR?: string;
+  selectedIndex?: number;
+  skipped?: boolean;
+  isCorrect?: boolean | null;
 }
 
 export interface ExamAttempt {

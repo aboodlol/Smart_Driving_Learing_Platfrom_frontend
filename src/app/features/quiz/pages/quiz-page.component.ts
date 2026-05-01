@@ -11,6 +11,7 @@ import { I18nService } from '../../../core/services/i18n.service';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
 
 interface QuizChapterCard {
+  chapterKey: string;
   chapterTitle: string;
   chapterTitleAR?: string;
   description: string;
@@ -201,12 +202,13 @@ export class QuizPageComponent {
         continue;
       }
 
-      const chapterKey = this.normalizeChapterKey(chapterTitle);
+      const chapterKey = this.normalizeText(question.chapterKey) ?? chapterTitle;
       const chapterTitleAR = this.normalizeText(question.chapterTitleAR);
       const existing = chapterMap.get(chapterKey);
 
       if (existing) {
         existing.questionCount += 1;
+        existing.chapterTitle = chapterTitle;
         if (!existing.chapterTitleAR && chapterTitleAR) {
           existing.chapterTitleAR = chapterTitleAR;
         }
@@ -215,6 +217,7 @@ export class QuizPageComponent {
 
       const fallbackDescription = this.getFallbackDescription(chapterTitle);
       chapterMap.set(chapterKey, {
+        chapterKey,
         chapterTitle,
         chapterTitleAR,
         description: fallbackDescription.en,
