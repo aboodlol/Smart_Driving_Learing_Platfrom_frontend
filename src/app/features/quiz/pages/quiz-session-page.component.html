@@ -7,20 +7,53 @@
       <p class="mt-3 loading-text">{{ 'quiz.loadingQuestions' | translate }}</p>
     </div>
   } @else if (result(); as res) {
-    <!-- Result View -->
-    <div class="result-card">
-      <div class="result-header" [class]="getScoreClass()">
-        <div class="score-circle">{{ res.score }}%</div>
-        <div>
-          <h2>{{ 'quiz.quizComplete' | translate }}</h2>
-          <p>
-            {{ 'quiz.youGotPrefix' | translate }} {{ res.correct }}
-            {{ 'quiz.youGotMiddle' | translate }} {{ res.totalQuestions }}
-            {{ 'quiz.youGotSuffix' | translate }}
-          </p>
+
+    <!-- ═══════════════════════════════ RESULT VIEW ═══════════════════════════════ -->
+
+    @if (isExamMode()) {
+      <!-- Exam result: verdict + stats -->
+      <div class="result-card">
+        <div class="exam-result-verdict">
+          <div class="exam-verdict-badge" [class.exam-verdict-passed]="examPassed()" [class.exam-verdict-failed]="!examPassed()">
+            {{ examPassed() ? ('quiz.examPassed' | translate) : ('quiz.examFailed' | translate) }}
+          </div>
+          <div class="score-circle-standalone" [class.score-good]="examPassed()" [class.score-bad]="!examPassed()">
+            {{ localizedScore() }}%
+          </div>
+        </div>
+
+        <div class="exam-result-stats">
+          <div class="exam-result-stat">
+            <span class="exam-result-stat-value stat-val-correct">{{ localizedCorrectCount() }}</span>
+            <span class="exam-result-stat-label">{{ 'quiz.examCorrect' | translate }}</span>
+          </div>
+          <div class="exam-result-stat">
+            <span class="exam-result-stat-value stat-val-wrong">{{ resultWrongCount() }}</span>
+            <span class="exam-result-stat-label">{{ 'quiz.examWrong' | translate }}</span>
+          </div>
+          <div class="exam-result-stat">
+            <span class="exam-result-stat-value stat-val-empty">{{ resultEmptyCount() }}</span>
+            <span class="exam-result-stat-label">{{ 'quiz.examEmpty' | translate }}</span>
+          </div>
+        </div>
+        <p class="exam-passing-score-result">{{ 'quiz.examPassingScore' | translate }}</p>
+      </div>
+    } @else {
+      <!-- Chapter result: original style -->
+      <div class="result-card">
+        <div class="result-header" [class]="getScoreClass()">
+          <div class="score-circle">{{ localizedScore() }}%</div>
+          <div>
+            <h2>{{ 'quiz.quizComplete' | translate }}</h2>
+            <p>
+              {{ 'quiz.youGotPrefix' | translate }} {{ localizedCorrectCount() }}
+              {{ 'quiz.youGotMiddle' | translate }} {{ localizedTotalQuestions() }}
+              {{ 'quiz.youGotSuffix' | translate }}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    }
 
     <div class="result-actions mb-4">
       <button class="btn-retake" (click)="retakeQuiz()">{{ 'quiz.retakeQuiz' | translate }}</button>
@@ -29,11 +62,21 @@
 
     <h3 class="review-heading mb-3">{{ 'quiz.questionReview' | translate }}</h3>
     <div class="review-list">
-      @for (item of res.results; track item.questionId; let i = $index) {
+      @for (item of localizedReviewItems(); track item.questionId; let i = $index) {
         <div class="review-item" [class.correct]="item.isCorrect" [class.wrong]="!item.isCorrect">
           <div class="review-number">{{ i + 1 }}</div>
           <div class="review-body">
             <h4>{{ item.question }}</h4>
+            @if (item.image) {
+              <div class="question-media question-media-image">
+                <img [src]="item.image" [alt]="item.question" loading="lazy" />
+              </div>
+            }
+            @if (item.video) {
+              <div class="question-media question-media-video">
+                <video [src]="item.video" controls preload="metadata"></video>
+              </div>
+            }
             <div class="review-answer">
               <span class="review-label">{{ 'quiz.yourAnswer' | translate }}</span>
               <span [class.text-success]="item.isCorrect" [class.text-danger]="!item.isCorrect">
@@ -54,60 +97,296 @@
         </div>
       }
     </div>
+
   } @else {
-    <!-- Quiz Taking View -->
-    <div class="quiz-title-bar">
-      <h2>{{ chapterTitle() }}</h2>
+
+    <!-- ══════════════════════════════ QUIZ TAKING VIEW ═══════════════════════════ -->
+    <div class="quiz-title-bar" [class.exam-title-bar]="isExamMode()">
+      <h2>{{ displayChapterTitle() }}</h2>
+      @if (isExamMode() && remainingTimeLabel()) {
+        <span class="quiz-timer-top">{{ remainingTimeLabel() }}</span>
+      }
     </div>
 
-    @if (currentQuestion(); as q) {
-      <div class="quiz-session-card">
-        <div class="quiz-progress-bar">
-          <div class="progress-track">
-            <div class="progress-fill" [style.width.%]="progressPercent()"></div>
-          </div>
-          <span class="quiz-counter">
-            {{ 'quiz.question' | translate }} {{ currentIndex() + 1 }} {{ 'quiz.of' | translate }} {{ questions().length }}
-          </span>
-        </div>
+    @if (isExamMode()) {
 
-        <h3 class="question-text">{{ q.question }}</h3>
+      <!-- ─────────────── EXAM LAYOUT: question + sidebar ─────────────── -->
+      <div class="exam-layout">
 
-        <div class="options-list">
-          @for (option of q.options; track option) {
-            <button
-              class="option-btn"
-              [class.selected]="getSelectedAnswer(q._id) === option"
-              (click)="selectAnswer(q._id, option)"
-              type="button"
-            >
-              <span class="option-radio" [class.checked]="getSelectedAnswer(q._id) === option"></span>
-              {{ option }}
-            </button>
-          }
-        </div>
+        <!-- Left/Main: question card -->
+        <div class="exam-main">
+          @if (currentQuestion(); as q) {
+            <div class="quiz-session-card">
 
-        <div class="quiz-nav">
-          <button class="btn-nav" [disabled]="currentIndex() === 0" (click)="previousQuestion()">
-            &larr; {{ 'quiz.previous' | translate }}
-          </button>
+              <!-- Progress bar -->
+              <div class="quiz-progress-bar">
+                <div class="progress-track">
+                  <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+                </div>
+                <span class="quiz-counter">
+                  {{ 'quiz.question' | translate }} {{ currentIndex() + 1 }}
+                  {{ 'quiz.of' | translate }} {{ questions().length }}
+                </span>
+              </div>
 
-          @if (currentIndex() < questions().length - 1) {
-            <button class="btn-nav btn-nav-primary" (click)="nextQuestion()">{{ 'quiz.next' | translate }} &rarr;</button>
-          } @else {
-            <button
-              class="btn-submit-quiz"
-              [disabled]="!allAnswered() || submitting()"
-              (click)="submitQuiz()"
-            >
-              @if (submitting()) {
-                <div class="custom-spinner-sm"></div>
+              <h3 class="question-text">{{ currentQuestionText() }}</h3>
+
+              @if (currentQuestionImage(); as imageUrl) {
+                <div class="question-media question-media-image">
+                  <img [src]="imageUrl" [alt]="currentQuestionText()" loading="lazy" />
+                </div>
               }
-              {{ 'quiz.submitQuiz' | translate }}
-            </button>
+              @if (currentQuestionVideo(); as videoUrl) {
+                <div class="question-media question-media-video">
+                  <video [src]="videoUrl" controls preload="metadata"></video>
+                </div>
+              }
+
+              <div class="options-list">
+                @for (option of currentQuestionOptions(); track $index; let optionIndex = $index) {
+                  <button
+                    class="option-btn"
+                    [class.selected]="isOptionSelected(q._id, optionIndex)"
+                    [disabled]="(isExamMode() && (examSavingAnswer() || examLocked())) || (isChapterMode() && !!chapterAnswerFeedback())"
+                    (click)="selectAnswer(q._id, optionIndex)"
+                    type="button"
+                  >
+                    <span class="option-radio" [class.checked]="isOptionSelected(q._id, optionIndex)"></span>
+                    {{ option }}
+                  </button>
+                }
+              </div>
+
+              <!-- Exam navigation row -->
+              <div class="quiz-nav exam-nav-row">
+                <button class="btn-nav" [disabled]="isExamMode() || currentIndex() === 0" (click)="previousQuestion()">
+                  &larr; {{ 'quiz.previous' | translate }}
+                </button>
+
+                <div class="exam-skip-area">
+                  <button
+                    class="btn-skip"
+                    [disabled]="skipsRemaining() <= 0 || answers().has(q._id)"
+                    (click)="skipQuestion()"
+                    type="button"
+                  >
+                    {{ 'quiz.skipQuestion' | translate }}
+                  </button>
+                  <span class="skips-label">{{ 'quiz.skipsRemainingLabel' | translate }} {{ skipsRemaining() }}</span>
+                </div>
+
+                <button
+                  class="btn-nav btn-nav-primary"
+                  [disabled]="examSavingAnswer() || examLocked() || !answers().has(q._id)"
+                  (click)="nextQuestion()"
+                >
+                  {{ 'quiz.next' | translate }} &rarr;
+                </button>
+              </div>
+
+              <!-- Submit exam button row -->
+              <div class="exam-submit-row">
+                <button class="btn-submit-exam" [disabled]="submitting()" (click)="submitQuiz()" type="button">
+                  @if (submitting()) {
+                    <div class="custom-spinner-sm"></div>
+                  }
+                  {{ 'quiz.submitExam' | translate }}
+                </button>
+              </div>
+
+            </div>
           }
+        </div>
+
+        <!-- Right/Sidebar: stats + navigator -->
+        <div class="exam-sidebar">
+
+          <!-- Live stats card -->
+          <div class="exam-stats-card">
+            <div class="exam-card-title">{{ 'quiz.examStats' | translate }}</div>
+            <div class="exam-stats-grid">
+              <div class="exam-stat stat-correct">
+                <span class="exam-stat-value">{{ examCorrectCount() }}</span>
+                <span class="exam-stat-label">{{ 'quiz.examCorrect' | translate }}</span>
+              </div>
+              <div class="exam-stat stat-wrong">
+                <span class="exam-stat-value">{{ examWrongCount() }}</span>
+                <span class="exam-stat-label">{{ 'quiz.examWrong' | translate }}</span>
+              </div>
+              <div class="exam-stat stat-remaining">
+                <span class="exam-stat-value">{{ examRemainingCount() }}</span>
+                <span class="exam-stat-label">{{ 'quiz.examRemaining' | translate }}</span>
+              </div>
+            </div>
+            <p class="exam-passing-score">{{ 'quiz.examPassingScore' | translate }}</p>
+          </div>
+
+          <!-- Question navigator card -->
+          <div class="exam-nav-card">
+            <div class="exam-card-title">{{ 'quiz.examNavigator' | translate }}</div>
+            <div class="exam-nav-grid">
+              @for (q of questions(); track q._id; let i = $index) {
+                <button [class]="getNavBtnClass(i)" [disabled]="isExamMode()" (click)="navigateToQuestion(i)" type="button">
+                  {{ i + 1 }}
+                </button>
+              }
+            </div>
+            <div class="nav-legend">
+              <div class="nav-legend-item">
+                <span class="nav-dot dot-current"></span>
+                {{ 'quiz.navCurrent' | translate }}
+              </div>
+              <div class="nav-legend-item">
+                <span class="nav-dot dot-correct"></span>
+                {{ 'quiz.navCorrect' | translate }}
+              </div>
+              <div class="nav-legend-item">
+                <span class="nav-dot dot-wrong"></span>
+                {{ 'quiz.navWrong' | translate }}
+              </div>
+              <div class="nav-legend-item">
+                <span class="nav-dot dot-skipped"></span>
+                {{ 'quiz.navSkipped' | translate }}
+              </div>
+              <div class="nav-legend-item">
+                <span class="nav-dot dot-unanswered"></span>
+                {{ 'quiz.navUnanswered' | translate }}
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
+
+    } @else {
+
+      <!-- ─────────────── CHAPTER LAYOUT: single column (unchanged) ─────────────── -->
+      @if (currentQuestion(); as q) {
+        <div class="chapter-layout">
+        <div class="quiz-session-card">
+          <div class="quiz-progress-bar">
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+            </div>
+            <span class="quiz-counter">
+              {{ 'quiz.question' | translate }} {{ currentIndex() + 1 }} {{ 'quiz.of' | translate }} {{ questions().length }}
+            </span>
+          </div>
+
+          <h3 class="question-text">{{ currentQuestionText() }}</h3>
+
+          @if (currentQuestionImage(); as imageUrl) {
+            <div class="question-media question-media-image">
+              <img [src]="imageUrl" [alt]="currentQuestionText()" loading="lazy" />
+            </div>
+          }
+          @if (currentQuestionVideo(); as videoUrl) {
+            <div class="question-media question-media-video">
+              <video [src]="videoUrl" controls preload="metadata"></video>
+            </div>
+          }
+
+          <div class="options-list">
+            @for (option of currentQuestionOptions(); track $index; let optionIndex = $index) {
+              <button
+                class="option-btn"
+                [class.selected]="isOptionSelected(q._id, optionIndex)"
+                [class.option-feedback-correct]="isChapterMode() && !!chapterAnswerFeedback() && optionIndex === getCorrectOptionIndex(q)"
+                [class.option-feedback-wrong]="isChapterMode() && !!chapterAnswerFeedback() && isOptionSelected(q._id, optionIndex) && !feedbackIsCorrect()"
+                [disabled]="isChapterMode() && !!chapterAnswerFeedback()"
+                (click)="selectAnswer(q._id, optionIndex)"
+                type="button"
+              >
+                <span class="option-radio" [class.checked]="isOptionSelected(q._id, optionIndex)"></span>
+                {{ option }}
+              </button>
+            }
+          </div>
+
+          @if (isChapterMode() && chapterAnswerFeedback()) {
+            <div class="answer-feedback" [class.answer-feedback-correct]="feedbackIsCorrect()" [class.answer-feedback-incorrect]="!feedbackIsCorrect()">
+              <div class="feedback-verdict">
+                <span class="feedback-verdict-icon">{{ feedbackIsCorrect() ? '✓' : '✗' }}</span>
+                <span class="feedback-verdict-label">
+                  {{ feedbackIsCorrect() ? ('quiz.correct' | translate) : ('quiz.incorrect' | translate) }}
+                </span>
+              </div>
+              <div class="feedback-correct-row">
+                <span class="feedback-detail-label">{{ 'quiz.correctAnswerLabel' | translate }}</span>
+                <span class="feedback-correct-answer-text">{{ feedbackCorrectAnswer() }}</span>
+              </div>
+              @if (feedbackExplanation()) {
+                <p class="feedback-explanation-text">{{ feedbackExplanation() }}</p>
+              }
+              <div class="feedback-actions">
+                <button class="btn-continue-answer" (click)="continueAfterFeedback()">
+                  {{ feedbackIsLastQuestion() ? ('quiz.submitQuiz' | translate) : ('quiz.continueBtn' | translate) }}
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="quiz-nav">
+              <button class="btn-nav" [disabled]="currentIndex() === 0" (click)="previousQuestion()">
+                &larr; {{ 'quiz.previous' | translate }}
+              </button>
+              @if (currentIndex() < questions().length - 1) {
+                <button
+                  class="btn-nav btn-nav-primary"
+                  [disabled]="savingChapterAnswer()"
+                  (click)="nextQuestion()"
+                >
+                  @if (savingChapterAnswer()) {
+                    <div class="custom-spinner-sm"></div>
+                  } @else {
+                    {{ 'quiz.next' | translate }} &rarr;
+                  }
+                </button>
+              } @else {
+                <button
+                  class="btn-submit-quiz"
+                  [disabled]="!allAnswered() || submitting() || savingChapterAnswer()"
+                  (click)="submitQuiz()"
+                >
+                  @if (submitting() || savingChapterAnswer()) {
+                    <div class="custom-spinner-sm"></div>
+                  }
+                  {{ 'quiz.submitQuiz' | translate }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <div class="exam-nav-card chapter-nav-card">
+          <div class="exam-card-title">{{ 'quiz.examNavigator' | translate }}</div>
+          <div class="exam-nav-grid">
+            @for (question of questions(); track question._id; let i = $index) {
+              <button [class]="getChapterNavBtnClass(i)" (click)="navigateToChapterQuestion(i)" type="button">
+                {{ i + 1 }}
+              </button>
+            }
+          </div>
+          <div class="nav-legend">
+            <div class="nav-legend-item">
+              <span class="nav-dot dot-current"></span>
+              {{ 'quiz.navCurrent' | translate }}
+            </div>
+            <div class="nav-legend-item">
+              <span class="nav-dot dot-correct"></span>
+              {{ 'quiz.navCorrect' | translate }}
+            </div>
+            <div class="nav-legend-item">
+              <span class="nav-dot dot-wrong"></span>
+              {{ 'quiz.navWrong' | translate }}
+            </div>
+            <div class="nav-legend-item">
+              <span class="nav-dot dot-unanswered"></span>
+              {{ 'quiz.navUnanswered' | translate }}
+            </div>
+          </div>
+        </div>
+        </div>
+      }
+
     }
   }
 </div>

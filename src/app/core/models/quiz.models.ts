@@ -1,10 +1,18 @@
 export interface QuizQuestion {
   _id: string;
   question: string;
+  questionAR?: string;
   options: string[];
+  optionsAR?: string[];
   correctAnswer?: string;
+  correctAnswerAR?: string;
+  chapterKey: string;
   chapterTitle: string;
+  chapterTitleAR?: string;
   explanation?: string;
+  explanationAR?: string;
+  image?: string | null;
+  video?: string | null;
   difficulty: 'easy' | 'medium' | 'hard';
   createdAt?: string;
   updatedAt?: string;
@@ -22,10 +30,16 @@ export interface QuizSubmission {
 export interface QuizQuestionResult {
   questionId: string;
   question: string;
+  questionAR?: string;
   selectedAnswer: string;
+  selectedAnswerAR?: string;
   correctAnswer: string;
+  correctAnswerAR?: string;
   isCorrect: boolean;
   explanation: string;
+  explanationAR?: string;
+  image?: string | null;
+  video?: string | null;
 }
 
 export interface QuizResult {
@@ -33,6 +47,16 @@ export interface QuizResult {
   totalQuestions: number;
   correct: number;
   results: QuizQuestionResult[];
+}
+
+export interface SaveAnswerResponse {
+  isCorrect?: boolean;
+  correctCount?: number;
+  wrongCount?: number;
+  answeredCount?: number;
+  remainingCount?: number;
+  earlyFailed?: boolean;
+  result?: QuizResult;
 }
 
 export type QuizMode = 'chapter' | 'exam';

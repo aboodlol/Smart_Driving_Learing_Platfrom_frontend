@@ -3,7 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { ProgressSummary } from '../models/progress.models';
+import { LessonProgressResponse, ProgressSummary } from '../models/progress.models';
+import { CompleteSubLessonResponse } from '../models/lesson.models';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,21 @@ export class ProgressApiService {
   getProgressSummary(): Observable<ProgressSummary> {
     return this.http
       .get<ProgressSummary>(`${this.baseUrl}/summary`)
+      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+  }
+
+  getLessonProgress(): Observable<LessonProgressResponse> {
+    return this.http
+      .get<LessonProgressResponse>(`${this.baseUrl}/lessons`)
+      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+  }
+
+  completeLesson(chapterId: string, subLessonIndex: number): Observable<CompleteSubLessonResponse> {
+    return this.http
+      .post<CompleteSubLessonResponse>(`${this.baseUrl}/lessons/complete`, {
+        chapterId,
+        subLessonIndex,
+      })
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 
