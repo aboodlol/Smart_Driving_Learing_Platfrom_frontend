@@ -1,62 +1,199 @@
-<div class="study-page">
+<div class="dw-detail" [attr.dir]="getTextDirection()">
   @if (loading()) {
-    <div class="loading-state">
-      <div class="custom-spinner"></div>
-      <p class="loading-text">{{ 'lessons.loadingChapter' | translate }}</p>
+    <div class="dw-loading">
+      <div class="dw-spinner"></div>
+      <p>{{ 'lessons.loadingChapter' | translate }}</p>
     </div>
   } @else if (chapter(); as ch) {
-    <a routerLink="/lessons" class="back-link">&larr; {{ 'lessons.backToLessons' | translate }}</a>
+    <!-- ─── Hero band ─── -->
+    <header class="dw-hero">
+      <a routerLink="/lessons" class="dw-back">
+        <span class="material-icons">{{ isArabicMode() ? 'chevron_right' : 'arrow_back' }}</span>
+        {{ 'lessons.title' | translate }}
+      </a>
 
-    <header class="chapter-header" [attr.dir]="getTextDirection()">
-      <h1>{{ getChapterTitle(ch) }}</h1>
-      <p class="chapter-desc">{{ getChapterDescription(ch) }}</p>
+      <div class="dw-hero__grid">
+        <div class="dw-hero__lead">
+          <span class="dw-chip dw-chip--teal">
+            {{ 'lessons.chapterLabel' | translate }} {{ chapterIndexLabel() }}
+          </span>
+          <h1>{{ getChapterTitle(ch) }}</h1>
+          <p>{{ getChapterDescription(ch) }}</p>
+
+          <div class="dw-hero__meta">
+            <span class="dw-meta-item">
+              <span class="material-icons">schedule</span>
+              {{ totalMinutes() }} {{ 'lessons.minutesLabel' | translate }}
+            </span>
+            <span class="dw-meta-item">
+              <span class="material-icons">menu_book</span>
+              {{ totalLessons() }} {{ 'lessons.subLessonsLabel' | translate }}
+            </span>
+            <span class="dw-meta-item">
+              <span class="material-icons">check_circle</span>
+              {{ completedCount() }} {{ 'lessons.completed' | translate | lowercase }}
+            </span>
+          </div>
+
+          <div class="dw-hero__progress">
+            <div class="dw-hero__progress-row">
+              <span class="dw-progress-label">{{ 'lessons.overall' | translate }}</span>
+              <span class="dw-progress-value">
+                {{ completedCount() }} / {{ totalLessons() }} · {{ percent() }}%
+              </span>
+            </div>
+            <div class="dw-progress dw-progress--md">
+              <div class="dw-progress__fill" [style.width.%]="percent()"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dw-stickers" aria-hidden="true">
+          <!-- stop -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="var(--dw-error)" stroke="#fff" stroke-width="3"/>
+            <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="16" fill="#fff">STOP</text>
+          </svg>
+          <!-- yield -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <polygon points="32,4 60,56 4,56" fill="#fff" stroke="var(--dw-error)" stroke-width="6" stroke-linejoin="round"/>
+          </svg>
+          <!-- speed -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <circle cx="32" cy="32" r="26" fill="#fff" stroke="var(--dw-error)" stroke-width="5"/>
+            <text x="32" y="40" text-anchor="middle" font-family="var(--dw-font-mono)" font-weight="800" font-size="20" fill="#1a1f24">50</text>
+          </svg>
+          <!-- park -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <rect x="6" y="6" width="52" height="52" rx="8" fill="var(--dw-info)" stroke="#fff" stroke-width="3"/>
+            <text x="32" y="44" text-anchor="middle" font-family="inherit" font-weight="800" font-size="34" fill="#fff">P</text>
+          </svg>
+          <!-- info -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <rect x="6" y="6" width="52" height="52" rx="8" fill="var(--dw-info)" stroke="#fff" stroke-width="3"/>
+            <path d="M32 22 L44 38 H20 Z" fill="#fff"/>
+          </svg>
+          <!-- right -->
+          <svg viewBox="0 0 64 64" class="dw-sticker">
+            <circle cx="32" cy="32" r="26" fill="var(--dw-info)" stroke="#fff" stroke-width="3"/>
+            <path d="M20 32h18M32 22l10 10-10 10" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
     </header>
 
-    <div class="study-layout">
-      <main class="study-content" [attr.dir]="getTextDirection()">
-        @if (studyComplete()) {
-          <section class="completion-state">
-            <span class="material-icons">check_circle</span>
-            <h2>{{ 'lessons.completed' | translate }}</h2>
-            <p>{{ getChapterTitle(ch) }}</p>
-          </section>
-        } @else if (currentSubLesson()) {
-          @if (getCurrentImage(ch)) {
-            <img class="study-image" [src]="getCurrentImage(ch)" [alt]="getCurrentSubLessonTitle()" loading="lazy">
+    <!-- ─── Body ─── -->
+    <div class="dw-body">
+      <!-- Sub-lessons list -->
+      <section class="dw-section">
+        <div class="dw-section__head">
+          <h2>{{ 'lessons.subLessonsHeading' | translate }}</h2>
+          <p>{{ 'lessons.subLessonsSub' | translate }}</p>
+        </div>
+
+        <div class="dw-card dw-sublist">
+          @for (sub of ch.lessons; track $index; let i = $index) {
+            @let st = statusFor(i);
+            <button
+              type="button"
+              class="dw-subrow"
+              [class.is-current]="st === 'current'"
+              [class.is-completed]="st === 'completed'"
+              [class.is-upcoming]="st === 'upcoming'"
+              [class.is-last]="i === ch.lessons.length - 1"
+              (click)="selectSubLesson(i)">
+              <span class="dw-subrow__num">
+                @if (st === 'completed') {
+                  <span class="material-icons">check</span>
+                } @else {
+                  {{ indexLabel(i) }}
+                }
+              </span>
+              <span class="dw-subrow__body">
+                <span class="dw-subrow__title">{{ getSubLessonTitle(i) }}</span>
+                <span class="dw-subrow__meta">
+                  {{ 4 }} {{ 'lessons.minutesLabel' | translate }}
+                  @if (st === 'current') {
+                    <span> · {{ 'lessons.inProgressLabel' | translate }}</span>
+                  }
+                </span>
+              </span>
+              <span
+                class="dw-subrow__action"
+                [class.is-current]="st === 'current'"
+                [class.is-completed]="st === 'completed'">
+                @if (st === 'current') {
+                  <span class="material-icons">play_arrow</span>
+                }
+                {{ actionLabelKey(i) | translate }}
+              </span>
+            </button>
           }
+        </div>
+      </section>
 
-          <p class="lesson-kicker">
-            {{ currentIndex() + 1 }} / {{ ch.lessons.length }}
-          </p>
-          <h2>{{ getCurrentSubLessonTitle() }}</h2>
-          <p class="study-copy">{{ getCurrentSubLessonContent() }}</p>
+      <!-- Right column: current lesson + chapter quiz -->
+      <aside class="dw-aside">
+        <section class="dw-section">
+          <div class="dw-section__head">
+            <h2>{{ 'lessons.currentLesson' | translate }}</h2>
+          </div>
+          <div class="dw-card dw-current">
+            <div class="dw-current__media">
+              @if (currentSubLesson()?.image || ch.image; as src) {
+                <img [src]="src" [alt]="getCurrentSubLessonTitle()" loading="lazy">
+              }
+              <div class="dw-current__media-overlay">
+                <button type="button" class="dw-play" (click)="next()" [disabled]="completing()" [attr.aria-label]="'lessons.continueLesson' | translate">
+                  <span class="material-icons">play_arrow</span>
+                </button>
+                <span class="dw-current__chip">
+                  {{ 'lessons.lessonOfTotal' | translate }} {{ currentIndex() + 1 }} / {{ totalLessons() }}
+                </span>
+              </div>
+            </div>
+            <div class="dw-current__body">
+              <span class="dw-eyebrow">{{ 'lessons.lessonOfTotal' | translate }} {{ currentIndexLabel() }}</span>
+              <h3>{{ getCurrentSubLessonTitle() }}</h3>
+              <p>{{ getCurrentSubLessonContent() }}</p>
+              <div class="dw-current__actions">
+                <button
+                  type="button"
+                  class="dw-btn dw-btn--primary dw-btn--full"
+                  (click)="next()"
+                  [disabled]="completing() || studyComplete()">
+                  @if (completing()) {
+                    <span class="dw-spinner dw-spinner--sm"></span>
+                  } @else {
+                    {{ 'lessons.continueLesson' | translate }}
+                    <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+                  }
+                </button>
+                <button type="button" class="dw-btn dw-btn--ghost dw-btn--icon" aria-label="bookmark">
+                  <span class="material-icons">bookmark_border</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <button class="btn-next" type="button" [disabled]="completing()" (click)="next()">
-            @if (completing()) {
-              <div class="custom-spinner-sm"></div>
-            } @else {
-              {{ 'quiz.next' | translate }}
-            }
-          </button>
-        }
-      </main>
-
-      <aside class="study-sidebar" [attr.dir]="getTextDirection()">
-        @for (sub of ch.lessons; track $index; let i = $index) {
-          <button
-            class="side-lesson"
-            type="button"
-            [class.completed]="isCompleted(i)"
-            [class.active]="currentIndex() === i && !studyComplete()"
-            (click)="selectSubLesson(i)"
-          >
-            <span class="side-number">{{ i + 1 }}</span>
-            <span class="side-title">{{ getSubLessonTitle(i) }}</span>
-            @if (isCompleted(i)) {
-              <span class="material-icons side-check">check</span>
-            }
-          </button>
-        }
+        <section class="dw-section">
+          <div class="dw-section__head">
+            <h2>{{ 'lessons.chapterQuiz' | translate }}</h2>
+          </div>
+          <div class="dw-card dw-quiz">
+            <span class="dw-quiz__icon">
+              <span class="material-icons">quiz</span>
+            </span>
+            <div class="dw-quiz__body">
+              <div class="dw-quiz__title">{{ 'lessons.practiceQuestions' | translate }}</div>
+              <div class="dw-quiz__hint">{{ 'lessons.practiceHint' | translate }}</div>
+            </div>
+            <a [routerLink]="quizRoute(ch)" class="dw-btn dw-btn--amber dw-btn--sm">
+              {{ 'quiz.startQuiz' | translate }}
+            </a>
+          </div>
+        </section>
       </aside>
     </div>
   }

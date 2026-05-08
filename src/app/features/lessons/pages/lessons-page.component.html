@@ -1,39 +1,101 @@
-<div class="page-wrapper">
-  <div class="page-header fade-in-up">
-    <h1 class="page-title">{{ 'lessons.title' | translate }}</h1>
-    <p class="page-subtitle">{{ 'lessons.subtitle' | translate }}</p>
-  </div>
+<div class="dw-lessons" [attr.dir]="getTextDirection()">
+  <header class="dw-head">
+    <div class="dw-head__title">
+      <h1>{{ 'lessons.title' | translate }}</h1>
+      <p>{{ subtitle() }}</p>
+    </div>
+    <div class="dw-filters" role="tablist">
+      @for (f of filters; track f.key) {
+        <button
+          type="button"
+          role="tab"
+          class="dw-filter"
+          [class.is-active]="filter() === f.key"
+          [attr.aria-selected]="filter() === f.key"
+          (click)="setFilter(f.key)">
+          {{ f.labelKey | translate }}
+        </button>
+      }
+    </div>
+  </header>
 
   @if (loading()) {
-    <div class="loading-state">
-      <div class="custom-spinner"></div>
-      <p class="loading-text">{{ 'lessons.loading' | translate }}</p>
+    <div class="dw-loading">
+      <div class="dw-spinner"></div>
+      <p>{{ 'lessons.loading' | translate }}</p>
     </div>
   } @else {
-    <div class="lessons-grid">
-      @for (chapter of chapters(); track chapter._id; let i = $index) {
-        <a [routerLink]="['/lessons', chapter._id]" class="lesson-card hover-lift fade-in-up" [style.animation-delay]="(i * 0.06) + 's'">
-          @if (chapter.image) {
-            <img class="lesson-image" [src]="chapter.image" [alt]="getChapterTitle(chapter)" loading="lazy">
-          }
-          <div class="lesson-card-top">
-            <div class="lesson-icon">
-              <span class="material-icons">menu_book</span>
-            </div>
-            <span class="status-badge" [class]="getStatusClass(chapter)">{{ getStatusKey(chapter) | translate }}</span>
+    <section class="dw-overall dw-card">
+      <div class="dw-overall__lead">
+        <span class="dw-eyebrow">{{ 'lessons.overall' | translate }}</span>
+        <div class="dw-overall__num">
+          {{ completedSubLessons() }} / {{ totalSubLessons() }}
+          <span>· {{ overallPercent() }}%</span>
+        </div>
+      </div>
+      <div class="dw-overall__bar">
+        <div class="dw-progress dw-progress--lg">
+          <div class="dw-progress__fill" [style.width.%]="overallPercent()"></div>
+        </div>
+        <div class="dw-overall__ticks">
+          <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+      </div>
+      @if (continueChapter(); as chapter) {
+        <a [routerLink]="['/lessons', chapter._id]" class="dw-btn dw-btn--primary">
+          <span class="material-icons">play_arrow</span>
+          {{ 'lessons.continueLearning' | translate }}
+        </a>
+      } @else {
+        <button type="button" class="dw-btn dw-btn--primary" disabled>
+          <span class="material-icons">play_arrow</span>
+          {{ 'lessons.continueLearning' | translate }}
+        </button>
+      }
+    </section>
+
+    <section class="dw-grid">
+      @for (chapter of visibleChapters(); track chapter._id; let i = $index) {
+        @let displayIdx = (chapter.order ? chapter.order - 1 : chapters().indexOf(chapter));
+        @let meta = metaFor(displayIdx);
+        <a
+          [routerLink]="['/lessons', chapter._id]"
+          class="dw-card dw-chapter dw-chapter--{{ meta.accent }}"
+          [style.animation-delay]="(i * 0.05) + 's'">
+          <span class="dw-chapter__num">{{ indexLabel(displayIdx) }}</span>
+          <span class="dw-chapter__icon">
+            <span class="material-icons">{{ meta.icon }}</span>
+          </span>
+          <div class="dw-chapter__head">
+            <span class="dw-eyebrow">{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(displayIdx) }}</span>
+            <h3>{{ titleFor(chapter) }}</h3>
           </div>
-          <h3 class="lesson-title" [attr.dir]="getTextDirection()">{{ getChapterTitle(chapter) }}</h3>
-          <p class="lesson-desc" [attr.dir]="getTextDirection()">{{ getChapterDescription(chapter) }}</p>
-          <div class="lesson-footer">
-            <div class="lesson-progress-info">
-              <span class="lesson-count">{{ getCompletedCount(chapter) }} / {{ chapter.lessons.length }} {{ 'admin.dashboard.subLessons' | translate | lowercase }}</span>
+          <div class="dw-chapter__meta">
+            <span>{{ chapter.lessons.length }} {{ 'lessons.subLessonsLabel' | translate }}</span>
+            <span aria-hidden="true">·</span>
+            <span>{{ minutesFor(chapter) }} {{ 'lessons.minutesLabel' | translate }}</span>
+          </div>
+          <div class="dw-chapter__foot">
+            <div class="dw-progress">
+              <div class="dw-progress__fill" [style.width.%]="percentFor(chapter)"></div>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" [style.width.%]="getChapterPercent(chapter)"></div>
+            <div class="dw-chapter__row">
+              <span class="dw-chip dw-chip--{{ statusToneFor(chapter) }}">
+                {{ statusKeyFor(chapter) | translate }}
+              </span>
+              <span class="dw-chapter__count">
+                {{ completedFor(chapter) }} / {{ chapter.lessons.length }}
+              </span>
             </div>
           </div>
         </a>
       }
-    </div>
+      @if (visibleChapters().length === 0) {
+        <div class="dw-empty">
+          <span class="material-icons">filter_list</span>
+          <p>{{ 'progress.statusNotStarted' | translate }} — 0</p>
+        </div>
+      }
+    </section>
   }
 </div>

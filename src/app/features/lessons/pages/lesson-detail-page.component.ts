@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { LowerCasePipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
@@ -10,9 +11,13 @@ import { ToastService } from '../../../core/services/toast.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
 
+type SubStatus = 'completed' | 'current' | 'upcoming';
+
+const MIN_PER_SUBLESSON = 4;
+
 @Component({
   selector: 'app-lesson-detail-page',
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, LowerCasePipe],
   templateUrl: './lesson-detail-page.component.html',
   styleUrl: './lesson-detail-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,10 +37,29 @@ export class LessonDetailPageComponent {
   protected readonly completing = signal(false);
   protected readonly studyComplete = signal(false);
   protected readonly isArabicMode = computed(() => this.i18n.currentLang() === 'ar');
+
   protected readonly currentSubLesson = computed(() => {
     const ch = this.chapter();
     return ch?.lessons[this.currentIndex()] ?? null;
   });
+
+  protected readonly completedCount = computed(() => this.completedSet().size);
+
+  protected readonly totalLessons = computed(() => this.chapter()?.lessons.length ?? 0);
+
+  protected readonly percent = computed(() => {
+    const total = this.totalLessons();
+    return total > 0 ? Math.round((this.completedCount() / total) * 100) : 0;
+  });
+
+  protected readonly totalMinutes = computed(() => this.totalLessons() * MIN_PER_SUBLESSON);
+
+  protected readonly chapterIndexLabel = computed(() => {
+    const order = this.chapter()?.order ?? 1;
+    return String(order).padStart(2, '0');
+  });
+
+  protected readonly currentIndexLabel = computed(() => String(this.currentIndex() + 1).padStart(2, '0'));
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -59,7 +83,31 @@ export class LessonDetailPageComponent {
           .filter((entry) => entry.chapterId === chapter._id)
           .map((entry) => entry.subLessonIndex);
         this.completedSet.set(new Set(completedIndexes));
+
+        const firstUnfinished = chapter.lessons.findIndex((_, idx) => !completedIndexes.includes(idx));
+        if (firstUnfinished >= 0) {
+          this.currentIndex.set(firstUnfinished);
+        } else {
+          this.currentIndex.set(Math.max(0, chapter.lessons.length - 1));
+        }
       });
+  }
+
+  protected indexLabel(index: number): string {
+    return String(index + 1).padStart(2, '0');
+  }
+
+  protected statusFor(index: number): SubStatus {
+    if (this.completedSet().has(index)) return 'completed';
+    if (index === this.currentIndex() && !this.studyComplete()) return 'current';
+    return 'upcoming';
+  }
+
+  protected actionLabelKey(index: number): string {
+    const status = this.statusFor(index);
+    if (status === 'completed') return 'lessons.review';
+    if (status === 'current') return 'lessons.resume';
+    return 'lessons.start';
   }
 
   protected isCompleted(index: number): boolean {
@@ -142,5 +190,9 @@ export class LessonDetailPageComponent {
 
   protected getTextDirection(): 'rtl' | 'ltr' {
     return this.isArabicMode() ? 'rtl' : 'ltr';
+  }
+
+  protected quizRoute(chapter: Chapter): string {
+    return `/quiz/chapter/${encodeURIComponent(chapter.title)}`;
   }
 }

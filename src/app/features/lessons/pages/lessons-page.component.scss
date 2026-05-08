@@ -1,167 +1,450 @@
+/* Drive Wise — Lessons page
+   Tokens scoped to the page so the design lives independently of the
+   project's existing dark theme tokens. Mirrors drive-wise-design-references/tokens.css. */
+
 :host {
   display: block;
+
+  --dw-bg:        oklch(98% 0.005 90);
+  --dw-surface:   oklch(100% 0 0);
+  --dw-surface-2: oklch(96% 0.005 90);
+  --dw-surface-3: oklch(93% 0.008 90);
+  --dw-border:    oklch(90% 0.008 90);
+  --dw-border-strong: oklch(82% 0.01 90);
+
+  --dw-text:   oklch(22% 0.02 220);
+  --dw-text-2: oklch(40% 0.015 220);
+  --dw-text-3: oklch(58% 0.012 220);
+  --dw-text-on-brand: oklch(98% 0.008 195);
+
+  --dw-teal-50:  oklch(97% 0.018 195);
+  --dw-teal-100: oklch(93% 0.04 195);
+  --dw-teal-500: oklch(62% 0.12 195);
+  --dw-teal-600: oklch(54% 0.115 195);
+
+  --dw-amber-500: oklch(78% 0.14 75);
+  --dw-amber-600: oklch(70% 0.14 70);
+
+  --dw-success:    oklch(68% 0.14 150);
+  --dw-success-bg: oklch(94% 0.05 150);
+  --dw-error:      oklch(60% 0.18 22);
+  --dw-error-bg:   oklch(95% 0.05 22);
+  --dw-info:       oklch(62% 0.12 240);
+  --dw-info-bg:    oklch(95% 0.04 240);
+
+  --dw-font-sans: 'Plus Jakarta Sans', 'Tajawal', -apple-system, system-ui, sans-serif;
+  --dw-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --dw-r-sm: 12px;
+  --dw-r-md: 16px;
+  --dw-r-lg: 20px;
+  --dw-r-pill: 999px;
+
+  --dw-shadow-sm: 0 1px 2px rgba(15, 30, 40, 0.04), 0 1px 1px rgba(15, 30, 40, 0.03);
+  --dw-shadow-md: 0 6px 16px -6px rgba(15, 50, 60, 0.10), 0 2px 4px rgba(15, 50, 60, 0.04);
+  --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.12 195 / 0.35);
+
+  --dw-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
-.page-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+:host-context(html[data-theme='dark']),
+:host-context([data-theme='dark']) {
+  --dw-bg:        oklch(18% 0.015 220);
+  --dw-surface:   oklch(22% 0.018 220);
+  --dw-surface-2: oklch(26% 0.02 220);
+  --dw-surface-3: oklch(30% 0.022 220);
+  --dw-border:    oklch(32% 0.02 220);
+  --dw-border-strong: oklch(40% 0.025 220);
+
+  --dw-text:   oklch(96% 0.01 220);
+  --dw-text-2: oklch(82% 0.015 220);
+  --dw-text-3: oklch(65% 0.015 220);
+
+  --dw-teal-50:  oklch(28% 0.04 195);
+  --dw-teal-100: oklch(32% 0.06 195);
+  --dw-teal-500: oklch(72% 0.12 195);
+  --dw-teal-600: oklch(78% 0.13 195);
+
+  --dw-success-bg: oklch(28% 0.05 150);
+  --dw-error-bg:   oklch(28% 0.05 22);
+  --dw-info-bg:    oklch(28% 0.04 240);
+
+  --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dw-shadow-md: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.14 195 / 0.5);
 }
 
-.page-header {
-  margin-bottom: 2rem;
+.dw-lessons {
+  font-family: var(--dw-font-sans);
+  color: var(--dw-text);
+  background: var(--dw-bg);
+  min-height: 100%;
+  padding: 32px 36px;
 }
 
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--dr-text);
-  margin: 0 0 0.4rem;
+[dir='rtl'] .dw-lessons {
+  font-family: 'Tajawal', var(--dw-font-sans);
 }
 
-.page-subtitle {
-  font-size: 0.95rem;
-  color: var(--dr-text-muted);
-  margin: 0;
-}
-
-/* ─── Loading ─── */
-.loading-state {
+/* ─── Header ─── */
+.dw-head {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 4rem 0;
-  gap: 1rem;
-}
-
-.loading-text {
-  color: var(--dr-text-muted);
-  font-size: 0.9rem;
-}
-
-/* ─── Lessons Grid ─── */
-.lessons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.25rem;
-}
-
-.lesson-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-  border-radius: 16px;
-  background: var(--dr-glass-bg);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--dr-glass-border);
-  text-decoration: none;
-  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-}
-
-.lesson-image {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  background: rgba(15, 23, 42, 0.8);
-}
-
-.lesson-card:hover {
-  border-color: rgba(139, 92, 246, 0.2);
-}
-
-.lesson-card-top {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.25rem 0;
-  margin-bottom: 1rem;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
-.lesson-icon {
+.dw-head__title h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  margin: 0;
+  color: var(--dw-text);
+  line-height: 1.1;
+}
+
+.dw-head__title p {
+  font-size: 14px;
+  color: var(--dw-text-3);
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+/* ─── Filter pill group ─── */
+.dw-filters {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--dw-surface-2);
+  border-radius: var(--dw-r-pill);
+}
+
+.dw-filter {
+  appearance: none;
+  padding: 8px 16px;
+  border-radius: var(--dw-r-pill);
+  border: 0;
+  background: transparent;
+  color: var(--dw-text-3);
+  font-weight: 700;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .2s var(--dw-ease), color .2s var(--dw-ease), box-shadow .2s var(--dw-ease);
+}
+
+.dw-filter.is-active {
+  background: var(--dw-surface);
+  color: var(--dw-text);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+.dw-filter:hover:not(.is-active) {
+  color: var(--dw-text-2);
+}
+
+/* ─── Card primitive ─── */
+.dw-card {
+  background: var(--dw-surface);
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-r-lg);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+/* ─── Overall progress strip ─── */
+.dw-overall {
+  padding: 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.dw-overall__lead { flex: 1; min-width: 180px; }
+
+.dw-eyebrow {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dw-text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dw-overall__num {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 4px;
+  font-family: var(--dw-font-mono);
+  color: var(--dw-text);
+  line-height: 1.1;
+}
+
+.dw-overall__num span {
+  color: var(--dw-text-3);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dw-overall__bar {
+  flex: 2;
+  min-width: 220px;
+}
+
+.dw-overall__ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--dw-text-3);
+  margin-top: 8px;
+  font-family: var(--dw-font-mono);
+}
+
+/* ─── Progress bar ─── */
+.dw-progress {
+  height: 8px;
+  background: var(--dw-surface-3);
+  border-radius: var(--dw-r-pill);
+  overflow: hidden;
+}
+
+.dw-progress--lg { height: 12px; }
+
+.dw-progress__fill {
+  height: 100%;
+  background: var(--dw-teal-500);
+  border-radius: var(--dw-r-pill);
+  transition: width .4s var(--dw-ease);
+}
+
+/* ─── Buttons ─── */
+.dw-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--dr-gradient-primary);
-  color: #fff;
+  gap: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  height: 44px;
+  border-radius: var(--dw-r-pill);
+  border: 1.5px solid transparent;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s var(--dw-ease), box-shadow .2s var(--dw-ease), filter .15s;
 }
 
-.lesson-icon .material-icons {
-  font-size: 20px;
+.dw-btn .material-icons { font-size: 18px; }
+
+.dw-btn--primary {
+  background: var(--dw-teal-600);
+  color: var(--dw-text-on-brand);
+  box-shadow: var(--dw-shadow-brand);
 }
 
-/* ─── Status Badges ─── */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.28rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+.dw-btn--primary:hover { filter: brightness(1.05); }
+.dw-btn--primary:active { transform: scale(0.98); }
+.dw-btn--primary[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Chapter grid ─── */
+.dw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
 
-.badge-completed {
-  background: rgba(16, 185, 129, 0.12);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+@media (max-width: 1100px) {
+  .dw-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-.badge-in-progress {
-  background: rgba(139, 92, 246, 0.12);
-  color: #a78bfa;
-  border: 1px solid rgba(139, 92, 246, 0.2);
+@media (max-width: 720px) {
+  .dw-grid { grid-template-columns: 1fr; }
+  .dw-lessons { padding: 24px 18px; }
+  .dw-head__title h1 { font-size: 26px; }
+  .dw-overall { gap: 16px; }
 }
 
-.badge-not-started {
-  background: rgba(100, 116, 139, 0.1);
-  color: var(--dr-text-dim);
-  border: 1px solid rgba(100, 116, 139, 0.15);
-}
+/* ─── Chapter card ─── */
+.dw-chapter {
+  --dw-accent: var(--dw-teal-500);
+  --dw-accent-bg: var(--dw-teal-100);
 
-.lesson-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--dr-text);
-  margin: 0 1.25rem 0.4rem;
-}
-
-.lesson-desc {
-  font-size: 0.85rem;
-  color: var(--dr-text-muted);
-  margin: 0 1.25rem 1.25rem;
-  line-height: 1.6;
-  flex: 1;
-}
-
-.lesson-footer {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1.25rem 1.25rem;
+  gap: 16px;
+  padding: 22px;
+  text-align: start;
+  text-decoration: none;
+  color: var(--dw-text);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform .2s var(--dw-ease), box-shadow .2s var(--dw-ease), border-color .2s var(--dw-ease);
+  opacity: 0;
+  animation: dwFadeUp .55s var(--dw-ease) forwards;
 }
 
-.lesson-progress-info {
+.dw-chapter:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--dw-shadow-md);
+  border-color: color-mix(in oklch, var(--dw-accent) 35%, var(--dw-border));
+}
+
+.dw-chapter:active { transform: translateY(-1px); }
+
+.dw-chapter--teal    { --dw-accent: var(--dw-teal-500);   --dw-accent-bg: var(--dw-teal-100); }
+.dw-chapter--amber   { --dw-accent: var(--dw-amber-500);  --dw-accent-bg: color-mix(in oklch, var(--dw-amber-500) 22%, var(--dw-surface)); }
+.dw-chapter--info    { --dw-accent: var(--dw-info);       --dw-accent-bg: var(--dw-info-bg); }
+.dw-chapter--success { --dw-accent: var(--dw-success);    --dw-accent-bg: var(--dw-success-bg); }
+.dw-chapter--error   { --dw-accent: var(--dw-error);      --dw-accent-bg: var(--dw-error-bg); }
+
+.dw-chapter--teal .dw-progress__fill,
+.dw-chapter--amber .dw-progress__fill,
+.dw-chapter--info .dw-progress__fill,
+.dw-chapter--success .dw-progress__fill,
+.dw-chapter--error .dw-progress__fill {
+  background: var(--dw-accent);
+}
+
+.dw-chapter__num {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  font-family: var(--dw-font-mono);
+  font-size: 28px;
+  font-weight: 800;
+  color: color-mix(in oklch, var(--dw-text-3) 30%, transparent);
+  letter-spacing: -0.5px;
+  pointer-events: none;
+}
+
+.dw-chapter__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--dw-accent-bg);
+  color: var(--dw-accent);
+  display: grid;
+  place-items: center;
+}
+
+.dw-chapter__icon .material-icons { font-size: 28px; }
+
+.dw-chapter__head h3 {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--dw-text);
+}
+
+.dw-chapter__head .dw-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+
+.dw-chapter__meta {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--dw-text-3);
+  font-weight: 600;
+}
+
+.dw-chapter__foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dw-chapter__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.lesson-count {
-  font-size: 0.78rem;
-  color: var(--dr-text-dim);
-  font-weight: 500;
+.dw-chapter__count {
+  font-size: 12px;
+  font-family: var(--dw-font-mono);
+  color: var(--dw-text-3);
+  font-weight: 700;
 }
 
-@media (max-width: 600px) {
-  .page-wrapper {
-    padding: 1.5rem 1rem;
-  }
+/* ─── Chips ─── */
+.dw-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--dw-r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
 
-  .lessons-grid {
-    grid-template-columns: 1fr;
-  }
+.dw-chip--success {
+  background: var(--dw-success-bg);
+  color: var(--dw-success);
+  border-color: color-mix(in oklch, var(--dw-success) 25%, transparent);
+}
+
+.dw-chip--amber {
+  background: color-mix(in oklch, var(--dw-amber-500) 18%, var(--dw-surface));
+  color: var(--dw-amber-600);
+  border-color: color-mix(in oklch, var(--dw-amber-500) 30%, transparent);
+}
+
+.dw-chip--neutral {
+  background: var(--dw-surface-2);
+  color: var(--dw-text-3);
+  border-color: var(--dw-border);
+}
+
+/* ─── Empty + loading ─── */
+.dw-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 56px 0;
+  color: var(--dw-text-3);
+
+  .material-icons { font-size: 32px; }
+  p { margin: 0; font-weight: 600; }
+}
+
+.dw-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 64px 0;
+
+  p { margin: 0; color: var(--dw-text-3); font-size: 14px; }
+}
+
+.dw-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--dw-surface-3);
+  border-top-color: var(--dw-teal-500);
+  border-radius: 50%;
+  animation: dwSpin 0.8s linear infinite;
+}
+
+@keyframes dwSpin { to { transform: rotate(360deg); } }
+
+@keyframes dwFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

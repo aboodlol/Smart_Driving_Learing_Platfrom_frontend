@@ -1,93 +1,58 @@
-<div class="page-wrapper">
-  <div class="page-header fade-in-up">
-    <h1 class="page-title">{{ 'quiz.title' | translate }}</h1>
-    <p class="page-subtitle">{{ 'quiz.subtitle' | translate }}</p>
-  </div>
+<div class="dw-quizzes" [attr.dir]="isArabicMode() ? 'rtl' : 'ltr'">
+  <header class="dw-page-head">
+    <div>
+      <h1>{{ 'quiz.title' | translate }}</h1>
+      <p>{{ 'quiz.subtitle' | translate }}</p>
+    </div>
+    @if (!loading() && hasChapters()) {
+      <span class="dw-page-pill">
+        <span class="material-icons">quiz</span>
+        {{ chapters().length }} · {{ totalQuestions() }}
+      </span>
+    }
+  </header>
 
   @if (loading()) {
-    <div class="loading-state">
-      <div class="custom-spinner"></div>
-      <p class="loading-text">{{ 'quiz.loading' | translate }}</p>
+    <div class="dw-loading">
+      <div class="dw-spinner"></div>
+      <p>{{ 'quiz.loading' | translate }}</p>
+    </div>
+  } @else if (!hasChapters()) {
+    <div class="dw-empty" [attr.dir]="getEmptyDirection()">
+      <span class="material-icons">quiz</span>
+      <h3>{{ getEmptyTitle() }}</h3>
+      <p>{{ getEmptyDescription() }}</p>
     </div>
   } @else {
-    <!-- Exam Hero -->
-    <div class="exam-hero fade-in-up">
-      <div class="exam-glow" aria-hidden="true"></div>
-      <div class="exam-hero-content">
-        <div class="exam-icon">
-          <span class="material-icons">emoji_events</span>
-        </div>
-        <div class="exam-text">
-          <h2>{{ 'quiz.examSimulationTitle' | translate }}</h2>
-          <p>{{ 'quiz.examSimulationDesc' | translate }}</p>
-        </div>
-      </div>
-      <div class="exam-actions">
-        @if (!checkingActive() && hasActiveAttempt()) {
-          <button type="button" class="btn-continue-exam" (click)="continueExam()">
-            <span class="material-icons">play_circle</span>
-            {{ 'quiz.continueExam' | translate }}
-          </button>
-        }
-        <button
-          type="button"
-          class="btn-start-exam"
-          [disabled]="startingExam()"
-          (click)="startNewExam()"
-        >
-          @if (startingExam()) {
-            <div class="custom-spinner-sm"></div>
-          } @else {
-            <span class="material-icons">play_arrow</span>
-          }
-          {{ 'quiz.startNewExam' | translate }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Chapter Quizzes -->
-    <h2 class="section-title fade-in-up" style="animation-delay: 0.1s;">{{ 'quiz.chapterQuizzes' | translate }}</h2>
-    @if (hasChapters()) {
-      <div class="quiz-grid">
-        @for (chapter of chapters(); track chapter.chapterKey; let i = $index) {
-          <div class="quiz-card hover-lift fade-in-up" [style.animation-delay]="((i + 2) * 0.06) + 's'">
-            <div class="quiz-card-icon">
-              <span class="material-icons">quiz</span>
-            </div>
-            <h3 [attr.dir]="getChapterTextDirection(chapter)">{{ getChapterDisplayTitle(chapter) }}</h3>
-            <p [attr.dir]="getChapterTextDirection(chapter)">{{ getChapterDisplayDescription(chapter) }}</p>
-            @if (chapter.questionCount > 0) {
-              <a [routerLink]="['/quiz/chapter', chapter.chapterKey]" class="btn-start-quiz">
-                {{ 'quiz.startQuiz' | translate }}
-                <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
-              </a>
-            } @else {
-              <span class="btn-start-quiz disabled">{{ 'quiz.startQuiz' | translate }}</span>
-            }
+    <section class="dw-grid">
+      @for (chapter of chapters(); track chapter.chapterKey; let i = $index) {
+        <a
+          [routerLink]="['/quiz/chapter', chapter.chapterKey]"
+          class="dw-card dw-chapter dw-chapter--{{ chapter.accent }}"
+          [style.animation-delay]="(i * 0.05) + 's'">
+          <span class="dw-chapter__num">{{ indexLabel(chapter.index) }}</span>
+          <span class="dw-chapter__icon">
+            <span class="material-icons">{{ chapter.icon }}</span>
+          </span>
+          <div class="dw-chapter__head">
+            <span class="dw-eyebrow">{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(chapter.index) }}</span>
+            <h3 [attr.dir]="getTextDirection(chapter)">{{ getChapterTitle(chapter) }}</h3>
           </div>
-        }
-      </div>
-    } @else {
-      <div class="quiz-empty-state fade-in-up" [attr.dir]="getEmptyStateDirection()">
-        <h3>{{ getEmptyStateTitle() }}</h3>
-        <p>{{ getEmptyStateDescription() }}</p>
-      </div>
-    }
-
-    <!-- Tips -->
-    <div class="tips-card fade-in-up" style="animation-delay: 0.3s;">
-      <div class="tips-icon">
-        <span class="material-icons">lightbulb</span>
-      </div>
-      <div>
-        <h3>{{ 'quiz.tipsTitle' | translate }}</h3>
-        <ul class="tips-list">
-          <li>{{ 'quiz.tip1' | translate }}</li>
-          <li>{{ 'quiz.tip2' | translate }}</li>
-          <li>{{ 'quiz.tip3' | translate }}</li>
-          <li>{{ 'quiz.tip4' | translate }}</li>
-        </ul>
-      </div>
-    </div>
+          <p class="dw-chapter__desc" [attr.dir]="getTextDirection(chapter)">
+            {{ getChapterDescription(chapter) }}
+          </p>
+          <div class="dw-chapter__foot">
+            <span class="dw-chip dw-chip--{{ chapter.accent }}">
+              <span class="material-icons">quiz</span>
+              {{ chapter.questionCount }} {{ 'quiz.question' | translate | lowercase }}
+            </span>
+            <span class="dw-chapter__cta">
+              {{ 'quiz.startQuiz' | translate }}
+              <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+            </span>
+          </div>
+        </a>
+      }
+    </section>
   }
 </div>

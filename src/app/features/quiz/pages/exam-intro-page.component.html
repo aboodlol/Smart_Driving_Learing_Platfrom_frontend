@@ -1,0 +1,102 @@
+<div class="dw-exam-intro" [attr.dir]="isArabicMode() ? 'rtl' : 'ltr'">
+  <header class="dw-page-head">
+    <h1>{{ 'quiz.examIntroTitle' | translate }}</h1>
+    <p>{{ 'quiz.examIntroSub' | translate }}</p>
+  </header>
+
+  <div class="dw-grid">
+    <!-- Hero card with instructions -->
+    <article class="dw-card dw-hero-card">
+      <div class="dw-hero">
+        <div class="dw-hero__inner">
+          <div class="dw-hero__badge" aria-hidden="true">
+            <span class="material-icons">military_tech</span>
+          </div>
+          <div class="dw-hero__copy">
+            <span class="dw-hero__eyebrow">{{ 'quiz.examMode' | translate }}</span>
+            <h2>{{ 'quiz.examMockTitle' | translate }}</h2>
+          </div>
+        </div>
+        <svg class="dw-hero__deco" viewBox="0 0 64 64" aria-hidden="true">
+          <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="#ffffff" stroke="#ffffff" stroke-width="3" opacity="0.95"/>
+          <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="14" fill="var(--dw-error)">STOP</text>
+        </svg>
+      </div>
+
+      <div class="dw-hero-card__body">
+        <h3>{{ 'quiz.examInstructionsTitle' | translate }}</h3>
+        <ul class="dw-instr">
+          @for (rule of examInstructions; track rule.key) {
+            <li>
+              <span class="dw-instr__ico">
+                <span class="material-icons">{{ rule.icon }}</span>
+              </span>
+              <span>{{ rule.key | translate }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="dw-hero-card__actions">
+          <button
+            type="button"
+            class="dw-btn dw-btn--primary dw-btn--lg dw-btn--full"
+            [disabled]="startingExam() || checkingActive()"
+            (click)="startNewExam()">
+            @if (startingExam()) {
+              <span class="dw-spinner dw-spinner--sm"></span>
+            } @else {
+              <span>{{ 'quiz.startExam' | translate }}</span>
+              <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+            }
+          </button>
+          @if (!checkingActive() && hasActiveAttempt()) {
+            <button
+              type="button"
+              class="dw-btn dw-btn--ghost dw-btn--lg"
+              (click)="resumeExam()">
+              <span class="material-icons">play_arrow</span>
+              {{ 'quiz.resumeExam' | translate }}
+            </button>
+          }
+        </div>
+      </div>
+    </article>
+
+    <!-- Right column -->
+    <aside class="dw-side">
+      <section class="dw-card dw-side-card">
+        <header class="dw-side-card__head">
+          <h3>{{ 'quiz.questionMix' | translate }}</h3>
+        </header>
+        @if (loadingMix()) {
+          <div class="dw-side-loading">
+            <span class="dw-spinner dw-spinner--sm"></span>
+          </div>
+        } @else if (chapterMix().length === 0) {
+          <p class="dw-side-empty">—</p>
+        } @else {
+          @for (row of chapterMix(); track row.title) {
+            <div class="dw-mix-row">
+              <div class="dw-mix-row__top">
+                <span class="dw-mix-row__label">{{ row.title }}</span>
+                <span class="dw-mix-row__count">{{ row.count }}</span>
+              </div>
+              <div class="dw-progress dw-progress--xs">
+                <div
+                  class="dw-progress__fill dw-progress__fill--{{ row.accent }}"
+                  [style.width.%]="mixPercent(row.count)"></div>
+              </div>
+            </div>
+          }
+        }
+      </section>
+
+      <section class="dw-card dw-side-card">
+        <header class="dw-side-card__head">
+          <h3>{{ 'quiz.examHistory' | translate }}</h3>
+        </header>
+        <p class="dw-side-empty">{{ 'quiz.examPassingScore' | translate }}</p>
+      </section>
+    </aside>
+  </div>
+</div>

@@ -1,9 +1,398 @@
-@use '../styles/auth-shared';
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
 
 :host {
+  /* Drive Wise design tokens — scoped to this page so we don't disturb the
+     existing global theme (which uses --dr-* variables). */
+  --brand-teal-400: oklch(70% 0.12 195);
+  --brand-teal-500: oklch(62% 0.12 195);
+  --brand-teal-600: oklch(54% 0.115 195);
+  --brand-teal-700: oklch(45% 0.10 195);
+  --brand-amber-500: oklch(78% 0.14 75);
+
+  --error: oklch(60% 0.18 22);
+
+  --dw-bg: oklch(98% 0.005 90);
+  --dw-surface: oklch(100% 0 0);
+  --dw-border: oklch(90% 0.008 90);
+  --dw-border-strong: oklch(82% 0.01 90);
+
+  --dw-text: oklch(22% 0.02 220);
+  --dw-text-2: oklch(40% 0.015 220);
+  --dw-text-3: oklch(58% 0.012 220);
+  --dw-text-on-brand: oklch(98% 0.008 195);
+
+  --dw-r-md: 16px;
+  --dw-r-pill: 999px;
+  --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.12 195 / 0.35);
+
+  --dw-font-sans: 'Plus Jakarta Sans', 'Tajawal', -apple-system, system-ui, sans-serif;
+  --dw-font-ar: 'Tajawal', 'Plus Jakarta Sans', system-ui, sans-serif;
+
   display: block;
+  min-height: 100vh;
+  background: var(--dw-bg);
+  font-family: var(--dw-font-sans);
+  color: var(--dw-text);
 }
 
-.login-gradient {
-  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a855f7 100%);
+:host-context([dir='rtl']) { font-family: var(--dw-font-ar); }
+
+* { box-sizing: border-box; }
+
+.dw-auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  background: var(--dw-bg);
+}
+
+/* ─── Visual pane (left) ─── */
+.dw-visual-pane {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(
+    160deg,
+    var(--brand-teal-700),
+    var(--brand-teal-500) 60%,
+    var(--brand-teal-400)
+  );
+}
+
+.dw-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.dw-logo-text {
+  font-weight: 800;
+  font-size: 17.6px;
+  letter-spacing: -0.4px;
+  color: #fff;
+  line-height: 1;
+}
+
+.dw-visual-mid { position: relative; z-index: 2; }
+
+.dw-visual-title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  margin: 0;
+  color: #fff;
+}
+
+.dw-visual-sub {
+  font-size: 15px;
+  opacity: 0.85;
+  margin: 14px 0 0;
+  max-width: 460px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.dw-pills {
+  display: flex;
+  gap: 16px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.dw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.dw-sticker {
+  position: absolute;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.dw-sticker-speed {
+  bottom: -60px;
+  inset-inline-end: -40px;
+}
+
+.dw-sticker-yield {
+  top: 100px;
+  inset-inline-end: 60px;
+  transform: rotate(8deg);
+}
+
+/* ─── Form pane (right) ─── */
+.dw-form-pane {
+  display: grid;
+  place-items: center;
+  padding: 48px;
+  overflow: auto;
+}
+
+.dw-form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+.dw-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.dw-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--dw-text-3);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dw-lang {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid var(--dw-border-strong);
+  background: transparent;
+  color: var(--dw-text-2);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.dw-icn { display: block; }
+
+.dw-h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  margin: 0;
+  color: var(--dw-text);
+  line-height: 1.15;
+}
+
+.dw-sub {
+  font-size: 14px;
+  color: var(--dw-text-3);
+  margin: 8px 0 28px;
+  line-height: 1.5;
+}
+
+.dw-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Field ─── */
+.dw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dw-text-2);
+}
+
+.dw-label { line-height: 1; }
+
+.dw-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--dw-surface);
+  border: 1.5px solid var(--dw-border);
+  border-radius: var(--dw-r-md);
+  padding: 0 14px;
+  height: 50px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dw-control:focus-within {
+  border-color: var(--brand-teal-500);
+  box-shadow: 0 0 0 4px oklch(62% 0.12 195 / 0.12);
+}
+
+.dw-control-icn {
+  color: var(--dw-text-3);
+  flex-shrink: 0;
+}
+
+.dw-control input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--dw-text);
+  height: 100%;
+  min-width: 0;
+  direction: inherit;
+  text-align: inherit;
+  font-weight: 400;
+}
+
+.dw-control input::placeholder { color: var(--dw-text-3); }
+
+.dw-eye {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--dw-text-3);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+/* ─── Remember / Forgot row ─── */
+.dw-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.dw-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--dw-text-2);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dw-remember input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brand-teal-500);
+}
+
+.dw-forgot {
+  color: var(--brand-teal-600);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dw-forgot:hover { text-decoration: underline; }
+
+/* ─── Submit button ─── */
+.dw-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  padding: 14px 22px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  width: 100%;
+  background: var(--brand-teal-600);
+  color: var(--dw-text-on-brand);
+  border: 1.5px solid transparent;
+  border-radius: var(--dw-r-pill);
+  box-shadow: var(--dw-shadow-brand);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.15s;
+}
+
+.dw-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+.dw-btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.dw-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+/* ─── Divider ─── */
+.dw-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--dw-text-3);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 10px 0;
+}
+
+.dw-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--dw-border);
+}
+
+.dw-divider-text {
+  white-space: nowrap;
+}
+
+/* ─── Social buttons ─── */
+.dw-socials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dw-social-btn {
+  height: 50px;
+  border-radius: var(--dw-r-md);
+  border: 1.5px solid var(--dw-border);
+  background: var(--dw-surface);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--dw-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dw-social-btn:hover {
+  border-color: var(--dw-border-strong);
+  background: oklch(96% 0.005 90);
+}
+
+/* ─── Footer ─── */
+.dw-foot {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--dw-text-3);
+  font-weight: 500;
+}
+
+.dw-foot-link {
+  color: var(--brand-teal-600);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dw-foot-link:hover { text-decoration: underline; }
+
+/* ─── Responsive ─── */
+@media (max-width: 991px) {
+  .dw-auth { grid-template-columns: 1fr; }
+  .dw-visual-pane { display: none; }
+  .dw-form-pane { padding: 32px 24px; }
 }

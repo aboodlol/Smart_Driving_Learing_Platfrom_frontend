@@ -30,6 +30,9 @@ const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
   templateUrl: './assistant-page.component.html',
   styleUrl: './assistant-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.dw-ai-ready]': 'transitionsReady()',
+  },
 })
 export class AssistantPageComponent implements OnInit {
   private readonly assistantApi = inject(AssistantApiService);
@@ -44,7 +47,8 @@ export class AssistantPageComponent implements OnInit {
   protected readonly conversationsLoading = signal(false);
   protected readonly conversationLoading = signal(false);
   protected readonly creatingConversation = signal(false);
-  protected readonly sidebarOpen = signal(true);
+  protected readonly sidebarOpen = signal(false);
+  protected readonly transitionsReady = signal(false);
 
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly inputText = signal('');
@@ -75,6 +79,15 @@ export class AssistantPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConversations();
+    // Defer enabling drawer transitions until after the initial paint, so the
+    // closed-state transform doesn't animate from `none` on mount.
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => this.transitionsReady.set(true));
+      });
+    } else {
+      this.transitionsReady.set(true);
+    }
   }
 
   protected createNewConversation(): void {

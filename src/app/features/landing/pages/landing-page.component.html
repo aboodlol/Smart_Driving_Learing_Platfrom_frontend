@@ -1,168 +1,174 @@
-<div #animWrapper class="landing-wrapper">
-  <!-- Animated gradient blobs -->
-  <div class="blob-container" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
+<div #animWrapper class="dw-landing" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
 
-  <!-- ── Hero ─────────────────────────────────────────────────── -->
-  <section class="hero-section">
-    <div class="hero-content scroll-reveal">
+  <!-- ─── Hero ─── -->
+  <section class="dw-hero">
+    <div class="dw-hero__lead scroll-reveal">
+      <span class="dw-chip dw-chip--amber">
+        <span class="dw-chip__dot" aria-hidden="true"></span>
+        {{ 'landing.heroChip' | translate }}
+      </span>
 
-      <!-- Badge -->
-      <div class="lang-badge-row">
-        <span class="trust-badge">
-          <span class="material-icons badge-icon">school</span>
-          <span class="badge-text">{{ 'landing.badge' | translate }}</span>
-        </span>
-      </div>
+      <h1 class="dw-hero__title">
+        {{ 'landing.heroTitle' | translate }}
+        <span class="dw-hero__highlight">{{ 'landing.heroTitleHighlight' | translate }}</span>
+      </h1>
 
-      <!-- Title block -->
-      <div class="hero-title-block">
-        <h1 class="hero-title">
-          <span class="hero-title-line1">{{ 'landing.heroTitle' | translate }}</span>
-          <span class="gradient-text hero-title-highlight">{{ 'landing.heroTitleHighlight' | translate }}</span>
-        </h1>
-      </div>
+      <p class="dw-hero__sub">{{ 'landing.heroSubtitle' | translate }}</p>
 
-      <p class="hero-subtitle">
-        {{ 'landing.heroSubtitle' | translate }}
-      </p>
-
-      <div class="hero-ctas">
-        <a routerLink="/register" class="btn-primary-glow">
-          <span class="material-icons">rocket_launch</span>
+      <div class="dw-hero__ctas">
+        <a routerLink="/register" class="dw-btn dw-btn--primary dw-btn--lg">
           {{ 'landing.ctaStart' | translate }}
+          <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
         </a>
-        <a routerLink="/login" class="btn-secondary-outline">
-          {{ 'landing.ctaSignIn' | translate }}
-          <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
+        <a routerLink="/login" class="dw-btn dw-btn--ghost dw-btn--lg">
+          <span class="material-icons">play_arrow</span>
+          {{ 'landing.heroTour' | translate }}
         </a>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-item">
-          <span class="stat-number">5</span>
-          <span class="stat-label">{{ 'landing.statsChapters' | translate }}</span>
+      <div class="dw-hero__stats">
+        <div class="dw-stat">
+          <div class="dw-stat__value">12k+</div>
+          <div class="dw-stat__label">{{ 'landing.studentsPassed' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number">50+</span>
-          <span class="stat-label">{{ 'landing.statsLessons' | translate }}</span>
+        <div class="dw-stat">
+          <div class="dw-stat__value">94%</div>
+          <div class="dw-stat__label">{{ 'landing.passRate' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number">100+</span>
-          <span class="stat-label">{{ 'landing.statsQuestions' | translate }}</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number gradient-text">AI</span>
-          <span class="stat-label">{{ 'landing.statsAI' | translate }}</span>
+        <div class="dw-stat">
+          <div class="dw-stat__value">1,800+</div>
+          <div class="dw-stat__label">{{ 'landing.examQuestions' | translate }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Floating cards -->
-    <div class="floating-cards" aria-hidden="true">
-      <div class="float-card float-card-1">
-        <span class="material-icons float-icon">traffic</span>
-        <span class="float-text">{{ 'landing.float1' | translate }}</span>
+    <!-- Hero illustration card with floating stickers -->
+    <div class="dw-hero__art scroll-reveal">
+      <div class="dw-hero-card">
+        <div class="dw-hero-card__media" aria-hidden="true">
+          <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice" class="dw-road">
+            <defs>
+              <linearGradient id="dw-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-teal-100)" />
+                <stop offset="100%" stop-color="var(--dw-teal-50)" />
+              </linearGradient>
+              <linearGradient id="dw-asphalt" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-teal-700)" />
+                <stop offset="100%" stop-color="var(--dw-teal-800)" />
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="600" height="220" fill="url(#dw-sky)" />
+            <ellipse cx="120" cy="210" rx="160" ry="40" fill="var(--dw-teal-200)" opacity="0.45" />
+            <ellipse cx="480" cy="220" rx="180" ry="46" fill="var(--dw-teal-200)" opacity="0.55" />
+            <polygon points="0,360 600,360 420,220 180,220" fill="url(#dw-asphalt)" />
+            <polygon points="240,360 360,360 320,220 280,220" fill="rgba(255,255,255,0.06)" />
+            <rect x="296" y="240" width="8" height="20" rx="2" fill="var(--dw-amber-400)" opacity="0.95" />
+            <rect x="296" y="276" width="8" height="22" rx="2" fill="var(--dw-amber-400)" opacity="0.85" />
+            <rect x="296" y="316" width="8" height="26" rx="2" fill="var(--dw-amber-400)" opacity="0.7" />
+            <circle cx="100" cy="120" r="46" fill="#fff" opacity="0.55" />
+            <circle cx="160" cy="100" r="32" fill="#fff" opacity="0.45" />
+            <g transform="translate(440 70)">
+              <circle r="34" fill="#fff" stroke="var(--dw-error)" stroke-width="6"/>
+              <text y="10" text-anchor="middle" font-family="var(--dw-font-mono)" font-weight="800" font-size="26" fill="#1a1f24">50</text>
+            </g>
+          </svg>
+        </div>
+        <div class="dw-hero-card__progress">
+          <div class="dw-hero-card__row">
+            <span class="dw-hero-card__label">{{ 'landing.heroCardChapter' | translate }}</span>
+            <span class="dw-hero-card__count">18 / 24</span>
+          </div>
+          <div class="dw-progress">
+            <div class="dw-progress__fill" [style.width.%]="75"></div>
+          </div>
+        </div>
       </div>
-      <div class="float-card float-card-2">
-        <span class="material-icons float-icon">smart_toy</span>
-        <span class="float-text">{{ 'landing.float2' | translate }}</span>
+
+      <div class="dw-floating dw-floating--start" aria-hidden="true">
+        <svg viewBox="0 0 64 64" class="dw-mini-sign">
+          <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="var(--dw-error)" stroke="#fff" stroke-width="3"/>
+          <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="16" fill="#fff">STOP</text>
+        </svg>
+        <div class="dw-floating__copy">
+          <div class="dw-floating__caption">{{ 'landing.explainSign' | translate }}</div>
+          <div class="dw-floating__title">{{ 'landing.askAi' | translate }}</div>
+        </div>
       </div>
-      <div class="float-card float-card-3">
-        <span class="material-icons float-icon">emoji_events</span>
-        <span class="float-text">{{ 'landing.float3' | translate }}</span>
+
+      <div class="dw-floating dw-floating--end" aria-hidden="true">
+        <span class="dw-floating__success">
+          <span class="material-icons">check</span>
+        </span>
+        <div class="dw-floating__copy">
+          <div class="dw-floating__caption">{{ 'landing.score' | translate }}</div>
+          <div class="dw-floating__score">52 / 60</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Features ─────────────────────────────────────────────── -->
-  <section class="features-section">
-    <h2 class="section-heading scroll-reveal">{{ 'landing.featuresHeading' | translate }}</h2>
-    <p class="section-subheading scroll-reveal">{{ 'landing.featuresSubheading' | translate }}</p>
+  <!-- ─── Features ─── -->
+  <section class="dw-features">
+    <header class="dw-features__head scroll-reveal">
+      <span class="dw-eyebrow">{{ 'landing.featuresEyebrow' | translate }}</span>
+      <h2>{{ 'landing.featuresH2' | translate }}</h2>
+    </header>
 
-    <div class="features-grid">
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-violet">
-          <span class="material-icons">menu_book</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature1Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature1Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-green">
-          <span class="material-icons">assignment</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature2Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature2Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-blue">
-          <span class="material-icons">smart_toy</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature3Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature3Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-orange">
-          <span class="material-icons">insights</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature4Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature4Desc' | translate }}</p>
-      </div>
+    <div class="dw-features__grid">
+      <article class="dw-feature dw-feature--teal scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">menu_book</span></span>
+        <h3>{{ 'landing.f1Title' | translate }}</h3>
+        <p>{{ 'landing.f1Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--amber scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">quiz</span></span>
+        <h3>{{ 'landing.f2Title' | translate }}</h3>
+        <p>{{ 'landing.f2Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--info scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">military_tech</span></span>
+        <h3>{{ 'landing.f3Title' | translate }}</h3>
+        <p>{{ 'landing.f3Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--success scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">trending_up</span></span>
+        <h3>{{ 'landing.f4Title' | translate }}</h3>
+        <p>{{ 'landing.f4Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--teal scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">auto_awesome</span></span>
+        <h3>{{ 'landing.f5Title' | translate }}</h3>
+        <p>{{ 'landing.f5Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--amber scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">language</span></span>
+        <h3>{{ 'landing.f6Title' | translate }}</h3>
+        <p>{{ 'landing.f6Desc' | translate }}</p>
+      </article>
     </div>
   </section>
 
-  <!-- ── How it works ─────────────────────────────────────────── -->
-  <section class="steps-section">
-    <h2 class="section-heading scroll-reveal">{{ 'landing.stepsHeading' | translate }}</h2>
-    <p class="section-subheading scroll-reveal">{{ 'landing.stepsSubheading' | translate }}</p>
-
-    <div class="steps-row">
-      <div class="step-card scroll-reveal">
-        <div class="step-number">1</div>
-        <h3 class="step-title">{{ 'landing.step1Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step1Desc' | translate }}</p>
+  <!-- ─── CTA banner ─── -->
+  <section class="dw-cta-section">
+    <div class="dw-cta scroll-reveal">
+      <div class="dw-cta__copy">
+        <h3>{{ 'landing.ctaH3' | translate }}</h3>
+        <p>{{ 'landing.ctaSub' | translate }}</p>
       </div>
-
-      <div class="step-connector scroll-reveal" aria-hidden="true">
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="step-card scroll-reveal">
-        <div class="step-number">2</div>
-        <h3 class="step-title">{{ 'landing.step2Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step2Desc' | translate }}</p>
-      </div>
-
-      <div class="step-connector scroll-reveal" aria-hidden="true">
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="step-card scroll-reveal">
-        <div class="step-number">3</div>
-        <h3 class="step-title">{{ 'landing.step3Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step3Desc' | translate }}</p>
-      </div>
+      <a routerLink="/register" class="dw-btn dw-btn--amber dw-btn--lg">
+        {{ 'landing.ctaStart' | translate }}
+        <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
+      </a>
+      <span class="dw-cta__lane" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </div>
   </section>
 
-  <!-- ── CTA ──────────────────────────────────────────────────── -->
-  <section class="cta-section scroll-reveal">
-    <div class="cta-glow" aria-hidden="true"></div>
-    <h2 class="cta-title">{{ 'landing.ctaSectionTitle' | translate }}</h2>
-    <p class="cta-subtitle">{{ 'landing.ctaSectionSubtitle' | translate }}</p>
-    <a routerLink="/register" class="btn-primary-glow btn-lg">
-      <span class="material-icons">rocket_launch</span>
-      {{ 'landing.ctaSectionBtn' | translate }}
-    </a>
-  </section>
+  <!-- ─── Footer ─── -->
+  <footer class="dw-foot">
+    {{ 'landing.footer' | translate }}
+  </footer>
 </div>

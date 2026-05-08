@@ -1,66 +1,188 @@
-<div class="auth-split">
-  <div class="auth-left login-gradient">
-    <div class="auth-left-icon">
-      <span class="material-icons">directions_car</span>
-    </div>
-    <h2 [innerHTML]="'auth.welcomeBack' | translate"></h2>
-    <p>{{ 'auth.continueJourney' | translate }}</p>
-    <ul class="auth-left-features">
-      <li><span class="material-icons">menu_book</span> {{ 'auth.richLessons' | translate }}</li>
-      <li><span class="material-icons">smart_toy</span> {{ 'auth.aiExplains' | translate }}</li>
-      <li><span class="material-icons">emoji_events</span> {{ 'auth.realExam' | translate }}</li>
-      <li><span class="material-icons">insights</span> {{ 'auth.visualProgress' | translate }}</li>
-    </ul>
-  </div>
+<div class="dw-auth">
+  <!-- Visual pane (left, gradient teal — LoginScreen uses default side="right" so visual is on the left) -->
+  <aside class="dw-visual-pane">
+    <span class="dw-logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M20 2 L34 7 V20 C34 28.5 28 34.5 20 38 C12 34.5 6 28.5 6 20 V7 Z" fill="#fff" />
+        <path d="M14 30 L20 12 L26 30 Z" fill="rgba(255,255,255,0.18)" />
+        <rect x="19" y="14" width="2" height="3" rx="1" fill="var(--brand-teal-700)" opacity="0.95" />
+        <rect x="19" y="19" width="2" height="3" rx="1" fill="var(--brand-teal-700)" opacity="0.85" />
+        <rect x="19" y="24" width="2" height="3" rx="1" fill="var(--brand-teal-700)" opacity="0.7" />
+        <circle cx="29.5" cy="10.5" r="3.6" fill="var(--brand-amber-500)" stroke="#fff" stroke-width="1.2" />
+      </svg>
+      <span class="dw-logo-text">{{ isAr() ? 'درايف وايز' : 'Drive Wise' }}</span>
+    </span>
 
-  <div class="auth-right">
-    <div class="auth-form-wrap">
-      <div class="auth-brand">
-        <span class="auth-brand-icon">
-          <span class="material-icons">smart_toy</span>
+    <div class="dw-visual-mid">
+      <h2 class="dw-visual-title">
+        {{ isAr() ? 'تعلَّم بثقة. اقرأ الإشارة. اعرف القاعدة.' : 'Learn with confidence. Read the sign. Know the rule.' }}
+      </h2>
+      <p class="dw-visual-sub">
+        {{ isAr()
+          ? 'كل ما تحتاجه لاجتياز الامتحان النظري في تطبيق واحد، مدعوم بالذكاء الاصطناعي.'
+          : 'Everything you need to pass the theory test, in one place — with an AI tutor that knows where you got stuck.' }}
+      </p>
+
+      <div class="dw-pills">
+        <span class="dw-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="3" width="16" height="18" rx="2" />
+            <path d="M8 8h8M8 12h8M8 16h5" />
+          </svg>
+          {{ isAr() ? 'محاكي امتحان حقيقي' : 'Real exam simulator' }}
         </span>
-        <span class="auth-brand-text">{{ 'brand' | translate }}</span>
-      </div>
-
-      <h2>{{ 'auth.signInBtn' | translate }}</h2>
-      <span class="auth-toggle-link">
-        {{ 'auth.noAccount' | translate }} <a routerLink="/register">{{ 'auth.registerFree' | translate }}</a>
-      </span>
-
-      <form class="auth-form-stack" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'auth.email' | translate }}</mat-label>
-          <input matInput formControlName="email" type="email" autocomplete="email" [placeholder]="'auth.emailPlaceholder' | translate" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'auth.password' | translate }}</mat-label>
-          <input
-            matInput
-            formControlName="password"
-            [type]="hidePassword() ? 'password' : 'text'"
-            autocomplete="current-password"
-          />
-          <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button" tabindex="-1">
-            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-        </mat-form-field>
-
-        <button class="auth-submit-btn" type="submit" [disabled]="loading() || loginForm.invalid">
-          @if (loading()) {
-            <div class="custom-spinner custom-spinner-sm" style="border-top-color: #fff;"></div>
-          }
-          <span class="material-icons" style="font-size: 18px;">login</span>
-          {{ 'auth.signInBtn' | translate }}
-        </button>
-      </form>
-
-      <div class="auth-back-link">
-        <a routerLink="/landing">
-          <span class="material-icons" style="font-size: 16px; vertical-align: middle;">arrow_back</span>
-          {{ 'auth.backToHome' | translate }}
-        </a>
+        <span class="dw-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+            <path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" />
+          </svg>
+          {{ isAr() ? 'مساعد ذكاء اصطناعي' : 'AI tutor' }}
+        </span>
+        <span class="dw-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+          {{ isAr() ? 'محتوى موثوق' : 'Verified content' }}
+        </span>
       </div>
     </div>
-  </div>
+
+    <div class="dw-sticker dw-sticker-speed" aria-hidden="true">
+      <svg width="300" height="300" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="#fff" stroke="var(--error)" stroke-width="5"/>
+        <text x="32" y="40" text-anchor="middle" font-family="ui-monospace, JetBrains Mono, monospace" font-weight="800" font-size="20" fill="#1a1f24">50</text>
+      </svg>
+    </div>
+
+    <div class="dw-sticker dw-sticker-yield" aria-hidden="true">
+      <svg width="140" height="140" viewBox="0 0 64 64">
+        <polygon points="32,4 60,56 4,56" fill="#fff" stroke="var(--error)" stroke-width="6" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </aside>
+
+  <!-- Form pane (right) -->
+  <section class="dw-form-pane">
+    <div class="dw-form-inner">
+      <div class="dw-top-row">
+        <button type="button" class="dw-back" (click)="goBack()">
+          @if (isAr()) {
+            <svg class="dw-icn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14" /><path d="M13 5l7 7-7 7" />
+            </svg>
+            العودة
+          } @else {
+            <svg class="dw-icn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 12H5" /><path d="M11 5l-7 7 7 7" />
+            </svg>
+            Back
+          }
+        </button>
+
+        <button type="button" class="dw-lang" (click)="toggleLang()">
+          <svg class="dw-icn" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+          </svg>
+          {{ isAr() ? 'English' : 'العربية' }}
+        </button>
+      </div>
+
+      <h1 class="dw-h1">{{ isAr() ? 'أهلًا بعودتك' : 'Welcome back' }}</h1>
+      <p class="dw-sub">
+        {{ isAr() ? 'ادخل إلى حسابك لتتابع التعلم.' : 'Sign in to keep your streak going.' }}
+      </p>
+
+      <form class="dw-fields" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <!-- Email -->
+        <label class="dw-field">
+          <span class="dw-label">{{ isAr() ? 'البريد الإلكتروني' : 'Email' }}</span>
+          <span class="dw-control">
+            <svg class="dw-control-icn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9Z" />
+              <path d="M10 21a2 2 0 0 0 4 0" />
+            </svg>
+            <input
+              type="email"
+              autocomplete="email"
+              formControlName="email"
+              placeholder="layla@example.com"
+            />
+          </span>
+        </label>
+
+        <!-- Password -->
+        <label class="dw-field">
+          <span class="dw-label">{{ isAr() ? 'كلمة المرور' : 'Password' }}</span>
+          <span class="dw-control">
+            <svg class="dw-control-icn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            <input
+              [type]="hidePassword() ? 'password' : 'text'"
+              autocomplete="current-password"
+              formControlName="password"
+              placeholder="••••••••••"
+            />
+            <button
+              type="button"
+              class="dw-eye"
+              tabindex="-1"
+              (click)="hidePassword.set(!hidePassword())"
+              [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            >
+              @if (hidePassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.5 6.2A10 10 0 0 1 22 12s-1.4 2.4-3.8 4.3" />
+                  <path d="M6.7 6.7C3.8 8.5 2 12 2 12s4 7 10 7c1.7 0 3.3-.4 4.7-1.1" />
+                  <path d="M9.5 9.5a3 3 0 0 0 4.2 4.2" />
+                </svg>
+              }
+            </button>
+          </span>
+        </label>
+
+        <!-- Remember me / Forgot password -->
+        <div class="dw-row-between">
+          <label class="dw-remember">
+            <input type="checkbox" formControlName="rememberMe" />
+            {{ isAr() ? 'تذكرني' : 'Remember me' }}
+          </label>
+          <a class="dw-forgot" href="#" (click)="$event.preventDefault()">
+            {{ isAr() ? 'نسيت كلمة المرور؟' : 'Forgot password?' }}
+          </a>
+        </div>
+
+        <button class="dw-btn-primary" type="submit" [disabled]="loading() || loginForm.invalid">
+          {{ isAr() ? 'تسجيل الدخول' : 'Sign in' }}
+        </button>
+
+        <div class="dw-divider">
+          <span class="dw-divider-line"></span>
+          <span class="dw-divider-text">{{ isAr() ? 'أو تابع باستخدام' : 'Or continue with' }}</span>
+          <span class="dw-divider-line"></span>
+        </div>
+
+        <div class="dw-socials">
+          <button type="button" class="dw-social-btn">Google</button>
+          <button type="button" class="dw-social-btn">Apple</button>
+        </div>
+
+        <div class="dw-foot">
+          {{ isAr() ? 'ليس لديك حساب؟' : 'No account?' }}
+          <a class="dw-foot-link" href="#" (click)="$event.preventDefault(); goToRegister()">
+            {{ isAr() ? 'أنشئ حسابًا' : 'Sign up' }}
+          </a>
+        </div>
+      </form>
+    </div>
+  </section>
 </div>

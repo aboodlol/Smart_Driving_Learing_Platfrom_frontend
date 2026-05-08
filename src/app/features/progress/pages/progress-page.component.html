@@ -1,251 +1,263 @@
-<div class="page-wrapper">
-  <div class="page-header fade-in-up">
-    <h1 class="page-title">{{ 'progress.title' | translate }}</h1>
-    <p class="page-subtitle">{{ 'progress.subtitle' | translate }}</p>
-  </div>
+<div class="dw-progress-page" [attr.dir]="isArabicMode() ? 'rtl' : 'ltr'">
+  <header class="dw-page-head">
+    <div class="dw-page-head__title">
+      <h1>{{ 'progress.title' | translate }}</h1>
+      <p>{{ 'progress.subtitle30d' | translate }}</p>
+    </div>
+    <div class="dw-range" role="tablist">
+      <button type="button" class="dw-range__btn" [class.is-active]="range() === '7d'" (click)="setRange('7d')">
+        {{ 'progress.range7d' | translate }}
+      </button>
+      <button type="button" class="dw-range__btn" [class.is-active]="range() === '30d'" (click)="setRange('30d')">
+        {{ 'progress.range30d' | translate }}
+      </button>
+      <button type="button" class="dw-range__btn" [class.is-active]="range() === 'all'" (click)="setRange('all')">
+        {{ 'progress.rangeAll' | translate }}
+      </button>
+    </div>
+  </header>
 
   @if (loading()) {
-    <div class="loading-state">
-      <div class="custom-spinner"></div>
-      <p class="loading-text">{{ 'progress.loading' | translate }}</p>
+    <div class="dw-loading">
+      <div class="dw-spinner"></div>
+      <p>{{ 'progress.loading' | translate }}</p>
     </div>
   } @else if (summary(); as s) {
-    <!-- Overall Progress -->
-    <div class="overall-card fade-in-up">
-      <div class="overall-content">
-        <div class="overall-circle" [class.circle-done]="s.overallProgress >= 100">
-          <svg viewBox="0 0 120 120" class="progress-ring">
-            <circle cx="60" cy="60" r="52" class="ring-bg" />
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              class="ring-fill"
-              [style.stroke-dasharray]="(2 * 3.14159 * 52)"
-              [style.stroke-dashoffset]="(2 * 3.14159 * 52) * (1 - s.overallProgress / 100)"
-            />
-          </svg>
-          <span class="overall-percent">{{ s.overallProgress }}%</span>
-        </div>
-        <div class="overall-text">
-          <h2>{{ 'progress.overallCompletion' | translate }}</h2>
-          <p>{{ s.overallProgress }}% {{ 'progress.ofAllChaptersCompleted' | translate }}</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Quiz Stats -->
-    <div class="stats-row fade-in-up" style="animation-delay: 0.1s;">
-      <div class="stat-card glass-card">
-        <div class="stat-icon icon-violet">
-          <span class="material-icons">scoreboard</span>
+    <!-- ─── Stats row ─── -->
+    <section class="dw-stats">
+      <article class="dw-stat dw-stat--success">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">check</span></span>
+          <span class="dw-stat__sub">{{ localeNumber(completionPercent()) }}%</span>
         </div>
-        <span class="stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
-        <span class="stat-label">{{ 'progress.lastQuizScore' | translate }}</span>
-      </div>
-      <div class="stat-card glass-card">
-        <div class="stat-icon icon-blue">
-          <span class="material-icons">repeat</span>
+        <div class="dw-stat__value">
+          {{ localeNumber(totalCompletedSubLessons()) }} / {{ localeNumber(totalSubLessons()) }}
         </div>
-        <span class="stat-value">{{ s.quizStats.totalAttempts }}</span>
-        <span class="stat-label">{{ 'progress.totalAttempts' | translate }}</span>
-      </div>
-      <div class="stat-card glass-card">
-        <div class="stat-icon icon-green">
-          <span class="material-icons">analytics</span>
+        <div class="dw-stat__label">{{ 'progress.completedLessons' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--teal">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">quiz</span></span>
+          <span class="dw-stat__sub">{{ questionsAccuracyLabel() }}</span>
         </div>
-        <span class="stat-value">{{ s.quizStats.averageScore }}%</span>
-        <span class="stat-label">{{ 'progress.averageScore' | translate }}</span>
-      </div>
-    </div>
-
-    <!-- Exam History -->
-    <h2 class="section-title fade-in-up" style="animation-delay: 0.15s;">{{ getHistorySectionTitle() }}</h2>
-    <div class="history-card glass-card fade-in-up" style="animation-delay: 0.2s;">
-      <div class="history-header">
-        <h3>{{ getHistorySectionTitle() }}</h3>
-        <p>{{ getHistorySectionSubtitle() }}</p>
-      </div>
-
-      @if (historyLoading()) {
-        <div class="loading-state history-loading">
-          <div class="custom-spinner"></div>
-          <p class="loading-text">{{ 'progress.loadingHistory' | translate }}</p>
-        </div>
-      } @else if (historyError()) {
-        <div class="history-empty-state error-state">
-          <h4>{{ getHistoryDetailsErrorTitle() }}</h4>
-          <p>{{ getHistoryDetailsErrorDescription() }}</p>
-        </div>
-      } @else if (hasHistory()) {
-        <div class="history-grid">
-          @for (attempt of history(); track attempt._id) {
-            <article class="history-item" [class.active]="selectedAttemptId() === attempt._id">
-              <div class="history-item-top">
-                <div>
-                  <span class="history-date-label">{{ getHistoryDateLabel() }}</span>
-                  <h4>{{ formatHistoryDate(attempt.rawDate) }}</h4>
-                </div>
-                <span class="status-badge" [class]="getHistoryStatusClass(attempt.status)">
-                  {{ getHistoryStatusLabel(attempt.status) }}
-                </span>
-              </div>
-
-              <div class="history-meta">
-                <div>
-                  <span>{{ getHistoryScoreLabel() }}</span>
-                  <strong>{{ attempt.score !== null ? attempt.score + '%' : '--' }}</strong>
-                </div>
-                <div>
-                  <span>{{ getHistoryQuestionsLabel() }}</span>
-                  <strong>{{ attempt.totalQuestions !== null ? attempt.totalQuestions : '--' }}</strong>
-                </div>
-              </div>
-
-              <div class="history-submitted">
-                <span>{{ getHistoryTimestampLabel(attempt.timestampSource) }}</span>
-                <strong>{{ formatHistoryDate(attempt.rawDate) }}</strong>
-              </div>
-
-              <button type="button" class="btn-history-view" (click)="viewAttemptDetails(attempt._id)">
-                {{ getHistoryButtonLabel() }}
-              </button>
-            </article>
+        <div class="dw-stat__value">{{ questionsAnsweredLabel() }}</div>
+        <div class="dw-stat__label">{{ 'progress.questionsAnswered' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--amber">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">emoji_events</span></span>
+          @if (bestScore() !== null) {
+            <span class="dw-stat__sub">{{ (bestPassed() ? 'progress.pass' : 'progress.fail') | translate }}</span>
           }
         </div>
-      } @else {
-        <div class="history-empty-state">
-          <h4>{{ getHistoryEmptyTitle() }}</h4>
-          <p>{{ getHistoryEmptyDescription() }}</p>
+        <div class="dw-stat__value">{{ bestScoreLabel() }}</div>
+        <div class="dw-stat__label">{{ 'progress.bestScore' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--info">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">local_fire_department</span></span>
+          @if ((summary()?.quizStats?.totalAttempts ?? 0) > 0) {
+            <span class="dw-stat__sub">
+              {{ 'progress.best' | translate }} {{ localeNumber(summary()?.quizStats?.totalAttempts || 0) }}
+            </span>
+          }
         </div>
-      }
+        <div class="dw-stat__value">{{ streakLabel() }}</div>
+        <div class="dw-stat__label">{{ 'progress.currentStreak' | translate }}</div>
+      </article>
+    </section>
 
-      @if (selectedAttemptLoading()) {
-        <div class="loading-state history-loading detail-loading">
-          <div class="custom-spinner"></div>
-          <p class="loading-text">{{ 'progress.loadingHistoryDetails' | translate }}</p>
+    <!-- ─── 1.4fr / 1fr layout ─── -->
+    <div class="dw-grid">
+      <article class="dw-card dw-activity">
+        <header class="dw-section-head">
+          <h2>{{ 'progress.studyActivity' | translate }}</h2>
+          <p>{{ 'progress.studyActivitySub' | translate }}</p>
+        </header>
+
+        <div class="dw-bars" aria-hidden="true">
+          @for (bar of bars(); track $index) {
+            <div
+              class="dw-bar"
+              [class.is-highlight]="bar.highlight"
+              [style.height.%]="bar.height"></div>
+          }
         </div>
-      } @else if (selectedAttemptError()) {
-        <div class="history-empty-state error-state detail-empty">
-          <h4>{{ getHistoryDetailsErrorTitle() }}</h4>
-          <p>{{ getHistoryDetailsErrorDescription() }}</p>
+        <div class="dw-bars__axis">
+          <span>{{ 'progress.thirtyDaysAgo' | translate }}</span>
+          <span>{{ 'progress.today' | translate }}</span>
         </div>
-      } @else if (selectedAttempt(); as selectedAttempt) {
-        <div class="history-details">
-          <div class="history-details-header">
-            <div>
-              <h3>{{ getSelectedAttemptTitle() }}</h3>
-              <p>{{ selectedAttemptTimestampLabel() }}: {{ selectedAttemptTimestamp() }}</p>
-            </div>
-            <button type="button" class="btn-history-close" (click)="closeAttemptDetails()">
-              {{ getCloseLabel() }}
-            </button>
-          </div>
 
-          <div class="history-details-stats">
-            <div>
-              <span>{{ 'progress.statusLabel' | translate }}</span>
-              <strong [class]="selectedAttemptStatusClass()">{{ selectedAttemptStatusLabel() }}</strong>
+        <header class="dw-section-head dw-section-head--inset">
+          <h2>{{ 'progress.chapterProgress' | translate }}</h2>
+        </header>
+        @if (chapterRows().length === 0) {
+          <p class="dw-empty">—</p>
+        } @else {
+          @for (row of chapterRows(); track row.chapterId) {
+            <div class="dw-cprow">
+              <div class="dw-cprow__top">
+                <span class="dw-cprow__label">{{ row.title }}</span>
+                <span class="dw-cprow__pct">{{ localeNumber(row.percent) }}%</span>
+              </div>
+              <div class="dw-progress dw-progress--md">
+                <div class="dw-progress__fill dw-progress__fill--{{ row.accent }}" [style.width.%]="row.percent"></div>
+              </div>
             </div>
+          }
+        }
+      </article>
+
+      <aside class="dw-aside">
+        <!-- Exam history -->
+        <section class="dw-card dw-history">
+          <header class="dw-section-head dw-section-head--row">
             <div>
-              <span>{{ getHistoryScoreLabel() }}</span>
-              <strong>{{ selectedAttemptScore() }}</strong>
+              <h2>{{ 'progress.examHistory' | translate }}</h2>
             </div>
-            <div>
-              <span>{{ getHistoryQuestionsLabel() }}</span>
-              <strong>{{ selectedAttemptTotalQuestions() }}</strong>
+            <a routerLink="/exam" class="dw-btn dw-btn--ghost dw-btn--sm">
+              {{ 'progress.newExam' | translate }}
+            </a>
+          </header>
+
+          @if (historyLoading()) {
+            <div class="dw-history__loading">
+              <div class="dw-spinner dw-spinner--sm"></div>
             </div>
-            <div>
-              <span>{{ selectedAttemptTimestampLabel() }}</span>
-              <strong>{{ selectedAttemptTimestamp() }}</strong>
-            </div>
-          </div>
-
-          <div class="history-review-list">
-            @for (item of reviewItems(); track item.questionId; let i = $index) {
-              <article class="review-item" [class.correct]="item.isCorrect" [class.wrong]="!item.isCorrect">
-                <div class="review-number">{{ i + 1 }}</div>
-                <div class="review-body">
-                  <h4>{{ item.question }}</h4>
-
-                  @if (item.image) {
-                    <div class="question-media question-media-image">
-                      <img [src]="item.image" [alt]="item.question" loading="lazy" />
-                    </div>
-                  }
-
-                  @if (item.video) {
-                    <div class="question-media question-media-video">
-                      <video [src]="item.video" controls preload="metadata"></video>
-                    </div>
-                  }
-
-                  <div class="review-answer">
-                    <span class="review-label">{{ 'progress.selectedAnswer' | translate }}</span>
-                    <span [class.answer-correct]="item.isCorrect" [class.answer-incorrect]="!item.isCorrect">
-                      {{ item.selectedAnswer }}
+          } @else if (!hasHistory()) {
+            <p class="dw-empty">{{ 'progress.noExamHistory' | translate }}</p>
+          } @else {
+            @for (h of history(); track h._id; let i = $index; let last = $last) {
+              <button
+                type="button"
+                class="dw-hrow"
+                [class.is-last]="last"
+                [class.is-active]="selectedAttemptId() === h._id"
+                (click)="toggleAttemptDetails(h._id)">
+                <span class="dw-hrow__icon" [class.is-pass]="h.passed" [class.is-fail]="!h.passed">
+                  <span class="material-icons">{{ h.passed ? 'emoji_events' : 'whatshot' }}</span>
+                </span>
+                <span class="dw-hrow__body">
+                  <span class="dw-hrow__date">{{ formatHistoryDate(h.rawDate) }}</span>
+                  @if (h.duration) {
+                    <span class="dw-hrow__time">
+                      <span class="material-icons">schedule</span>
+                      {{ h.duration }}
                     </span>
-                  </div>
-
-                  <div class="review-answer">
-                    <span class="review-label">{{ 'progress.correctAnswer' | translate }}</span>
-                    <span>{{ item.correctAnswer }}</span>
-                  </div>
-
-                  @if (item.explanation) {
-                    <div class="review-explanation">
-                      <span class="review-label">{{ 'progress.explanation' | translate }}</span>
-                      <p>{{ item.explanation }}</p>
-                    </div>
+                  } @else {
+                    <span class="dw-hrow__time dw-hrow__time--muted">
+                      {{ getHistoryStatusLabel(h.status) }}
+                    </span>
                   }
-                </div>
-              </article>
+                </span>
+                <span class="dw-hrow__score">
+                  <span class="dw-hrow__num" [class.is-pass]="h.passed" [class.is-fail]="!h.passed">
+                    {{ h.score !== null ? localeNumber(h.score) : '—' }}
+                  </span>
+                  <span class="dw-hrow__total">/ {{ localeNumber(h.totalQuestions || 60) }}</span>
+                </span>
+              </button>
+
+              @if (selectedAttemptId() === h._id) {
+                @if (selectedAttemptLoading()) {
+                  <div class="dw-attempt__loading">
+                    <div class="dw-spinner dw-spinner--sm"></div>
+                  </div>
+                } @else if (selectedAttemptError()) {
+                  <p class="dw-empty">—</p>
+                } @else if (selectedAttempt(); as attempt) {
+                  <div class="dw-attempt">
+                    <div class="dw-attempt__stats">
+                      <div>
+                        <span class="dw-attempt__label">{{ 'progress.statusLabel' | translate }}</span>
+                        <strong>{{ selectedAttemptStatusLabel() }}</strong>
+                      </div>
+                      <div>
+                        <span class="dw-attempt__label">{{ 'quiz.examCorrect' | translate }}</span>
+                        <strong>{{ selectedAttemptScore() }}</strong>
+                      </div>
+                      <div>
+                        <span class="dw-attempt__label">{{ 'admin.dashboard.subLessons' | translate }}</span>
+                        <strong>{{ selectedAttemptTotalQuestions() }}</strong>
+                      </div>
+                    </div>
+                    <ul class="dw-attempt__list">
+                      @for (item of reviewItems(); track item.questionId; let idx = $index) {
+                        <li
+                          class="dw-attempt__row"
+                          [class.is-correct]="item.isCorrect"
+                          [class.is-wrong]="!item.isCorrect">
+                          <span class="dw-attempt__num">{{ idx + 1 }}</span>
+                          <div class="dw-attempt__body">
+                            <p class="dw-attempt__q">{{ item.question }}</p>
+                            <div class="dw-attempt__answers">
+                              <span class="dw-attempt__answer-row">
+                                <span class="dw-attempt__answer-label">{{ 'progress.selectedAnswer' | translate }}</span>
+                                <span [class.text-success]="item.isCorrect" [class.text-danger]="!item.isCorrect">
+                                  {{ item.selectedAnswer || '—' }}
+                                </span>
+                              </span>
+                              @if (!item.isCorrect) {
+                                <span class="dw-attempt__answer-row">
+                                  <span class="dw-attempt__answer-label">{{ 'progress.correctAnswer' | translate }}</span>
+                                  <span class="text-success">{{ item.correctAnswer }}</span>
+                                </span>
+                              }
+                              @if (item.explanation) {
+                                <p class="dw-attempt__expl">{{ item.explanation }}</p>
+                              }
+                            </div>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              }
             }
-          </div>
-        </div>
-      } @else {
-        <div class="history-empty-state detail-empty">
-          <h4>{{ getHistoryDetailsEmptyTitle() }}</h4>
-          <p>{{ getHistoryDetailsEmptyDescription() }}</p>
-        </div>
-      }
+          }
+        </section>
+
+        <!-- Weakest topics -->
+        <section class="dw-card dw-weakest">
+          <header class="dw-section-head">
+            <h2>{{ 'progress.weakest' | translate }}</h2>
+          </header>
+          @if (weakestRows().length === 0) {
+            <p class="dw-empty">{{ 'progress.noWeakest' | translate }}</p>
+          } @else {
+            @for (w of weakestRows(); track w.chapterId) {
+              <div class="dw-weak-row">
+                <span class="dw-weak-row__num dw-weak-row__num--{{ w.tone }}">
+                  {{ localeNumber(w.remaining) }}
+                </span>
+                <span class="dw-weak-row__label">{{ w.title }}</span>
+                <a [routerLink]="['/lessons', w.chapterId]" class="dw-btn dw-btn--ghost dw-btn--sm">
+                  {{ 'progress.practice' | translate }}
+                </a>
+              </div>
+            }
+          }
+        </section>
+      </aside>
     </div>
 
-    <!-- Chapter Progress -->
-    <h2 class="section-title fade-in-up" style="animation-delay: 0.25s;">{{ 'progress.chapterProgress' | translate }}</h2>
-    <div class="chapters-grid fade-in-up" style="animation-delay: 0.3s;">
-      @for (lesson of s.lessons; track lesson.chapterId) {
-        <div class="chapter-card glass-card">
-          <div class="chapter-card-header">
-            <h3>{{ lesson.title }}</h3>
-            <span class="status-badge" [class]="getStatusClass(lesson.status)">{{ getStatusKey(lesson.status) | translate }}</span>
-          </div>
-          <p class="chapter-desc">{{ lesson.description }}</p>
-          <div class="chapter-progress-row">
-            <div class="progress-track" style="flex: 1;">
-              <div class="progress-fill" [style.width.%]="getChapterPercent(lesson.totalSubLessons, lesson.completedSubLessons)"></div>
-            </div>
-            <span class="chapter-count">{{ lesson.completedSubLessons }} / {{ lesson.totalSubLessons }}</span>
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- Reset -->
-    <div class="reset-section fade-in-up" style="animation-delay: 0.35s;">
-      <div class="reset-icon">
+    <!-- ─── Reset section ─── -->
+    <section class="dw-reset">
+      <span class="dw-reset__icon">
         <span class="material-icons">warning</span>
-      </div>
-      <div class="reset-content">
+      </span>
+      <div class="dw-reset__body">
         <h3>{{ 'progress.resetProgress' | translate }}</h3>
         <p>{{ 'progress.resetDescription' | translate }}</p>
-        <button class="btn-reset" [disabled]="resetting()" (click)="resetProgress()">
-          @if (resetting()) {
-            <div class="custom-spinner custom-spinner-sm"></div>
-          }
-          {{ 'progress.resetAllProgress' | translate }}
-        </button>
       </div>
-    </div>
+      <button type="button" class="dw-btn dw-btn--danger dw-btn--sm" [disabled]="resetting()" (click)="resetProgress()">
+        @if (resetting()) {
+          <span class="dw-spinner dw-spinner--sm"></span>
+        }
+        {{ 'progress.resetAllProgress' | translate }}
+      </button>
+    </section>
   }
 </div>
