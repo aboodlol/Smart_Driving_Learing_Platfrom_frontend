@@ -242,7 +242,16 @@
     "inProgressLabel": "in progress",
     "lessonOfTotal": "Lesson",
     "practiceQuestions": "Practice questions",
-    "practiceHint": "Test what you've learned in this chapter."
+    "practiceHint": "Test what you've learned in this chapter.",
+    "markComplete": "Mark complete",
+    "lessonCompleted": "Lesson completed ✅",
+    "lessonCompletedHint": "You've finished this chapter. Choose what to do next.",
+    "goToNextChapter": "Go to next chapter",
+    "reviewCurrentChapter": "Review current chapter",
+    "bookmarks": "Bookmarks",
+    "bookmarksEmpty": "No bookmarks yet. Use the bookmark button on any lesson to save it.",
+    "addBookmark": "Add bookmark",
+    "removeBookmark": "Remove bookmark"
   },
   "quiz": {
     "title": "Quizzes",

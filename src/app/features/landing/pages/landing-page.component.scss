@@ -49,6 +49,26 @@
   --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.12 195 / 0.35);
 
   --dw-ease: cubic-bezier(.2, .8, .2, 1);
+
+  /* Hero illustration palette (light) */
+  --dw-illustration-sky-top:    #d8eef0;
+  --dw-illustration-sky-bottom: #f1f6f2;
+  --dw-illustration-sun:        #f4c97a;
+  --dw-illustration-hill-1:     #c2dad8;
+  --dw-illustration-hill-2:     #9ec6c4;
+  --dw-illustration-hill-3:     #7eb1ad;
+  --dw-illustration-road-near:  #16323b;
+  --dw-illustration-road-far:   #2a4d56;
+  --dw-illustration-road-line:  #ffffff;
+  --dw-illustration-sign-bg:    #ffffff;
+  --dw-illustration-sign-stroke:#d92330;
+  --dw-illustration-sign-text:  #1a1f24;
+  --dw-illustration-pole:       #6e7984;
+  --dw-illustration-car-body:   #f0a818;
+  --dw-illustration-car-light:  #ffd158;
+  --dw-illustration-car-shadow: #b87a08;
+  --dw-illustration-car-window: #232a30;
+  --dw-illustration-tail-light: #cf3a3a;
 }
 
 :host-context(html[data-theme='dark']),
@@ -79,6 +99,26 @@
   --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --dw-shadow-md: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
   --dw-shadow-lg: 0 24px 50px -16px rgba(0, 0, 0, 0.6);
+
+  /* Hero illustration palette (dark) */
+  --dw-illustration-sky-top:    #1a2a3e;
+  --dw-illustration-sky-bottom: #0d1825;
+  --dw-illustration-sun:        #e8a86a;
+  --dw-illustration-hill-1:     #1f3640;
+  --dw-illustration-hill-2:     #1a2c34;
+  --dw-illustration-hill-3:     #14222a;
+  --dw-illustration-road-near:  #04080c;
+  --dw-illustration-road-far:   #0c1820;
+  --dw-illustration-road-line:  #d8e2e8;
+  --dw-illustration-sign-bg:    #e6edf0;
+  --dw-illustration-sign-stroke:#e84b58;
+  --dw-illustration-sign-text:  #1a1f24;
+  --dw-illustration-pole:       #4a5560;
+  --dw-illustration-car-body:   #d89018;
+  --dw-illustration-car-light:  #f0b840;
+  --dw-illustration-car-shadow: #8a5a08;
+  --dw-illustration-car-window: #060a0d;
+  --dw-illustration-tail-light: #e8504a;
 }
 
 .dw-landing {

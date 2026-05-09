@@ -242,7 +242,16 @@
     "inProgressLabel": "مستمر",
     "lessonOfTotal": "الدرس",
     "practiceQuestions": "أسئلة تدريب",
-    "practiceHint": "اختبر ما تعلمته في هذا الفصل."
+    "practiceHint": "اختبر ما تعلمته في هذا الفصل.",
+    "markComplete": "إنهاء الدرس",
+    "lessonCompleted": "تم إنهاء الدرس ✅",
+    "lessonCompletedHint": "لقد أكملت هذا الفصل. اختر ما تريد فعله الآن.",
+    "goToNextChapter": "الانتقال إلى الفصل التالي",
+    "reviewCurrentChapter": "مراجعة الفصل الحالي",
+    "bookmarks": "المرجعيات",
+    "bookmarksEmpty": "لا توجد مرجعيات بعد. استخدم زر العلامة على أي درس لحفظه.",
+    "addBookmark": "إضافة مرجعية",
+    "removeBookmark": "إزالة المرجعية"
   },
   "quiz": {
     "title": "الاختبارات",

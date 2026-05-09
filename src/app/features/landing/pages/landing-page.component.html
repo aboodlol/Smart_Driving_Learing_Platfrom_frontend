@@ -46,30 +46,143 @@
     <div class="dw-hero__art scroll-reveal">
       <div class="dw-hero-card">
         <div class="dw-hero-card__media" aria-hidden="true">
-          <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice" class="dw-road">
+          <svg viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" class="dw-road">
             <defs>
-              <linearGradient id="dw-sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--dw-teal-100)" />
-                <stop offset="100%" stop-color="var(--dw-teal-50)" />
+              <linearGradient id="dw-ill-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-sky-top)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-sky-bottom)" />
               </linearGradient>
-              <linearGradient id="dw-asphalt" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--dw-teal-700)" />
-                <stop offset="100%" stop-color="var(--dw-teal-800)" />
+              <linearGradient id="dw-ill-road" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-road-far)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-road-near)" />
               </linearGradient>
+              <linearGradient id="dw-ill-car" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-car-light)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-car-body)" />
+              </linearGradient>
+              <radialGradient id="dw-ill-sun-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--dw-illustration-sun)" stop-opacity="0.55" />
+                <stop offset="100%" stop-color="var(--dw-illustration-sun)" stop-opacity="0" />
+              </radialGradient>
             </defs>
-            <rect x="0" y="0" width="600" height="220" fill="url(#dw-sky)" />
-            <ellipse cx="120" cy="210" rx="160" ry="40" fill="var(--dw-teal-200)" opacity="0.45" />
-            <ellipse cx="480" cy="220" rx="180" ry="46" fill="var(--dw-teal-200)" opacity="0.55" />
-            <polygon points="0,360 600,360 420,220 180,220" fill="url(#dw-asphalt)" />
-            <polygon points="240,360 360,360 320,220 280,220" fill="rgba(255,255,255,0.06)" />
-            <rect x="296" y="240" width="8" height="20" rx="2" fill="var(--dw-amber-400)" opacity="0.95" />
-            <rect x="296" y="276" width="8" height="22" rx="2" fill="var(--dw-amber-400)" opacity="0.85" />
-            <rect x="296" y="316" width="8" height="26" rx="2" fill="var(--dw-amber-400)" opacity="0.7" />
-            <circle cx="100" cy="120" r="46" fill="#fff" opacity="0.55" />
-            <circle cx="160" cy="100" r="32" fill="#fff" opacity="0.45" />
-            <g transform="translate(440 70)">
-              <circle r="34" fill="#fff" stroke="var(--dw-error)" stroke-width="6"/>
-              <text y="10" text-anchor="middle" font-family="var(--dw-font-mono)" font-weight="800" font-size="26" fill="#1a1f24">50</text>
+
+            <!-- Sky -->
+            <rect width="1200" height="720" fill="url(#dw-ill-sky)" />
+
+            <!-- Sun glow + sun disc -->
+            <circle cx="920" cy="200" r="140" fill="url(#dw-ill-sun-glow)" />
+            <circle cx="920" cy="200" r="44" fill="var(--dw-illustration-sun)" />
+
+            <!-- Hills (back layer) -->
+            <path d="M0,445 C140,410 300,420 460,432 C620,442 800,408 970,418 C1080,425 1200,438 1200,440 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-1)" />
+            <!-- Hills (mid layer) -->
+            <path d="M0,478 C140,452 300,462 470,478 C620,492 790,462 970,472 C1090,478 1200,488 1200,488 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-2)" />
+            <!-- Hills (front layer) -->
+            <path d="M0,510 C140,490 320,498 500,510 C680,524 860,498 1040,510 C1140,516 1200,520 1200,520 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-3)" />
+
+            <!-- Road surface -->
+            <polygon points="555,440 645,440 1140,720 60,720" fill="url(#dw-ill-road)" />
+            <!-- Road outer edge lines -->
+            <polygon points="555,440 561,440 80,720 60,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
+            <polygon points="639,440 645,440 1140,720 1120,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
+
+            <!-- Center dashed lane markers (perspective) -->
+            <g fill="var(--dw-illustration-road-line)" opacity="0.95">
+              <polygon points="599,447 601,447 601,452 599,452" />
+              <polygon points="597,462 603,462 603,470 597,470" />
+              <polygon points="594,480 606,480 607,492 593,492" />
+              <polygon points="590,503 610,503 613,520 587,520" />
+              <polygon points="583,535 617,535 622,560 578,560" />
+            </g>
+
+            <!-- Triangle warning sign (left) -->
+            <g>
+              <rect x="277" y="475" width="7" height="160" rx="2" fill="var(--dw-illustration-pole)" />
+              <polygon points="280,395 339,478 221,478" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="7" stroke-linejoin="round" />
+            </g>
+
+            <!-- Speed limit 60 sign (right) -->
+            <g>
+              <rect x="956" y="478" width="7" height="155" rx="2" fill="var(--dw-illustration-pole)" />
+              <circle cx="960" cy="425" r="52" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="9" />
+              <text x="960" y="442" text-anchor="middle" style="font-family: var(--dw-font-mono); font-weight: 800; font-size: 40px;" fill="var(--dw-illustration-sign-text)">60</text>
+            </g>
+
+            <!-- Car (rear view, Mustang-style coupe) -->
+            <g>
+              <!-- Ground shadow -->
+              <ellipse cx="600" cy="720" rx="248" ry="13" fill="#000" opacity="0.32" />
+
+              <!-- Main body silhouette (yellow, roof-to-bumper) -->
+              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L752,540 Q792,560 812,600 L818,660 Q818,686 798,690 L402,690 Q382,686 382,660 L388,600 Q408,560 448,540 L472,472 Z" fill="url(#dw-ill-car)" />
+
+              <!-- Roof / upper darker shade -->
+              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L740,510 L460,510 Z" fill="var(--dw-illustration-car-shadow)" opacity="0.55" />
+
+              <!-- Rear window (dark gradient glass) -->
+              <path d="M500,480 Q530,472 580,470 L670,472 Q698,476 710,484 L730,538 L470,538 Z" fill="var(--dw-illustration-car-window)" />
+              <!-- Glass inner tint -->
+              <path d="M514,488 Q545,482 580,480 L660,482 Q685,484 695,490 L705,525 L495,525 Z" fill="#34404d" opacity="0.45" />
+              <!-- Glass top sheen -->
+              <path d="M526,481 Q580,474 642,478 L658,488 Q592,484 536,488 Z" fill="#fff" opacity="0.28" />
+
+              <!-- Trunk lid horizontal highlight -->
+              <rect x="458" y="555" width="284" height="3" fill="#fff" opacity="0.35" />
+
+              <!-- Side body highlights (shoulder gloss) -->
+              <path d="M388,600 Q396,594 408,600 L405,672 Q392,670 384,660 Z" fill="#fff" opacity="0.22" />
+              <path d="M812,600 Q804,594 792,600 L795,672 Q808,670 816,660 Z" fill="#fff" opacity="0.22" />
+
+              <!-- Black rear panel (between taillights) -->
+              <path d="M408,598 L792,598 Q798,598 798,604 L798,662 Q798,668 792,668 L408,668 Q402,668 402,662 L402,604 Q402,598 408,598 Z" fill="#0d1115" />
+              <rect x="408" y="598" width="384" height="2" fill="#fff" opacity="0.18" />
+
+              <!-- Left taillight cluster: 3 stacked red bars -->
+              <rect x="416" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="416" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="416" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="420" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="420" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="420" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
+
+              <!-- Right taillight cluster: 3 stacked red bars -->
+              <rect x="714" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="714" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="714" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="718" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="718" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="718" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
+
+              <!-- Subtle emblem (no brand) -->
+              <ellipse cx="600" cy="612" rx="16" ry="5" fill="#cfd6dc" opacity="0.7" />
+
+              <!-- License plate -->
+              <rect x="548" y="625" width="104" height="28" rx="3" fill="#fff" />
+              <rect x="548" y="625" width="104" height="28" rx="3" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+
+              <!-- Bumper seam -->
+              <path d="M402,670 L798,670" stroke="rgba(0,0,0,0.22)" stroke-width="1.5" stroke-linecap="round" />
+
+              <!-- Diffuser / lower bumper -->
+              <path d="M412,686 L788,686 Q798,686 798,696 L790,716 Q760,722 720,722 L480,722 Q440,722 410,716 L402,696 Q402,686 412,686 Z" fill="#14181d" />
+
+              <!-- Diffuser fins -->
+              <g fill="#2c333a">
+                <rect x="558" y="694" width="3" height="22" />
+                <rect x="574" y="694" width="3" height="22" />
+                <rect x="590" y="694" width="3" height="22" />
+                <rect x="610" y="694" width="3" height="22" />
+                <rect x="626" y="694" width="3" height="22" />
+                <rect x="642" y="694" width="3" height="22" />
+              </g>
+
+              <!-- Exhaust pipes -->
+              <ellipse cx="468" cy="708" rx="20" ry="9" fill="#080a0d" />
+              <ellipse cx="468" cy="707" rx="14" ry="6" fill="#3a4046" />
+              <ellipse cx="468" cy="707" rx="9" ry="4" fill="#0e1216" />
+              <ellipse cx="732" cy="708" rx="20" ry="9" fill="#080a0d" />
+              <ellipse cx="732" cy="707" rx="14" ry="6" fill="#3a4046" />
+              <ellipse cx="732" cy="707" rx="9" ry="4" fill="#0e1216" />
             </g>
           </svg>
         </div>

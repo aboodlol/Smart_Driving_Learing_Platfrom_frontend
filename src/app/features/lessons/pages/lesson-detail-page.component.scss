@@ -222,10 +222,10 @@
   color: var(--dw-teal-700);
 }
 
-/* ─── Body grid ─── */
+/* ─── Body grid: narrow sidebar + wider main ─── */
 .dw-body {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
   padding: 32px 36px;
   align-items: start;
@@ -273,6 +273,43 @@
   overflow: hidden;
 }
 
+/* ─── Sidebar (narrow, fixed height, scrollable) ─── */
+.dw-sidebar {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 32px);
+}
+
+.dw-sidebar .dw-sublist {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.dw-sidebar .dw-sublist::-webkit-scrollbar { width: 8px; }
+.dw-sidebar .dw-sublist::-webkit-scrollbar-thumb {
+  background: var(--dw-border-strong);
+  border-radius: var(--dw-r-pill);
+}
+
+@media (max-width: 1100px) {
+  .dw-sidebar { position: static; max-height: 360px; }
+}
+
+.dw-section__head--compact { margin-bottom: 8px; }
+.dw-section__head--compact h2 { font-size: 16px; }
+
+/* ─── Main content ─── */
+.dw-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
 /* ─── Sub-lesson list ─── */
 .dw-sublist { padding: 0; }
 
@@ -284,10 +321,10 @@
   font-family: inherit;
   text-align: start;
   cursor: pointer;
-  padding: 18px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   border-bottom: 1px solid var(--dw-border);
   transition: background .15s var(--dw-ease);
   color: var(--dw-text);
@@ -304,19 +341,19 @@
 .dw-subrow.is-current:hover { background: color-mix(in oklch, var(--dw-teal-100) 60%, var(--dw-teal-50)); }
 
 .dw-subrow__num {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   font-family: var(--dw-font-mono);
   font-weight: 800;
-  font-size: 14px;
+  font-size: 12px;
   background: var(--dw-surface-2);
   color: var(--dw-text-3);
 
-  .material-icons { font-size: 18px; }
+  .material-icons { font-size: 16px; }
 }
 
 .dw-subrow.is-completed .dw-subrow__num {
@@ -332,16 +369,19 @@
 .dw-subrow__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 
 .dw-subrow__title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--dw-text);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
 }
 
 .dw-subrow__meta {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--dw-text-3);
   font-weight: 600;
 }
@@ -377,70 +417,50 @@
   height: 36px;
 }
 
-/* ─── Right column: current lesson card ─── */
+/* ─── Main: current lesson card (image-only media) ─── */
 .dw-current { display: flex; flex-direction: column; }
 
 .dw-current__media {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: linear-gradient(160deg, var(--dw-teal-200), var(--dw-amber-200));
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 22px 24px 0;
+  border-radius: 18px;
+  padding: 30px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--dw-teal-100), var(--dw-amber-200));
+  min-height: 220px;
   overflow: hidden;
 
   img {
-    position: absolute;
-    inset: 0;
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.85;
+    max-width: 520px;
+    height: 320px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: var(--dw-surface);
   }
 }
 
-.dw-current__media-overlay {
-  position: relative;
-  display: contents;
-}
+@media (max-width: 720px) {
+  .dw-current__media {
+    margin: 18px 16px 0;
+    padding: 18px;
+    min-height: 180px;
 
-.dw-play {
-  position: relative;
-  z-index: 1;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--dw-surface);
-  border: 0;
-  color: var(--dw-teal-600);
-  display: grid;
-  place-items: center;
-  box-shadow: var(--dw-shadow-lg);
-  cursor: pointer;
-  transition: transform .15s var(--dw-ease), box-shadow .2s var(--dw-ease);
-
-  .material-icons { font-size: 28px; }
-}
-
-.dw-play:hover { transform: scale(1.05); }
-.dw-play:active { transform: scale(0.97); }
-.dw-play[disabled] { opacity: 0.7; cursor: not-allowed; }
-
-.dw-current__chip {
-  position: absolute;
-  inset-inline-start: 12px;
-  bottom: 10px;
-  font-family: var(--dw-font-mono);
-  font-size: 11px;
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  border-radius: var(--dw-r-pill);
-  z-index: 1;
+    img { height: 240px; }
+  }
 }
 
 .dw-current__body {
-  padding: 18px;
+  padding: 22px 24px 24px;
+}
+
+.dw-current__content {
+  font-size: 14px;
+  color: var(--dw-text-2);
+  margin: 12px 0 0;
+  line-height: 1.7;
+  white-space: pre-line;
 }
 
 .dw-eyebrow {
@@ -453,31 +473,27 @@
   margin-bottom: 4px;
 }
 
-.dw-current__body h3 {
-  font-size: 17px;
+.dw-current__body h2 {
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
   margin: 0;
   color: var(--dw-text);
 }
 
-.dw-current__body p {
-  font-size: 13px;
-  color: var(--dw-text-2);
-  margin: 10px 0 0;
-  line-height: 1.55;
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .dw-current__actions {
   display: flex;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.dw-btn--grow { flex: 1 1 auto; min-width: 160px; }
+
+.dw-btn--icon.is-active {
+  border-color: var(--dw-teal-500);
+  color: var(--dw-teal-600);
+  background: var(--dw-teal-50);
 }
 
 /* ─── Buttons ─── */
@@ -593,4 +609,175 @@
   background: var(--dw-teal-500);
   border-radius: var(--dw-r-pill);
   transition: width .4s var(--dw-ease);
+}
+
+/* ─── Meta-item button (bookmarks toggle in hero) ─── */
+.dw-meta-item--btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--dw-r-pill);
+  border: 1px solid var(--dw-border);
+}
+
+.dw-meta-item--btn:hover {
+  color: var(--dw-text);
+  background: var(--dw-surface);
+}
+
+/* ─── Bookmarks panel (collapsible under hero) ─── */
+.dw-bookmarks-panel {
+  background: var(--dw-surface);
+  border-bottom: 1px solid var(--dw-border);
+  padding: 18px 36px;
+}
+
+.dw-bookmarks-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h3 {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dw-text);
+  }
+
+  h3 .material-icons { font-size: 18px; color: var(--dw-teal-600); }
+}
+
+.dw-bookmarks-panel__empty {
+  font-size: 13px;
+  color: var(--dw-text-3);
+  margin: 0;
+}
+
+.dw-bookmarks-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+}
+
+.dw-bookmark-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-r-md);
+  background: var(--dw-surface-2);
+  overflow: hidden;
+}
+
+.dw-bookmark-row__main {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  flex: 1;
+  text-align: start;
+  color: var(--dw-text);
+
+  .material-icons { color: var(--dw-teal-600); font-size: 18px; }
+}
+
+.dw-bookmark-row__main:hover { background: var(--dw-surface-3); }
+
+.dw-bookmark-row__title {
+  font-size: 13px;
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dw-icon-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 12px;
+  display: grid;
+  place-items: center;
+  color: var(--dw-text-3);
+  border-inline-start: 1px solid var(--dw-border);
+
+  .material-icons { font-size: 18px; }
+}
+
+.dw-icon-btn:hover { color: var(--dw-error); background: var(--dw-surface); }
+.dw-icon-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 720px) {
+  .dw-bookmarks-panel { padding: 14px 18px; }
+}
+
+/* ─── Lesson completion state ─── */
+.dw-complete {
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.dw-complete__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--dw-success-bg);
+  color: var(--dw-success);
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+
+  .material-icons { font-size: 40px; }
+}
+
+.dw-complete h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0;
+  color: var(--dw-text);
+}
+
+.dw-complete p {
+  font-size: 14px;
+  color: var(--dw-text-2);
+  margin: 0;
+  max-width: 460px;
+}
+
+.dw-complete__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  justify-content: center;
+}
+
+.dw-complete__hint {
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-inline-start: 4px;
 }

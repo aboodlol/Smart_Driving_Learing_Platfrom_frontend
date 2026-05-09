@@ -31,7 +31,7 @@ const CHAPTER_META: ChapterMeta[] = [
   { icon: 'directions_car', accent: 'success' },
 ];
 
-const MIN_PER_SUBLESSON = 4;
+const MIN_PER_SUBLESSON = 2;
 
 @Component({
   selector: 'app-lessons-page',
