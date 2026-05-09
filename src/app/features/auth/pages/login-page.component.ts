@@ -1,25 +1,21 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { I18nService } from '../../../core/services/i18n.service';
-import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-login-page',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    TranslatePipe,
-  ],
+  imports: [ReactiveFormsModule],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,15 +25,31 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly i18n = inject(I18nService);
 
   protected readonly loading = signal(false);
-  protected readonly i18n = inject(I18nService);
   protected readonly hidePassword = signal(true);
+
+  protected readonly lang = computed(() => this.i18n.currentLang());
+  protected readonly isAr = computed(() => this.lang() === 'ar');
 
   protected readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    rememberMe: [true],
   });
+
+  protected toggleLang(): void {
+    this.i18n.toggle();
+  }
+
+  protected goBack(): void {
+    void this.router.navigateByUrl('/landing');
+  }
+
+  protected goToRegister(): void {
+    void this.router.navigateByUrl('/register');
+  }
 
   protected submitLogin(): void {
     if (this.loginForm.invalid || this.loading()) {
@@ -47,8 +59,10 @@ export class LoginPageComponent {
 
     this.loading.set(true);
 
+    const { email, password } = this.loginForm.getRawValue();
+
     this.authService
-      .login(this.loginForm.getRawValue())
+      .login({ email, password })
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef),

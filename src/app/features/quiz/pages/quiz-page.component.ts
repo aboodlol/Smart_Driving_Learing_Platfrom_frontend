@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { LowerCasePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { QuizQuestion } from '../../../core/models/quiz.models';
-import { ExamAttempt } from '../../../core/models/exam-attempt.models';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { ToastService } from '../../../core/services/toast.service';
-import { ExamAttemptApiService } from '../../../core/services/exam-attempt-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
 
@@ -17,12 +15,12 @@ interface QuizChapterCard {
   description: string;
   descriptionAR: string;
   questionCount: number;
+  index: number;
+  accent: 'teal' | 'amber' | 'info' | 'success' | 'error';
+  icon: string;
 }
 
-interface BilingualText {
-  en: string;
-  ar: string;
-}
+interface BilingualText { en: string; ar: string; }
 
 const CHAPTER_DESCRIPTION_MAP: Record<string, BilingualText> = {
   'basic driving skills': {
@@ -34,48 +32,57 @@ const CHAPTER_DESCRIPTION_MAP: Record<string, BilingualText> = {
     ar: 'التعرف على الشواخص التحذيرية والتنظيمية والإرشادية وتطبيقها بشكل صحيح.',
   },
   'road priorities and right of way': {
-    en: 'Learn right-of-way rules at intersections, roundabouts, and merging lanes.',
-    ar: 'فهم قواعد حق المرور عند التقاطعات والدوارات ومناطق الاندماج.',
+    en: 'Right-of-way rules at intersections, roundabouts, and merging lanes.',
+    ar: 'قواعد حق المرور عند التقاطعات والدوارات ومناطق الاندماج.',
   },
   'speed limits and safe following': {
-    en: 'Use legal speed limits and maintain safe following distances in all conditions.',
-    ar: 'الالتزام بحدود السرعة القانونية والحفاظ على مسافة أمان مناسبة في كل الظروف.',
+    en: 'Speed limits and safe following distances in all conditions.',
+    ar: 'حدود السرعة القانونية ومسافة الأمان في كل الظروف.',
   },
   'seat belt safety and passenger rules': {
-    en: 'Follow seat belt requirements and key safety rules for all passengers.',
-    ar: 'الالتزام بمتطلبات حزام الأمان وقواعد السلامة الأساسية لجميع الركاب.',
+    en: 'Seat belt requirements and key safety rules for passengers.',
+    ar: 'متطلبات حزام الأمان وقواعد السلامة لجميع الركاب.',
   },
   'alcohol and driving laws': {
-    en: 'Understand legal limits, penalties, and safety risks of impaired driving.',
-    ar: 'معرفة الحدود القانونية والعقوبات ومخاطر القيادة تحت تأثير الكحول.',
+    en: 'Legal limits, penalties, and risks of impaired driving.',
+    ar: 'الحدود القانونية والعقوبات ومخاطر القيادة تحت تأثير الكحول.',
   },
   'license categories and vehicle types': {
-    en: 'Match license classes to vehicle types and permitted driving privileges.',
-    ar: 'مطابقة فئات الرخص مع أنواع المركبات وصلاحيات القيادة المسموح بها.',
+    en: 'License classes mapped to vehicle types and permitted privileges.',
+    ar: 'فئات الرخص وأنواع المركبات المسموح بقيادتها.',
   },
   'first aid and emergency response': {
-    en: 'Know immediate actions for accidents, emergency calls, and basic first aid.',
-    ar: 'معرفة الإجراءات الفورية للحوادث وطلب الطوارئ ومبادئ الإسعافات الأولية.',
+    en: 'Immediate actions for accidents and basic first aid.',
+    ar: 'الإجراءات الفورية للحوادث ومبادئ الإسعافات الأولية.',
   },
   'vehicle maintenance and mechanics': {
-    en: 'Review essential maintenance checks and basic mechanical safety knowledge.',
-    ar: 'مراجعة فحوصات الصيانة الضرورية وأساسيات السلامة الميكانيكية للمركبة.',
+    en: 'Maintenance checks and basic mechanical safety knowledge.',
+    ar: 'فحوصات الصيانة وأساسيات السلامة الميكانيكية.',
   },
 };
 
+const ROTATION: { accent: QuizChapterCard['accent']; icon: string }[] = [
+  { accent: 'teal',    icon: 'directions_car' },
+  { accent: 'amber',   icon: 'flag' },
+  { accent: 'info',    icon: 'shield' },
+  { accent: 'success', icon: 'schedule' },
+  { accent: 'teal',    icon: 'shield' },
+  { accent: 'amber',   icon: 'menu_book' },
+  { accent: 'error',   icon: 'quiz' },
+  { accent: 'info',    icon: 'auto_awesome' },
+  { accent: 'success', icon: 'directions_car' },
+];
+
 @Component({
   selector: 'app-quiz-page',
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, LowerCasePipe],
   templateUrl: './quiz-page.component.html',
   styleUrl: './quiz-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuizPageComponent {
   private readonly quizApi = inject(QuizApiService);
-  private readonly examAttemptApi = inject(ExamAttemptApiService);
   private readonly i18n = inject(I18nService);
-  private readonly router = inject(Router);
-  private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
@@ -83,10 +90,9 @@ export class QuizPageComponent {
   protected readonly chapters = signal<QuizChapterCard[]>([]);
   protected readonly isArabicMode = computed(() => this.i18n.currentLang() === 'ar');
   protected readonly hasChapters = computed(() => this.chapters().length > 0);
-  protected readonly startingExam = signal(false);
-  protected readonly checkingActive = signal(true);
-  protected readonly activeAttempt = signal<ExamAttempt | null>(null);
-  protected readonly hasActiveAttempt = computed(() => this.activeAttempt() !== null);
+  protected readonly totalQuestions = computed(() =>
+    this.chapters().reduce((sum, c) => sum + c.questionCount, 0),
+  );
 
   constructor() {
     this.quizApi
@@ -105,150 +111,97 @@ export class QuizPageComponent {
           this.chapters.set([]);
         },
       });
-
-    this.examAttemptApi
-      .getActiveExamAttempt()
-      .pipe(
-        finalize(() => this.checkingActive.set(false)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (attempt) => this.activeAttempt.set(attempt),
-        error: () => this.activeAttempt.set(null),
-      });
   }
 
-  protected getChapterDisplayTitle(chapter: QuizChapterCard): string {
-    if (this.isArabicMode()) {
-      return chapter.chapterTitleAR ?? chapter.chapterTitle;
-    }
-
-    return chapter.chapterTitle;
+  protected getChapterTitle(chapter: QuizChapterCard): string {
+    return this.isArabicMode() && chapter.chapterTitleAR ? chapter.chapterTitleAR : chapter.chapterTitle;
   }
 
-  protected getChapterDisplayDescription(chapter: QuizChapterCard): string {
+  protected getChapterDescription(chapter: QuizChapterCard): string {
     return this.isArabicMode() ? chapter.descriptionAR : chapter.description;
   }
 
-  protected getChapterTextDirection(chapter: QuizChapterCard): 'rtl' | 'ltr' {
-    if (!this.isArabicMode()) {
-      return 'ltr';
-    }
-
+  protected getTextDirection(chapter: QuizChapterCard): 'rtl' | 'ltr' {
+    if (!this.isArabicMode()) return 'ltr';
     return chapter.chapterTitleAR ? 'rtl' : 'ltr';
   }
 
-  protected getEmptyStateTitle(): string {
+  protected indexLabel(i: number): string {
+    return String(i + 1).padStart(2, '0');
+  }
+
+  protected getEmptyTitle(): string {
     if (this.isArabicMode()) {
       return this.loadFailed()
         ? 'تعذر تحميل اختبارات الفصول حالياً.'
         : 'لا توجد اختبارات فصول متاحة حالياً.';
     }
-
     return this.loadFailed()
       ? 'Unable to load chapter quizzes right now.'
       : 'No chapter quizzes are available right now.';
   }
 
-  protected getEmptyStateDescription(): string {
+  protected getEmptyDescription(): string {
     if (this.isArabicMode()) {
       return this.loadFailed()
         ? 'يرجى التحقق من اتصال الخادم ثم المحاولة مرة أخرى.'
         : 'ستظهر اختبارات الفصول هنا عندما تصبح بيانات الاختبارات متاحة.';
     }
-
     return this.loadFailed()
       ? 'Please check backend connectivity and try again.'
       : 'Chapter quiz cards will appear here when quiz data is available.';
   }
 
-  protected getEmptyStateDirection(): 'rtl' | 'ltr' {
+  protected getEmptyDirection(): 'rtl' | 'ltr' {
     return this.isArabicMode() ? 'rtl' : 'ltr';
   }
 
-  protected continueExam(): void {
-    void this.router.navigateByUrl('/quiz/exam');
-  }
-
-  protected startNewExam(): void {
-    if (this.startingExam()) {
-      return;
-    }
-
-    this.startingExam.set(true);
-
-    this.examAttemptApi
-      .startExamAttempt()
-      .pipe(
-        finalize(() => this.startingExam.set(false)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: () => {
-          void this.router.navigateByUrl('/quiz/exam');
-        },
-        error: (err: Error) => {
-          this.toast.error(err.message);
-        },
-      });
-  }
-
   private buildChapterCards(questions: QuizQuestion[]): QuizChapterCard[] {
-    const chapterMap = new Map<string, QuizChapterCard>();
+    const map = new Map<string, QuizChapterCard>();
 
-    for (const question of questions) {
-      const chapterTitle = this.normalizeText(question.chapterTitle);
-      if (!chapterTitle) {
-        continue;
-      }
+    for (const q of questions) {
+      const title = this.normalize(q.chapterTitle);
+      if (!title) continue;
 
-      const chapterKey = this.normalizeText(question.chapterKey) ?? chapterTitle;
-      const chapterTitleAR = this.normalizeText(question.chapterTitleAR);
-      const existing = chapterMap.get(chapterKey);
-
+      const key = this.normalize(q.chapterKey) ?? title;
+      const titleAR = this.normalize(q.chapterTitleAR);
+      const existing = map.get(key);
       if (existing) {
         existing.questionCount += 1;
-        existing.chapterTitle = chapterTitle;
-        if (!existing.chapterTitleAR && chapterTitleAR) {
-          existing.chapterTitleAR = chapterTitleAR;
-        }
+        if (!existing.chapterTitleAR && titleAR) existing.chapterTitleAR = titleAR;
         continue;
       }
 
-      const fallbackDescription = this.getFallbackDescription(chapterTitle);
-      chapterMap.set(chapterKey, {
-        chapterKey,
-        chapterTitle,
-        chapterTitleAR,
-        description: fallbackDescription.en,
-        descriptionAR: fallbackDescription.ar,
+      const desc = this.fallbackDescription(title);
+      const order = map.size;
+      const rot = ROTATION[order % ROTATION.length];
+      map.set(key, {
+        chapterKey: key,
+        chapterTitle: title,
+        chapterTitleAR: titleAR,
+        description: desc.en,
+        descriptionAR: desc.ar,
         questionCount: 1,
+        index: order,
+        accent: rot.accent,
+        icon: rot.icon,
       });
     }
 
-    return Array.from(chapterMap.values());
+    return Array.from(map.values());
   }
 
-  private getFallbackDescription(chapterTitle: string): BilingualText {
-    const chapterKey = this.normalizeChapterKey(chapterTitle);
-    return (
-      CHAPTER_DESCRIPTION_MAP[chapterKey] ?? {
-        en: 'Practice key questions for this chapter.',
-        ar: 'تدرّب على الأسئلة الأساسية لهذا الفصل.',
-      }
-    );
+  private fallbackDescription(title: string): BilingualText {
+    const key = title.trim().toLowerCase().replace(/\s+/g, ' ');
+    return CHAPTER_DESCRIPTION_MAP[key] ?? {
+      en: 'Practice key questions for this chapter.',
+      ar: 'تدرّب على الأسئلة الأساسية لهذا الفصل.',
+    };
   }
 
-  private normalizeText(value?: string | null): string | undefined {
-    if (typeof value !== 'string') {
-      return undefined;
-    }
-
+  private normalize(value?: string | null): string | undefined {
+    if (typeof value !== 'string') return undefined;
     const trimmed = value.trim();
     return trimmed.length > 0 ? trimmed : undefined;
-  }
-
-  private normalizeChapterKey(value: string): string {
-    return value.trim().toLowerCase().replace(/\s+/g, ' ');
   }
 }

@@ -1,0 +1,320 @@
+/* Drive Wise — Exam intro page (mirrors exam.jsx::ExamIntroScreen) */
+
+:host {
+  display: block;
+
+  --dw-bg:        oklch(98% 0.005 90);
+  --dw-surface:   oklch(100% 0 0);
+  --dw-surface-2: oklch(96% 0.005 90);
+  --dw-surface-3: oklch(93% 0.008 90);
+  --dw-border:    oklch(90% 0.008 90);
+  --dw-border-strong: oklch(82% 0.01 90);
+
+  --dw-text:   oklch(22% 0.02 220);
+  --dw-text-2: oklch(40% 0.015 220);
+  --dw-text-3: oklch(58% 0.012 220);
+  --dw-text-on-brand: oklch(98% 0.008 195);
+
+  --dw-teal-50:  oklch(97% 0.018 195);
+  --dw-teal-100: oklch(93% 0.04 195);
+  --dw-teal-500: oklch(62% 0.12 195);
+  --dw-teal-600: oklch(54% 0.115 195);
+  --dw-teal-700: oklch(45% 0.10 195);
+  --dw-teal-800: oklch(36% 0.08 195);
+
+  --dw-amber-500: oklch(78% 0.14 75);
+  --dw-amber-600: oklch(70% 0.14 70);
+
+  --dw-success:    oklch(68% 0.14 150);
+  --dw-success-bg: oklch(94% 0.05 150);
+  --dw-error:      oklch(60% 0.18 22);
+  --dw-info:       oklch(62% 0.12 240);
+
+  --dw-font-sans: 'Plus Jakarta Sans', 'Tajawal', -apple-system, system-ui, sans-serif;
+  --dw-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --dw-r-md: 16px;
+  --dw-r-lg: 20px;
+  --dw-r-pill: 999px;
+
+  --dw-shadow-sm: 0 1px 2px rgba(15, 30, 40, 0.04), 0 1px 1px rgba(15, 30, 40, 0.03);
+  --dw-shadow-md: 0 6px 16px -6px rgba(15, 50, 60, 0.10), 0 2px 4px rgba(15, 50, 60, 0.04);
+  --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.12 195 / 0.35);
+
+  --dw-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+:host-context(html[data-theme='dark']),
+:host-context([data-theme='dark']) {
+  --dw-bg:        oklch(18% 0.015 220);
+  --dw-surface:   oklch(22% 0.018 220);
+  --dw-surface-2: oklch(26% 0.02 220);
+  --dw-surface-3: oklch(30% 0.022 220);
+  --dw-border:    oklch(32% 0.02 220);
+  --dw-border-strong: oklch(40% 0.025 220);
+
+  --dw-text:   oklch(96% 0.01 220);
+  --dw-text-2: oklch(82% 0.015 220);
+  --dw-text-3: oklch(65% 0.015 220);
+
+  --dw-teal-100: oklch(32% 0.06 195);
+  --dw-teal-500: oklch(72% 0.12 195);
+  --dw-teal-600: oklch(78% 0.13 195);
+  --dw-teal-700: oklch(82% 0.13 195);
+  --dw-teal-800: oklch(36% 0.08 195);
+
+  --dw-success-bg: oklch(28% 0.05 150);
+  --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dw-shadow-md: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  --dw-shadow-brand: 0 14px 30px -10px oklch(62% 0.14 195 / 0.5);
+}
+
+.dw-exam-intro {
+  font-family: var(--dw-font-sans);
+  color: var(--dw-text);
+  background: var(--dw-bg);
+  min-height: 100%;
+  padding: 32px 36px;
+}
+
+[dir='rtl'] .dw-exam-intro { font-family: 'Tajawal', var(--dw-font-sans); }
+
+.dw-page-head { max-width: 1080px; margin: 0 auto 24px; }
+.dw-page-head h1 {
+  font-size: 32px; font-weight: 800; letter-spacing: -0.6px;
+  margin: 0; color: var(--dw-text); line-height: 1.1;
+}
+.dw-page-head p {
+  font-size: 14px; color: var(--dw-text-3); margin: 6px 0 0;
+}
+
+.dw-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .dw-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .dw-exam-intro { padding: 22px 18px; }
+  .dw-page-head h1 { font-size: 26px; }
+}
+
+/* ─── Card primitive ─── */
+.dw-card {
+  background: var(--dw-surface);
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-r-lg);
+  box-shadow: var(--dw-shadow-sm);
+  overflow: hidden;
+}
+
+/* ─── Hero card ─── */
+.dw-hero-card { padding: 0; }
+
+.dw-hero {
+  position: relative;
+  padding: 40px 32px;
+  background: linear-gradient(135deg, var(--dw-teal-700), var(--dw-teal-500));
+  color: #fff;
+  overflow: hidden;
+}
+
+.dw-hero__inner { display: flex; gap: 24px; align-items: center; }
+
+.dw-hero__badge {
+  width: 96px; height: 96px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+
+  .material-icons { font-size: 44px; color: #fff; }
+}
+
+.dw-hero__copy { min-width: 0; }
+.dw-hero__eyebrow {
+  display: block; font-size: 13px; font-weight: 700; opacity: 0.85;
+  margin-bottom: 4px; letter-spacing: 0.4px;
+}
+.dw-hero__copy h2 {
+  font-size: 30px; font-weight: 800; letter-spacing: -0.5px;
+  line-height: 1.1; margin: 0;
+}
+
+.dw-hero__deco {
+  position: absolute;
+  bottom: -40px;
+  inset-inline-end: -10px;
+  width: 160px; height: 160px;
+  opacity: 0.1;
+  transform: rotate(-12deg);
+}
+
+[dir='rtl'] .dw-hero__deco { transform: rotate(12deg); }
+
+.dw-hero-card__body { padding: 28px; }
+
+.dw-hero-card__body h3 {
+  font-size: 16px; font-weight: 800; margin: 0 0 14px;
+  color: var(--dw-text);
+}
+
+/* ─── Instructions list ─── */
+.dw-instr {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.dw-instr li {
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 14px; color: var(--dw-text-2); line-height: 1.5;
+}
+
+.dw-instr__ico {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--dw-teal-100);
+  color: var(--dw-teal-600);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+
+  .material-icons { font-size: 16px; }
+}
+
+.dw-hero-card__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+@media (max-width: 540px) {
+  .dw-hero-card__actions { flex-direction: column; }
+}
+
+/* ─── Side ─── */
+.dw-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dw-side-card { padding: 22px; }
+
+.dw-side-card__head {
+  margin-bottom: 14px;
+}
+
+.dw-side-card__head h3 {
+  font-size: 16px; font-weight: 800; margin: 0;
+  color: var(--dw-text);
+}
+
+.dw-side-loading {
+  padding: 18px 0;
+  display: grid;
+  place-items: center;
+}
+
+.dw-side-empty {
+  font-size: 13px;
+  color: var(--dw-text-3);
+  margin: 0;
+}
+
+.dw-mix-row { margin-bottom: 10px; }
+.dw-mix-row:last-child { margin-bottom: 0; }
+
+.dw-mix-row__top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.dw-mix-row__label { color: var(--dw-text-2); font-weight: 600; }
+.dw-mix-row__count {
+  font-family: var(--dw-font-mono);
+  font-weight: 700;
+  color: var(--dw-text-3);
+}
+
+/* ─── Progress ─── */
+.dw-progress {
+  height: 8px;
+  background: var(--dw-surface-3);
+  border-radius: var(--dw-r-pill);
+  overflow: hidden;
+}
+.dw-progress--xs { height: 6px; }
+
+.dw-progress__fill {
+  height: 100%;
+  background: var(--dw-teal-500);
+  border-radius: var(--dw-r-pill);
+  transition: width .4s var(--dw-ease);
+}
+
+.dw-progress__fill--teal    { background: var(--dw-teal-500); }
+.dw-progress__fill--amber   { background: var(--dw-amber-500); }
+.dw-progress__fill--info    { background: var(--dw-info); }
+.dw-progress__fill--success { background: var(--dw-success); }
+.dw-progress__fill--neutral { background: var(--dw-text-3); }
+
+/* ─── Buttons ─── */
+.dw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  height: 44px;
+  border-radius: var(--dw-r-pill);
+  border: 1.5px solid transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform .15s var(--dw-ease), box-shadow .2s var(--dw-ease), filter .15s, background .15s;
+
+  .material-icons { font-size: 18px; }
+}
+
+.dw-btn--lg { height: 52px; padding: 14px 22px; font-size: 15px; }
+.dw-btn--full { flex: 1; }
+
+.dw-btn--primary {
+  background: var(--dw-teal-600);
+  color: var(--dw-text-on-brand);
+  box-shadow: var(--dw-shadow-brand);
+}
+.dw-btn--primary:hover:not(:disabled) { filter: brightness(1.05); }
+.dw-btn--primary:active:not(:disabled) { transform: scale(0.98); }
+.dw-btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.dw-btn--ghost {
+  background: transparent;
+  color: var(--dw-text);
+  border-color: var(--dw-border-strong);
+}
+.dw-btn--ghost:hover { background: var(--dw-surface-2); }
+
+/* ─── Spinner ─── */
+.dw-spinner {
+  width: 30px; height: 30px;
+  border: 3px solid var(--dw-surface-3);
+  border-top-color: var(--dw-teal-500);
+  border-radius: 50%;
+  animation: dwSpin .8s linear infinite;
+}
+.dw-spinner--sm { width: 18px; height: 18px; border-width: 2px; }
+
+@keyframes dwSpin { to { transform: rotate(360deg); } }

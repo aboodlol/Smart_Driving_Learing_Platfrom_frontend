@@ -239,6 +239,69 @@ export class QuizSessionPageComponent {
     this.localizedReviewItems().filter((i) => !i.selectedAnswer?.trim()).length,
   );
 
+  protected readonly chapterCorrectCount = computed(() => {
+    const qs = this.questions();
+    const answers = this.answers();
+    const saved = this.savedChapterAnswerIds();
+    let correct = 0;
+    for (const q of qs) {
+      if (!saved.has(q._id)) continue;
+      const idx = answers.get(q._id);
+      if (idx === undefined) continue;
+      if (this.isQuestionAnsweredCorrectly(q, idx)) correct += 1;
+    }
+    return correct;
+  });
+
+  protected readonly chapterWrongCount = computed(() => {
+    const qs = this.questions();
+    const answers = this.answers();
+    const saved = this.savedChapterAnswerIds();
+    let wrong = 0;
+    for (const q of qs) {
+      if (!saved.has(q._id)) continue;
+      const idx = answers.get(q._id);
+      if (idx === undefined) continue;
+      if (!this.isQuestionAnsweredCorrectly(q, idx)) wrong += 1;
+    }
+    return wrong;
+  });
+
+  protected readonly chapterAccuracy = computed(() => {
+    const total = this.chapterCorrectCount() + this.chapterWrongCount();
+    if (total === 0) return 0;
+    return Math.round((this.chapterCorrectCount() / total) * 100);
+  });
+
+  protected readonly examAccuracy = computed(() => {
+    const total = this.examCorrectCount() + this.examWrongCount();
+    if (total === 0) return 0;
+    return Math.round((this.examCorrectCount() / total) * 100);
+  });
+
+  protected readonly backRoute = computed(() =>
+    this.isExamMode() ? '/exam' : '/quiz',
+  );
+
+  protected optionLetter(i: number): string {
+    return String.fromCharCode(65 + i);
+  }
+
+  protected optionStatus(question: QuizQuestion, optionIndex: number): 'correct' | 'wrong' | 'selected' | 'idle' {
+    const fb = this.chapterAnswerFeedback();
+    if (!fb || fb.question._id !== question._id) {
+      return this.isOptionSelected(question._id, optionIndex) ? 'selected' : 'idle';
+    }
+    const correctIdx = this.getCorrectOptionIndex(question);
+    if (optionIndex === correctIdx) return 'correct';
+    if (this.isOptionSelected(question._id, optionIndex)) return 'wrong';
+    return 'idle';
+  }
+
+  protected formatIndex(i: number): string {
+    return String(i + 1).padStart(2, '0');
+  }
+
   constructor() {
     const snapshot = this.route.snapshot;
     const chapterTitle = snapshot.paramMap.get('chapterTitle');

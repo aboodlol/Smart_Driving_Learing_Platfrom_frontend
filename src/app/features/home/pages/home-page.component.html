@@ -1,123 +1,217 @@
-<div class="page-wrapper">
+<div class="dw-home" [attr.dir]="isArabicMode() ? 'rtl' : 'ltr'">
   @if (loading()) {
-    <div class="loading-state">
-      <div class="custom-spinner"></div>
-      <p class="loading-text">{{ 'home.loading' | translate }}</p>
+    <div class="dw-loading">
+      <div class="dw-spinner"></div>
+      <p>{{ 'home.loading' | translate }}</p>
     </div>
   } @else {
-    <!-- Welcome Hero -->
-    <div class="welcome-card fade-in-up">
-      <div class="welcome-glow" aria-hidden="true"></div>
-      <div class="welcome-content">
-        <h1 class="welcome-title">{{ 'home.welcome' | translate }} <span class="gradient-text">{{ currentUser()?.name }}</span>!</h1>
-        <p class="welcome-subtitle">{{ 'home.subtitle' | translate }}</p>
+    <!-- ─── Hero ─── -->
+    <section class="dw-hero">
+      <div class="dw-hero__lead">
+        @if ((summary()?.overallProgress ?? 0) > 0) {
+          <span class="dw-chip dw-chip--amber">
+            <span class="material-icons">local_fire_department</span>
+            {{ localeNumber(summary()?.overallProgress || 0) }}% {{ 'lessons.completed' | translate | lowercase }}
+          </span>
+        }
+        <h1>
+          {{ 'home.welcomeBack' | translate }}@if (currentUser()?.name) {<span>, {{ currentUser()?.name }}</span>}
+        </h1>
+        <p>{{ heroSub() }}</p>
+        <div class="dw-hero__actions">
+          <a [routerLink]="continueRoute()" class="dw-btn dw-btn--amber">
+            {{ 'home.continueLearning' | translate }}
+            <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+          </a>
+          <a routerLink="/exam" class="dw-btn dw-btn--ghost-on-color">
+            <span class="material-icons">military_tech</span>
+            {{ 'nav.exam' | translate }}
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Action Cards -->
-    <div class="action-grid fade-in-up" style="animation-delay: 0.1s;">
-      <a routerLink="/lessons" class="action-card hover-lift">
-        <div class="action-icon icon-violet">
-          <span class="material-icons">menu_book</span>
-        </div>
-        <h3 class="action-title">{{ 'home.startLearning' | translate }}</h3>
-        <p class="action-desc">{{ 'home.startLearningDesc' | translate }}</p>
-        <span class="action-arrow">
-          <span class="material-icons">arrow_forward</span>
-        </span>
-      </a>
-      <a routerLink="/quiz" class="action-card hover-lift">
-        <div class="action-icon icon-green">
-          <span class="material-icons">assignment</span>
-        </div>
-        <h3 class="action-title">{{ 'home.takeQuiz' | translate }}</h3>
-        <p class="action-desc">{{ 'home.takeQuizDesc' | translate }}</p>
-        <span class="action-arrow">
-          <span class="material-icons">arrow_forward</span>
-        </span>
-      </a>
-      <a routerLink="/progress" class="action-card hover-lift">
-        <div class="action-icon icon-blue">
-          <span class="material-icons">insights</span>
-        </div>
-        <h3 class="action-title">{{ 'home.viewProgress' | translate }}</h3>
-        <p class="action-desc">{{ 'home.trackJourneyDesc' | translate }}</p>
-        <span class="action-arrow">
-          <span class="material-icons">arrow_forward</span>
-        </span>
-      </a>
-    </div>
-
-    @if (summary(); as s) {
-      <!-- Progress Section -->
-      <div class="content-grid fade-in-up" style="animation-delay: 0.2s;">
-        <div class="progress-card glass-card">
-          <h2 class="card-heading">{{ 'home.quickProgressOverview' | translate }}</h2>
-          <div class="overall-progress-row">
-            <span class="progress-label">{{ 'home.overallCompletion' | translate }}</span>
-            <span class="progress-percent gradient-text">{{ s.overallProgress }}%</span>
+      <div class="dw-hero__side" aria-hidden="true">
+        @if (nextChapter(); as next) {
+          <div class="dw-next-card">
+            <div class="dw-next-card__eyebrow">{{ 'home.nextLesson' | translate }}</div>
+            <div class="dw-next-card__title">
+              {{ next.title }} · {{ 'home.lessonShort' | translate }} {{ localeNumber(nextLessonNumber()) }}
+            </div>
+            <div class="dw-next-card__signs">
+              <svg viewBox="0 0 64 64" class="dw-mini-sign">
+                <polygon points="32,4 60,56 4,56" fill="#fff" stroke="var(--dw-error)" stroke-width="6" stroke-linejoin="round"/>
+              </svg>
+              <svg viewBox="0 0 64 64" class="dw-mini-sign">
+                <circle cx="32" cy="32" r="26" fill="#fff" stroke="var(--dw-error)" stroke-width="5"/>
+                <text x="32" y="40" text-anchor="middle" font-family="var(--dw-font-mono)" font-weight="800" font-size="20" fill="#1a1f24">50</text>
+              </svg>
+              <svg viewBox="0 0 64 64" class="dw-mini-sign">
+                <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="var(--dw-error)" stroke="#fff" stroke-width="3"/>
+                <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="16" fill="#fff">STOP</text>
+              </svg>
+              <svg viewBox="0 0 64 64" class="dw-mini-sign">
+                <rect x="6" y="6" width="52" height="52" rx="8" fill="var(--dw-info)" stroke="#fff" stroke-width="3"/>
+                <text x="32" y="44" text-anchor="middle" font-family="inherit" font-weight="800" font-size="34" fill="#fff">P</text>
+              </svg>
+            </div>
+            <div class="dw-progress dw-progress--md">
+              <div class="dw-progress__fill dw-progress__fill--amber" [style.width.%]="nextChapterPercent()"></div>
+            </div>
+            <div class="dw-next-card__count">
+              {{ localeNumber(next.completedSubLessons) }} / {{ localeNumber(next.totalSubLessons) }}
+            </div>
           </div>
-          <div class="progress-track" style="height: 10px; border-radius: 5px;">
-            <div class="progress-fill" [style.width.%]="s.overallProgress" style="border-radius: 5px;"></div>
-          </div>
+        }
+      </div>
+    </section>
 
-          <div class="chapters-list">
-            @for (lesson of s.lessons; track lesson.chapterId) {
-              <div class="chapter-mini">
-                <div class="chapter-mini-header">
-                  <span class="chapter-mini-name">{{ lesson.title }}</span>
-                  <span class="chapter-mini-count">{{ lesson.completedSubLessons }}/{{ lesson.totalSubLessons }}</span>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-fill" [style.width.%]="getChapterPercent(lesson.totalSubLessons, lesson.completedSubLessons)"></div>
+    <!-- ─── Stats row ─── -->
+    <section class="dw-stats">
+      <article class="dw-stat dw-stat--success">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">check</span></span>
+          <span class="dw-stat__sub">+{{ localeNumber(totalCompletedLessons()) }}</span>
+        </div>
+        <div class="dw-stat__value">{{ localeNumber(totalCompletedLessons()) }}</div>
+        <div class="dw-stat__label">{{ 'home.completedLessons' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--teal">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">quiz</span></span>
+          <span class="dw-stat__sub">{{ localeNumber(summary()?.quizStats?.averageScore || 0) }}%</span>
+        </div>
+        <div class="dw-stat__value">{{ localeNumber(summary()?.quizStats?.averageScore || 0) }}%</div>
+        <div class="dw-stat__label">{{ 'home.quizAccuracy' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--info">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">military_tech</span></span>
+          @if (summary()?.quizStats?.lastScore !== null && summary()?.quizStats?.lastScore !== undefined) {
+            <span class="dw-stat__sub">{{ 'home.lastShort' | translate }} {{ localeNumber(summary()?.quizStats?.lastScore || 0) }}</span>
+          }
+        </div>
+        <div class="dw-stat__value">{{ localeNumber(summary()?.quizStats?.totalAttempts || 0) }}</div>
+        <div class="dw-stat__label">{{ 'home.examAttempts' | translate }}</div>
+      </article>
+      <article class="dw-stat dw-stat--amber">
+        <div class="dw-stat__head">
+          <span class="dw-stat__icon"><span class="material-icons">emoji_events</span></span>
+          @if (summary()?.quizStats?.lastScore !== null && summary()?.quizStats?.lastScore !== undefined) {
+            <span class="dw-stat__sub">{{ ((summary()?.quizStats?.lastScore || 0) >= 85 ? 'home.pass' : 'home.fail') | translate }}</span>
+          }
+        </div>
+        <div class="dw-stat__value">{{ bestScoreLabel() }}</div>
+        <div class="dw-stat__label">{{ 'home.bestScore' | translate }}</div>
+      </article>
+    </section>
+
+    <!-- ─── Continue / aside grid ─── -->
+    <div class="dw-grid">
+      <section>
+        <header class="dw-section-head">
+          <h2>{{ 'home.continueLearning' | translate }}</h2>
+          <p>{{ 'home.continueLearningSub' | translate }}</p>
+        </header>
+        <div class="dw-cont-grid">
+          @for (ch of continueChapters(); track ch.chapterId) {
+            <a
+              [routerLink]="['/lessons', ch.chapterId]"
+              class="dw-card dw-cont-card dw-cont-card--{{ ch.accent }}">
+              <div class="dw-cont-card__top">
+                <span class="dw-cont-card__icon">
+                  <span class="material-icons">{{ ch.icon }}</span>
+                </span>
+                <span class="dw-chip dw-chip--{{ getStatusTone(ch.status) }}">
+                  @if (ch.status === 'Completed') {
+                    {{ 'progress.statusCompleted' | translate }}
+                  } @else if (ch.status === 'Not Started') {
+                    {{ 'progress.statusNotStarted' | translate }}
+                  } @else {
+                    {{ localeNumber(ch.percent) }}%
+                  }
+                </span>
+              </div>
+              <div class="dw-cont-card__body">
+                <div class="dw-cont-card__title">{{ ch.title }}</div>
+                <div class="dw-cont-card__meta">
+                  {{ localeNumber(ch.totalSubLessons) }} {{ 'home.sublessons' | translate }}
                 </div>
               </div>
+              <div class="dw-progress">
+                <div
+                  class="dw-progress__fill dw-progress__fill--{{ ch.accent }}"
+                  [style.width.%]="ch.percent"></div>
+              </div>
+            </a>
+          }
+          @if (continueChapters().length === 0) {
+            <p class="dw-empty">{{ 'home.noActivity' | translate }}</p>
+          }
+        </div>
+      </section>
+
+      <aside class="dw-aside">
+        <section>
+          <header class="dw-section-head">
+            <h2>{{ 'home.quickActions' | translate }}</h2>
+          </header>
+          <div class="dw-card dw-actions">
+            <a routerLink="/quiz" class="dw-action">
+              <span class="dw-action__icon"><span class="material-icons">quiz</span></span>
+              <span class="dw-action__body">
+                <span class="dw-action__label">{{ 'nav.quiz' | translate }}</span>
+                <span class="dw-action__sub">{{ 'home.quizzesSub' | translate }}</span>
+              </span>
+              <span class="material-icons dw-action__chev">{{ isArabicMode() ? 'chevron_left' : 'chevron_right' }}</span>
+            </a>
+            <a routerLink="/exam" class="dw-action">
+              <span class="dw-action__icon"><span class="material-icons">military_tech</span></span>
+              <span class="dw-action__body">
+                <span class="dw-action__label">{{ 'nav.exam' | translate }}</span>
+                <span class="dw-action__sub">{{ 'home.examActionSub' | translate }}</span>
+              </span>
+              <span class="material-icons dw-action__chev">{{ isArabicMode() ? 'chevron_left' : 'chevron_right' }}</span>
+            </a>
+            <a routerLink="/assistant" class="dw-action">
+              <span class="dw-action__icon"><span class="material-icons">auto_awesome</span></span>
+              <span class="dw-action__body">
+                <span class="dw-action__label">{{ 'home.askAi' | translate }}</span>
+                <span class="dw-action__sub">{{ 'home.askAiSub' | translate }}</span>
+              </span>
+              <span class="material-icons dw-action__chev">{{ isArabicMode() ? 'chevron_left' : 'chevron_right' }}</span>
+            </a>
+            <a routerLink="/progress" class="dw-action dw-action--last">
+              <span class="dw-action__icon"><span class="material-icons">trending_up</span></span>
+              <span class="dw-action__body">
+                <span class="dw-action__label">{{ 'nav.progress' | translate }}</span>
+                <span class="dw-action__sub">{{ 'home.progressSub' | translate }}</span>
+              </span>
+              <span class="material-icons dw-action__chev">{{ isArabicMode() ? 'chevron_left' : 'chevron_right' }}</span>
+            </a>
+          </div>
+        </section>
+
+        <section>
+          <header class="dw-section-head">
+            <h2>{{ 'home.recentActivity' | translate }}</h2>
+          </header>
+          <div class="dw-card dw-recent">
+            @if (recentActivity().length === 0) {
+              <p class="dw-empty">{{ 'home.noActivity' | translate }}</p>
+            } @else {
+              @for (r of recentActivity(); track $index) {
+                <div class="dw-recent__row">
+                  <span class="dw-recent__icon dw-recent__icon--{{ r.tone }}">
+                    <span class="material-icons">{{ r.icon }}</span>
+                  </span>
+                  <span class="dw-recent__text">{{ r.text }}</span>
+                  <span class="dw-recent__ago">{{ r.ago }}</span>
+                </div>
+              }
             }
           </div>
-        </div>
-
-        <div class="quiz-stats-card glass-card">
-          <h2 class="card-heading">{{ 'home.quizPerformance' | translate }}</h2>
-          <div class="quiz-stats-grid">
-            <div class="quiz-stat-item">
-              <span class="quiz-stat-value">{{ s.quizStats.lastScore !== null ? s.quizStats.lastScore + '%' : '--' }}</span>
-              <span class="quiz-stat-label">{{ 'home.lastScore' | translate }}</span>
-            </div>
-            <div class="quiz-stat-item">
-              <span class="quiz-stat-value">{{ s.quizStats.totalAttempts }}</span>
-              <span class="quiz-stat-label">{{ 'home.attempts' | translate }}</span>
-            </div>
-            <div class="quiz-stat-item">
-              <span class="quiz-stat-value">{{ s.quizStats.averageScore }}%</span>
-              <span class="quiz-stat-label">{{ 'home.average' | translate }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Links -->
-      <div class="quick-links fade-in-up" style="animation-delay: 0.3s;">
-        <a routerLink="/assistant" class="quick-link-card hover-lift">
-          <div class="ql-icon icon-violet">
-            <span class="material-icons">smart_toy</span>
-          </div>
-          <div class="ql-content">
-            <h3>{{ 'home.askAiTutor' | translate }}</h3>
-            <p>{{ 'home.askAiTutorDesc' | translate }}</p>
-          </div>
-          <span class="material-icons ql-arrow">arrow_forward</span>
-        </a>
-        <a routerLink="/quiz/exam" class="quick-link-card hover-lift">
-          <div class="ql-icon icon-orange">
-            <span class="material-icons">emoji_events</span>
-          </div>
-          <div class="ql-content">
-            <h3>{{ 'home.examSimulation' | translate }}</h3>
-            <p>{{ 'home.examSimulationDesc' | translate }}</p>
-          </div>
-          <span class="material-icons ql-arrow">arrow_forward</span>
-        </a>
-      </div>
-    }
+        </section>
+      </aside>
+    </div>
   }
 </div>

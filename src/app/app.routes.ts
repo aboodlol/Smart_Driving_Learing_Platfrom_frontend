@@ -65,7 +65,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'quiz/exam',
+    path: 'quiz/chapter/:chapterTitle',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/quiz/pages/quiz-session-page.component').then(
@@ -73,12 +73,25 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'quiz/chapter/:chapterTitle',
+    path: 'exam',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/quiz/pages/exam-intro-page.component').then(
+        (m) => m.ExamIntroPageComponent,
+      ),
+  },
+  {
+    path: 'exam/session',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/quiz/pages/quiz-session-page.component').then(
         (m) => m.QuizSessionPageComponent,
       ),
+  },
+  {
+    path: 'quiz/exam',
+    redirectTo: 'exam/session',
+    pathMatch: 'full',
   },
   {
     path: 'progress',

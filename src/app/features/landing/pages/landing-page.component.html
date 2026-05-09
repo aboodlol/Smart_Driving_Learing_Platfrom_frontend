@@ -1,168 +1,287 @@
-<div #animWrapper class="landing-wrapper">
-  <!-- Animated gradient blobs -->
-  <div class="blob-container" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
+<div #animWrapper class="dw-landing" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
 
-  <!-- ── Hero ─────────────────────────────────────────────────── -->
-  <section class="hero-section">
-    <div class="hero-content scroll-reveal">
+  <!-- ─── Hero ─── -->
+  <section class="dw-hero">
+    <div class="dw-hero__lead scroll-reveal">
+      <span class="dw-chip dw-chip--amber">
+        <span class="dw-chip__dot" aria-hidden="true"></span>
+        {{ 'landing.heroChip' | translate }}
+      </span>
 
-      <!-- Badge -->
-      <div class="lang-badge-row">
-        <span class="trust-badge">
-          <span class="material-icons badge-icon">school</span>
-          <span class="badge-text">{{ 'landing.badge' | translate }}</span>
-        </span>
-      </div>
+      <h1 class="dw-hero__title">
+        {{ 'landing.heroTitle' | translate }}
+        <span class="dw-hero__highlight">{{ 'landing.heroTitleHighlight' | translate }}</span>
+      </h1>
 
-      <!-- Title block -->
-      <div class="hero-title-block">
-        <h1 class="hero-title">
-          <span class="hero-title-line1">{{ 'landing.heroTitle' | translate }}</span>
-          <span class="gradient-text hero-title-highlight">{{ 'landing.heroTitleHighlight' | translate }}</span>
-        </h1>
-      </div>
+      <p class="dw-hero__sub">{{ 'landing.heroSubtitle' | translate }}</p>
 
-      <p class="hero-subtitle">
-        {{ 'landing.heroSubtitle' | translate }}
-      </p>
-
-      <div class="hero-ctas">
-        <a routerLink="/register" class="btn-primary-glow">
-          <span class="material-icons">rocket_launch</span>
+      <div class="dw-hero__ctas">
+        <a routerLink="/register" class="dw-btn dw-btn--primary dw-btn--lg">
           {{ 'landing.ctaStart' | translate }}
+          <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
         </a>
-        <a routerLink="/login" class="btn-secondary-outline">
-          {{ 'landing.ctaSignIn' | translate }}
-          <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
+        <a routerLink="/login" class="dw-btn dw-btn--ghost dw-btn--lg">
+          <span class="material-icons">play_arrow</span>
+          {{ 'landing.heroTour' | translate }}
         </a>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-item">
-          <span class="stat-number">5</span>
-          <span class="stat-label">{{ 'landing.statsChapters' | translate }}</span>
+      <div class="dw-hero__stats">
+        <div class="dw-stat">
+          <div class="dw-stat__value">12k+</div>
+          <div class="dw-stat__label">{{ 'landing.studentsPassed' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number">50+</span>
-          <span class="stat-label">{{ 'landing.statsLessons' | translate }}</span>
+        <div class="dw-stat">
+          <div class="dw-stat__value">94%</div>
+          <div class="dw-stat__label">{{ 'landing.passRate' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number">100+</span>
-          <span class="stat-label">{{ 'landing.statsQuestions' | translate }}</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number gradient-text">AI</span>
-          <span class="stat-label">{{ 'landing.statsAI' | translate }}</span>
+        <div class="dw-stat">
+          <div class="dw-stat__value">1,800+</div>
+          <div class="dw-stat__label">{{ 'landing.examQuestions' | translate }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Floating cards -->
-    <div class="floating-cards" aria-hidden="true">
-      <div class="float-card float-card-1">
-        <span class="material-icons float-icon">traffic</span>
-        <span class="float-text">{{ 'landing.float1' | translate }}</span>
+    <!-- Hero illustration card with floating stickers -->
+    <div class="dw-hero__art scroll-reveal">
+      <div class="dw-hero-card">
+        <div class="dw-hero-card__media" aria-hidden="true">
+          <svg viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" class="dw-road">
+            <defs>
+              <linearGradient id="dw-ill-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-sky-top)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-sky-bottom)" />
+              </linearGradient>
+              <linearGradient id="dw-ill-road" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-road-far)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-road-near)" />
+              </linearGradient>
+              <linearGradient id="dw-ill-car" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--dw-illustration-car-light)" />
+                <stop offset="100%" stop-color="var(--dw-illustration-car-body)" />
+              </linearGradient>
+              <radialGradient id="dw-ill-sun-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--dw-illustration-sun)" stop-opacity="0.55" />
+                <stop offset="100%" stop-color="var(--dw-illustration-sun)" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+
+            <!-- Sky -->
+            <rect width="1200" height="720" fill="url(#dw-ill-sky)" />
+
+            <!-- Sun glow + sun disc -->
+            <circle cx="920" cy="200" r="140" fill="url(#dw-ill-sun-glow)" />
+            <circle cx="920" cy="200" r="44" fill="var(--dw-illustration-sun)" />
+
+            <!-- Hills (back layer) -->
+            <path d="M0,445 C140,410 300,420 460,432 C620,442 800,408 970,418 C1080,425 1200,438 1200,440 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-1)" />
+            <!-- Hills (mid layer) -->
+            <path d="M0,478 C140,452 300,462 470,478 C620,492 790,462 970,472 C1090,478 1200,488 1200,488 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-2)" />
+            <!-- Hills (front layer) -->
+            <path d="M0,510 C140,490 320,498 500,510 C680,524 860,498 1040,510 C1140,516 1200,520 1200,520 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-3)" />
+
+            <!-- Road surface -->
+            <polygon points="555,440 645,440 1140,720 60,720" fill="url(#dw-ill-road)" />
+            <!-- Road outer edge lines -->
+            <polygon points="555,440 561,440 80,720 60,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
+            <polygon points="639,440 645,440 1140,720 1120,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
+
+            <!-- Center dashed lane markers (perspective) -->
+            <g fill="var(--dw-illustration-road-line)" opacity="0.95">
+              <polygon points="599,447 601,447 601,452 599,452" />
+              <polygon points="597,462 603,462 603,470 597,470" />
+              <polygon points="594,480 606,480 607,492 593,492" />
+              <polygon points="590,503 610,503 613,520 587,520" />
+              <polygon points="583,535 617,535 622,560 578,560" />
+            </g>
+
+            <!-- Triangle warning sign (left) -->
+            <g>
+              <rect x="277" y="475" width="7" height="160" rx="2" fill="var(--dw-illustration-pole)" />
+              <polygon points="280,395 339,478 221,478" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="7" stroke-linejoin="round" />
+            </g>
+
+            <!-- Speed limit 60 sign (right) -->
+            <g>
+              <rect x="956" y="478" width="7" height="155" rx="2" fill="var(--dw-illustration-pole)" />
+              <circle cx="960" cy="425" r="52" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="9" />
+              <text x="960" y="442" text-anchor="middle" style="font-family: var(--dw-font-mono); font-weight: 800; font-size: 40px;" fill="var(--dw-illustration-sign-text)">60</text>
+            </g>
+
+            <!-- Car (rear view, Mustang-style coupe) -->
+            <g>
+              <!-- Ground shadow -->
+              <ellipse cx="600" cy="720" rx="248" ry="13" fill="#000" opacity="0.32" />
+
+              <!-- Main body silhouette (yellow, roof-to-bumper) -->
+              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L752,540 Q792,560 812,600 L818,660 Q818,686 798,690 L402,690 Q382,686 382,660 L388,600 Q408,560 448,540 L472,472 Z" fill="url(#dw-ill-car)" />
+
+              <!-- Roof / upper darker shade -->
+              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L740,510 L460,510 Z" fill="var(--dw-illustration-car-shadow)" opacity="0.55" />
+
+              <!-- Rear window (dark gradient glass) -->
+              <path d="M500,480 Q530,472 580,470 L670,472 Q698,476 710,484 L730,538 L470,538 Z" fill="var(--dw-illustration-car-window)" />
+              <!-- Glass inner tint -->
+              <path d="M514,488 Q545,482 580,480 L660,482 Q685,484 695,490 L705,525 L495,525 Z" fill="#34404d" opacity="0.45" />
+              <!-- Glass top sheen -->
+              <path d="M526,481 Q580,474 642,478 L658,488 Q592,484 536,488 Z" fill="#fff" opacity="0.28" />
+
+              <!-- Trunk lid horizontal highlight -->
+              <rect x="458" y="555" width="284" height="3" fill="#fff" opacity="0.35" />
+
+              <!-- Side body highlights (shoulder gloss) -->
+              <path d="M388,600 Q396,594 408,600 L405,672 Q392,670 384,660 Z" fill="#fff" opacity="0.22" />
+              <path d="M812,600 Q804,594 792,600 L795,672 Q808,670 816,660 Z" fill="#fff" opacity="0.22" />
+
+              <!-- Black rear panel (between taillights) -->
+              <path d="M408,598 L792,598 Q798,598 798,604 L798,662 Q798,668 792,668 L408,668 Q402,668 402,662 L402,604 Q402,598 408,598 Z" fill="#0d1115" />
+              <rect x="408" y="598" width="384" height="2" fill="#fff" opacity="0.18" />
+
+              <!-- Left taillight cluster: 3 stacked red bars -->
+              <rect x="416" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="416" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="416" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="420" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="420" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="420" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
+
+              <!-- Right taillight cluster: 3 stacked red bars -->
+              <rect x="714" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="714" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="714" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
+              <rect x="718" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="718" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
+              <rect x="718" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
+
+              <!-- Subtle emblem (no brand) -->
+              <ellipse cx="600" cy="612" rx="16" ry="5" fill="#cfd6dc" opacity="0.7" />
+
+              <!-- License plate -->
+              <rect x="548" y="625" width="104" height="28" rx="3" fill="#fff" />
+              <rect x="548" y="625" width="104" height="28" rx="3" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+
+              <!-- Bumper seam -->
+              <path d="M402,670 L798,670" stroke="rgba(0,0,0,0.22)" stroke-width="1.5" stroke-linecap="round" />
+
+              <!-- Diffuser / lower bumper -->
+              <path d="M412,686 L788,686 Q798,686 798,696 L790,716 Q760,722 720,722 L480,722 Q440,722 410,716 L402,696 Q402,686 412,686 Z" fill="#14181d" />
+
+              <!-- Diffuser fins -->
+              <g fill="#2c333a">
+                <rect x="558" y="694" width="3" height="22" />
+                <rect x="574" y="694" width="3" height="22" />
+                <rect x="590" y="694" width="3" height="22" />
+                <rect x="610" y="694" width="3" height="22" />
+                <rect x="626" y="694" width="3" height="22" />
+                <rect x="642" y="694" width="3" height="22" />
+              </g>
+
+              <!-- Exhaust pipes -->
+              <ellipse cx="468" cy="708" rx="20" ry="9" fill="#080a0d" />
+              <ellipse cx="468" cy="707" rx="14" ry="6" fill="#3a4046" />
+              <ellipse cx="468" cy="707" rx="9" ry="4" fill="#0e1216" />
+              <ellipse cx="732" cy="708" rx="20" ry="9" fill="#080a0d" />
+              <ellipse cx="732" cy="707" rx="14" ry="6" fill="#3a4046" />
+              <ellipse cx="732" cy="707" rx="9" ry="4" fill="#0e1216" />
+            </g>
+          </svg>
+        </div>
+        <div class="dw-hero-card__progress">
+          <div class="dw-hero-card__row">
+            <span class="dw-hero-card__label">{{ 'landing.heroCardChapter' | translate }}</span>
+            <span class="dw-hero-card__count">18 / 24</span>
+          </div>
+          <div class="dw-progress">
+            <div class="dw-progress__fill" [style.width.%]="75"></div>
+          </div>
+        </div>
       </div>
-      <div class="float-card float-card-2">
-        <span class="material-icons float-icon">smart_toy</span>
-        <span class="float-text">{{ 'landing.float2' | translate }}</span>
+
+      <div class="dw-floating dw-floating--start" aria-hidden="true">
+        <svg viewBox="0 0 64 64" class="dw-mini-sign">
+          <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="var(--dw-error)" stroke="#fff" stroke-width="3"/>
+          <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="16" fill="#fff">STOP</text>
+        </svg>
+        <div class="dw-floating__copy">
+          <div class="dw-floating__caption">{{ 'landing.explainSign' | translate }}</div>
+          <div class="dw-floating__title">{{ 'landing.askAi' | translate }}</div>
+        </div>
       </div>
-      <div class="float-card float-card-3">
-        <span class="material-icons float-icon">emoji_events</span>
-        <span class="float-text">{{ 'landing.float3' | translate }}</span>
+
+      <div class="dw-floating dw-floating--end" aria-hidden="true">
+        <span class="dw-floating__success">
+          <span class="material-icons">check</span>
+        </span>
+        <div class="dw-floating__copy">
+          <div class="dw-floating__caption">{{ 'landing.score' | translate }}</div>
+          <div class="dw-floating__score">52 / 60</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Features ─────────────────────────────────────────────── -->
-  <section class="features-section">
-    <h2 class="section-heading scroll-reveal">{{ 'landing.featuresHeading' | translate }}</h2>
-    <p class="section-subheading scroll-reveal">{{ 'landing.featuresSubheading' | translate }}</p>
+  <!-- ─── Features ─── -->
+  <section class="dw-features">
+    <header class="dw-features__head scroll-reveal">
+      <span class="dw-eyebrow">{{ 'landing.featuresEyebrow' | translate }}</span>
+      <h2>{{ 'landing.featuresH2' | translate }}</h2>
+    </header>
 
-    <div class="features-grid">
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-violet">
-          <span class="material-icons">menu_book</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature1Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature1Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-green">
-          <span class="material-icons">assignment</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature2Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature2Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-blue">
-          <span class="material-icons">smart_toy</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature3Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature3Desc' | translate }}</p>
-      </div>
-
-      <div class="feature-card scroll-reveal">
-        <div class="feature-icon-wrap icon-orange">
-          <span class="material-icons">insights</span>
-        </div>
-        <h3 class="feature-title">{{ 'landing.feature4Title' | translate }}</h3>
-        <p class="feature-desc">{{ 'landing.feature4Desc' | translate }}</p>
-      </div>
+    <div class="dw-features__grid">
+      <article class="dw-feature dw-feature--teal scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">menu_book</span></span>
+        <h3>{{ 'landing.f1Title' | translate }}</h3>
+        <p>{{ 'landing.f1Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--amber scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">quiz</span></span>
+        <h3>{{ 'landing.f2Title' | translate }}</h3>
+        <p>{{ 'landing.f2Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--info scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">military_tech</span></span>
+        <h3>{{ 'landing.f3Title' | translate }}</h3>
+        <p>{{ 'landing.f3Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--success scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">trending_up</span></span>
+        <h3>{{ 'landing.f4Title' | translate }}</h3>
+        <p>{{ 'landing.f4Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--teal scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">auto_awesome</span></span>
+        <h3>{{ 'landing.f5Title' | translate }}</h3>
+        <p>{{ 'landing.f5Desc' | translate }}</p>
+      </article>
+      <article class="dw-feature dw-feature--amber scroll-reveal">
+        <span class="dw-feature__icon"><span class="material-icons">language</span></span>
+        <h3>{{ 'landing.f6Title' | translate }}</h3>
+        <p>{{ 'landing.f6Desc' | translate }}</p>
+      </article>
     </div>
   </section>
 
-  <!-- ── How it works ─────────────────────────────────────────── -->
-  <section class="steps-section">
-    <h2 class="section-heading scroll-reveal">{{ 'landing.stepsHeading' | translate }}</h2>
-    <p class="section-subheading scroll-reveal">{{ 'landing.stepsSubheading' | translate }}</p>
-
-    <div class="steps-row">
-      <div class="step-card scroll-reveal">
-        <div class="step-number">1</div>
-        <h3 class="step-title">{{ 'landing.step1Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step1Desc' | translate }}</p>
+  <!-- ─── CTA banner ─── -->
+  <section class="dw-cta-section">
+    <div class="dw-cta scroll-reveal">
+      <div class="dw-cta__copy">
+        <h3>{{ 'landing.ctaH3' | translate }}</h3>
+        <p>{{ 'landing.ctaSub' | translate }}</p>
       </div>
-
-      <div class="step-connector scroll-reveal" aria-hidden="true">
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="step-card scroll-reveal">
-        <div class="step-number">2</div>
-        <h3 class="step-title">{{ 'landing.step2Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step2Desc' | translate }}</p>
-      </div>
-
-      <div class="step-connector scroll-reveal" aria-hidden="true">
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="step-card scroll-reveal">
-        <div class="step-number">3</div>
-        <h3 class="step-title">{{ 'landing.step3Title' | translate }}</h3>
-        <p class="step-desc">{{ 'landing.step3Desc' | translate }}</p>
-      </div>
+      <a routerLink="/register" class="dw-btn dw-btn--amber dw-btn--lg">
+        {{ 'landing.ctaStart' | translate }}
+        <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
+      </a>
+      <span class="dw-cta__lane" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </div>
   </section>
 
-  <!-- ── CTA ──────────────────────────────────────────────────── -->
-  <section class="cta-section scroll-reveal">
-    <div class="cta-glow" aria-hidden="true"></div>
-    <h2 class="cta-title">{{ 'landing.ctaSectionTitle' | translate }}</h2>
-    <p class="cta-subtitle">{{ 'landing.ctaSectionSubtitle' | translate }}</p>
-    <a routerLink="/register" class="btn-primary-glow btn-lg">
-      <span class="material-icons">rocket_launch</span>
-      {{ 'landing.ctaSectionBtn' | translate }}
-    </a>
-  </section>
+  <!-- ─── Footer ─── -->
+  <footer class="dw-foot">
+    {{ 'landing.footer' | translate }}
+  </footer>
 </div>

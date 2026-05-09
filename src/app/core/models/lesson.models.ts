@@ -21,8 +21,17 @@ export interface Chapter {
   updatedAt: string;
 }
 
+export interface NextChapterRef {
+  _id: string;
+  chapterKey: string;
+  title: string;
+  titleAR?: string;
+  order: number;
+}
+
 export interface CompleteSubLessonResponse {
   message: string;
+  completed?: boolean;
   completedLesson: {
     chapterId: string;
     subLessonIndex: number;
@@ -34,4 +43,7 @@ export interface CompleteSubLessonResponse {
     completedAt: string;
   }[];
   overallProgress: number;
+  isChapterCompleted?: boolean;
+  isLastSubLesson?: boolean;
+  nextChapter?: NextChapterRef | null;
 }
