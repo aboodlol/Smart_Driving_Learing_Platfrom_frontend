@@ -371,9 +371,10 @@ export class AssistantPageComponent implements OnInit {
     image: File | null,
     file: File | null,
     previousMessages: ChatMessage[],
+    imageUrl: string | null = null,
   ): void {
     this.assistantApi
-      .sendMessageToConversation(conversationId, { message: text, image, file })
+      .sendMessageToConversation(conversationId, { message: text, image, file, imageUrl })
       .pipe(
         finalize(() => {
           this.loading.set(false);
@@ -669,6 +670,7 @@ export class AssistantPageComponent implements OnInit {
       return null;
     }
 
+    const imageUrl = typeof ctx.image === 'string' ? ctx.image.trim() : '';
     return {
       questionText: String(ctx.questionText ?? ''),
       questionTextAR: String(ctx.questionTextAR ?? ''),
@@ -682,6 +684,7 @@ export class AssistantPageComponent implements OnInit {
       chapterTitleAR: String(ctx.chapterTitleAR ?? ''),
       chapterKey: String(ctx.chapterKey ?? ''),
       isCorrect: Boolean(ctx.isCorrect),
+      ...(imageUrl ? { image: imageUrl } : {}),
     };
   }
 
@@ -705,6 +708,11 @@ export class AssistantPageComponent implements OnInit {
         },
       });
 
+    const imageUrl = context.image?.trim() || '';
+    const imagePromise: Promise<{ file: File | null; failureReason: string | null }> = imageUrl
+      ? this.fetchImageAsFile(imageUrl)
+      : Promise.resolve({ file: null, failureReason: null });
+
     this.assistantApi
       .createConversation()
       .pipe(
@@ -719,13 +727,35 @@ export class AssistantPageComponent implements OnInit {
           this.persistLastConversationId(mapped._id);
           this.messages.set(mapped.messages);
 
-          const prompt = this.buildQuizContextPrompt(context);
-          const previousMessages = this.messages();
-          const optimistic = this.buildOptimisticUserMessage(prompt, null, null);
-          this.messages.set([...previousMessages, optimistic]);
-          this.loading.set(true);
-          this.scrollToBottom();
-          this.dispatchMessage(mapped._id, prompt, null, null, previousMessages);
+          imagePromise.then(({ file: imageFile, failureReason }) => {
+            if (imageUrl && !imageFile) {
+              console.warn(
+                '[AssistantQuizContext] Failed to fetch quiz image as a File. Falling back to imageUrl-only flow.',
+                { imageUrl, reason: failureReason },
+              );
+            }
+
+            const prompt = this.buildQuizContextPrompt(context, {
+              fileAttached: !!imageFile,
+              imageUrl,
+            });
+            const previousMessages = this.messages();
+            const optimistic = this.buildOptimisticUserMessage(prompt, imageFile, null);
+            if (imageUrl) {
+              optimistic.imageUrl = imageUrl;
+            }
+            this.messages.set([...previousMessages, optimistic]);
+            this.loading.set(true);
+            this.scrollToBottom();
+            this.dispatchMessage(
+              mapped._id,
+              prompt,
+              imageFile,
+              null,
+              previousMessages,
+              imageUrl || null,
+            );
+          });
         },
         error: (error: unknown) => {
           this.pageError.set(
@@ -736,7 +766,42 @@ export class AssistantPageComponent implements OnInit {
       });
   }
 
-  private buildQuizContextPrompt(context: QuizQuestionContext): string {
+  private async fetchImageAsFile(url: string): Promise<{ file: File | null; failureReason: string | null }> {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        return { file: null, failureReason: `HTTP ${response.status} ${response.statusText}` };
+      }
+      const blob = await response.blob();
+      if (!blob.type.startsWith('image/')) {
+        return { file: null, failureReason: `Unexpected MIME type: ${blob.type || 'unknown'}` };
+      }
+      const fileName = this.deriveImageFileName(url, blob.type);
+      return { file: new File([blob], fileName, { type: blob.type }), failureReason: null };
+    } catch (err) {
+      const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      return { file: null, failureReason: reason };
+    }
+  }
+
+  private deriveImageFileName(url: string, mimeType: string): string {
+    const fallbackExt = mimeType.split('/')[1]?.replace(/[^a-z0-9]/gi, '') || 'png';
+    try {
+      const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+      const parsed = new URL(url, base);
+      const last = parsed.pathname.split('/').filter(Boolean).pop();
+      if (last && last.includes('.')) return last;
+      if (last) return `${last}.${fallbackExt}`;
+    } catch {
+      // fall through
+    }
+    return `quiz-image.${fallbackExt}`;
+  }
+
+  private buildQuizContextPrompt(
+    context: QuizQuestionContext,
+    options: { fileAttached: boolean; imageUrl: string } = { fileAttached: false, imageUrl: '' },
+  ): string {
     const isArabic = this.i18n.currentLang() === 'ar';
 
     const questionText =
@@ -761,6 +826,10 @@ export class AssistantPageComponent implements OnInit {
       context.chapterTitleAR ||
       context.chapterKey;
 
+    const hasImage = options.fileAttached || !!options.imageUrl;
+    const fileAttached = options.fileAttached;
+    const imageUrl = options.imageUrl;
+
     if (isArabic) {
       const lines = [
         'هل يمكنك شرح سؤال اختبار القيادة هذا بمزيد من التفصيل؟',
@@ -772,6 +841,14 @@ export class AssistantPageComponent implements OnInit {
       if (correctAnswer) lines.push(`الإجابة الصحيحة: ${correctAnswer}`);
       lines.push(`النتيجة: ${context.isCorrect ? 'إجابة صحيحة' : 'إجابة خاطئة'}`);
       if (explanation) lines.push(`الشرح المتاح: ${explanation}`);
+      if (hasImage) {
+        if (fileAttached) {
+          lines.push('السؤال مرفق بصورة — يرجى الاستعانة بالصورة أيضاً عند الشرح.');
+        } else if (imageUrl) {
+          lines.push(`السؤال يحتوي على صورة. الرابط: ${imageUrl}`);
+          lines.push('يرجى تحليل الصورة عبر الرابط ودمجها في الشرح.');
+        }
+      }
       lines.push('');
       lines.push(
         'من فضلك اشرح لي السؤال بطريقة أوضح، ولماذا الإجابة الصحيحة صحيحة، وما الفكرة التي يجب أن أتذكرها لاحقاً.',
@@ -789,6 +866,14 @@ export class AssistantPageComponent implements OnInit {
     if (correctAnswer) lines.push(`Correct answer: ${correctAnswer}`);
     lines.push(`Result: ${context.isCorrect ? 'I answered correctly' : 'I answered incorrectly'}`);
     if (explanation) lines.push(`Existing explanation: ${explanation}`);
+    if (hasImage) {
+      if (fileAttached) {
+        lines.push('An image is attached to this question — please use it when explaining.');
+      } else if (imageUrl) {
+        lines.push(`This question has an image. URL: ${imageUrl}`);
+        lines.push('Please analyse the image at that URL and use it in your explanation.');
+      }
+    }
     lines.push('');
     lines.push(
       'Can you walk me through this question in a clearer way, explain why the correct answer is right, and give me one tip to remember it next time?',

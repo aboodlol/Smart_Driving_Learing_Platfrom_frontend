@@ -24,6 +24,7 @@ export interface ConversationMessageRequest {
   message?: string;
   image?: File | null;
   file?: File | null;
+  imageUrl?: string | null;
 }
 
 export interface QuizQuestionContext {
@@ -39,6 +40,7 @@ export interface QuizQuestionContext {
   chapterTitleAR: string;
   chapterKey: string;
   isCorrect: boolean;
+  image?: string;
 }
 
 export const QUIZ_CONTEXT_NAV_KEY = 'quizQuestionContext';

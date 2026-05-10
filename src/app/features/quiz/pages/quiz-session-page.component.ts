@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, interval, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 import { QuizQuestion, QuizMode, QuizQuestionResult, QuizResult, SaveAnswerResponse } from '../../../core/models/quiz.models';
 import { ExamAttempt, ExamAttemptAnswer } from '../../../core/models/exam-attempt.models';
 import { ChapterQuizAnswer, ChapterQuizProgress } from '../../../core/models/chapter-quiz-progress.models';
@@ -466,6 +467,7 @@ export class QuizSessionPageComponent {
     const arabicOptions = q.optionsAR ?? [];
     const idx = fb.selectedOptionIndex;
 
+    const imageUrl = this.resolveAbsoluteImageUrl(q.image);
     const context: QuizQuestionContext = {
       questionText: this.normalizeText(q.question) ?? '',
       questionTextAR: this.normalizeText(q.questionAR) ?? '',
@@ -479,11 +481,38 @@ export class QuizSessionPageComponent {
       chapterTitleAR: this.normalizeText(q.chapterTitleAR) ?? '',
       chapterKey: q.chapterKey ?? '',
       isCorrect: fb.isCorrect,
+      ...(imageUrl ? { image: imageUrl } : {}),
     };
+
+    console.info('[ExplainWithAI] navigating to assistant with quiz context', {
+      questionId: q._id,
+      rawImage: q.image ?? null,
+      resolvedImage: imageUrl,
+    });
 
     void this.router.navigate(['/assistant'], {
       state: { [QUIZ_CONTEXT_NAV_KEY]: context },
     });
+  }
+
+  private resolveAbsoluteImageUrl(rawUrl?: string | null): string {
+    const trimmed = this.normalizeText(rawUrl);
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+    const backendUrl = (environment.backendUrl || '').replace(/\/+$/, '');
+    if (backendUrl) {
+      return trimmed.startsWith('/') ? `${backendUrl}${trimmed}` : `${backendUrl}/${trimmed}`;
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        return new URL(trimmed, window.location.origin).toString();
+      } catch {
+        // fall through
+      }
+    }
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   }
 
   protected skipQuestion(): void {

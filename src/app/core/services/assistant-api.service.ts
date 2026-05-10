@@ -44,6 +44,9 @@ export class AssistantApiService {
     if (payload.file) {
       formData.append('file', payload.file, payload.file.name);
     }
+    if (payload.imageUrl) {
+      formData.append('imageUrl', payload.imageUrl);
+    }
 
     return this.http
       .post(`${this.baseUrl}/${conversationId}/messages`, formData)
