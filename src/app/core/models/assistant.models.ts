@@ -25,3 +25,20 @@ export interface ConversationMessageRequest {
   image?: File | null;
   file?: File | null;
 }
+
+export interface QuizQuestionContext {
+  questionText: string;
+  questionTextAR: string;
+  selectedAnswer: string;
+  selectedAnswerAR: string;
+  correctAnswer: string;
+  correctAnswerAR: string;
+  explanation: string;
+  explanationAR: string;
+  chapterTitle: string;
+  chapterTitleAR: string;
+  chapterKey: string;
+  isCorrect: boolean;
+}
+
+export const QUIZ_CONTEXT_NAV_KEY = 'quizQuestionContext';

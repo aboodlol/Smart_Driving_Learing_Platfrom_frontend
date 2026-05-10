@@ -405,7 +405,7 @@
                 [class.is-selected]="st === 'selected'"
                 [class.is-correct]="st === 'correct'"
                 [class.is-wrong]="st === 'wrong'"
-                [disabled]="!!chapterAnswerFeedback()"
+                [disabled]="!!currentFeedback()"
                 (click)="selectAnswer(q._id, i)">
                 <span class="dw-option__badge">
                   @if (st === 'correct') { <span class="material-icons">check</span> }
@@ -417,7 +417,7 @@
             }
           </div>
 
-          @if (chapterAnswerFeedback()) {
+          @if (currentFeedback()) {
             <div class="dw-feedback" [class.is-correct]="feedbackIsCorrect()" [class.is-info]="!feedbackIsCorrect()">
               <div class="dw-feedback__head">
                 <span class="material-icons">{{ feedbackIsCorrect() ? 'check_circle' : 'auto_awesome' }}</span>
@@ -435,17 +435,21 @@
                 <p class="dw-feedback__expl">{{ feedbackExplanation() }}</p>
               }
               <div class="dw-feedback__actions">
-                <button type="button" class="dw-btn dw-btn--ai-link">
+                <button type="button" class="dw-btn dw-btn--ai-link" (click)="explainWithAI()">
                   <span class="material-icons">auto_awesome</span>
                   {{ 'quiz.explainWithAI' | translate }}
                 </button>
-                <button type="button" class="dw-btn dw-btn--primary" (click)="continueAfterFeedback()">
-                  {{ (feedbackIsLastQuestion() ? 'quiz.submitQuiz' : 'quiz.continueBtn') | translate }}
-                  <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
-                </button>
+                @if (chapterAnswerFeedback()) {
+                  <button type="button" class="dw-btn dw-btn--primary" (click)="continueAfterFeedback()">
+                    {{ (feedbackIsLastQuestion() ? 'quiz.submitQuiz' : 'quiz.continueBtn') | translate }}
+                    <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+                  </button>
+                }
               </div>
             </div>
-          } @else {
+          }
+
+          @if (!chapterAnswerFeedback()) {
             <footer class="dw-q-card__foot">
               <button
                 type="button"

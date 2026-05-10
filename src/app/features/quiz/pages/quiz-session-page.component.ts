@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 import { QuizQuestion, QuizMode, QuizQuestionResult, QuizResult, SaveAnswerResponse } from '../../../core/models/quiz.models';
 import { ExamAttempt, ExamAttemptAnswer } from '../../../core/models/exam-attempt.models';
 import { ChapterQuizAnswer, ChapterQuizProgress } from '../../../core/models/chapter-quiz-progress.models';
+import { QUIZ_CONTEXT_NAV_KEY, QuizQuestionContext } from '../../../core/models/assistant.models';
 import { ExamAttemptApiService } from '../../../core/services/exam-attempt-api.service';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
 import { ChapterQuizProgressApiService } from '../../../core/services/chapter-quiz-progress-api.service';
@@ -71,10 +72,28 @@ export class QuizSessionPageComponent {
   protected readonly isExamMode = computed(() => this.mode() === 'exam');
   protected readonly isChapterMode = computed(() => this.mode() === 'chapter');
   protected readonly isArabicMode = computed(() => this.i18n.currentLang() === 'ar');
-  protected readonly feedbackIsCorrect = computed(() => this.chapterAnswerFeedback()?.isCorrect ?? false);
-  protected readonly feedbackIsLastQuestion = computed(() => this.chapterAnswerFeedback()?.isLastQuestion ?? false);
+  protected readonly currentFeedback = computed<ChapterAnswerFeedback | null>(() => {
+    const inFlight = this.chapterAnswerFeedback();
+    if (inFlight) return inFlight;
+
+    const q = this.currentQuestion();
+    if (!q) return null;
+    if (!this.savedChapterAnswerIds().has(q._id)) return null;
+
+    const selectedIndex = this.answers().get(q._id);
+    if (selectedIndex === undefined) return null;
+
+    return {
+      question: q,
+      selectedOptionIndex: selectedIndex,
+      isCorrect: this.isQuestionAnsweredCorrectly(q, selectedIndex),
+      isLastQuestion: this.currentIndex() === this.questions().length - 1,
+    };
+  });
+  protected readonly feedbackIsCorrect = computed(() => this.currentFeedback()?.isCorrect ?? false);
+  protected readonly feedbackIsLastQuestion = computed(() => this.currentFeedback()?.isLastQuestion ?? false);
   protected readonly feedbackCorrectAnswer = computed(() => {
-    const fb = this.chapterAnswerFeedback();
+    const fb = this.currentFeedback();
     if (!fb) return '';
     const q = fb.question;
     return this.isArabicMode()
@@ -82,7 +101,7 @@ export class QuizSessionPageComponent {
       : (this.normalizeText(q.correctAnswer) ?? this.normalizeText(q.correctAnswerAR) ?? '');
   });
   protected readonly feedbackExplanation = computed(() => {
-    const fb = this.chapterAnswerFeedback();
+    const fb = this.currentFeedback();
     if (!fb) return '';
     const q = fb.question;
     return this.isArabicMode()
@@ -90,7 +109,7 @@ export class QuizSessionPageComponent {
       : (this.normalizeText(q.explanation) ?? this.normalizeText(q.explanationAR) ?? '');
   });
   protected readonly feedbackSelectedAnswer = computed(() => {
-    const fb = this.chapterAnswerFeedback();
+    const fb = this.currentFeedback();
     if (!fb) return '';
     return this.getQuestionOptions(fb.question)[fb.selectedOptionIndex] ?? '';
   });
@@ -288,10 +307,14 @@ export class QuizSessionPageComponent {
   }
 
   protected optionStatus(question: QuizQuestion, optionIndex: number): 'correct' | 'wrong' | 'selected' | 'idle' {
+    const isSaved = this.savedChapterAnswerIds().has(question._id);
     const fb = this.chapterAnswerFeedback();
-    if (!fb || fb.question._id !== question._id) {
+    const showsResult = isSaved || (fb?.question._id === question._id);
+
+    if (!showsResult) {
       return this.isOptionSelected(question._id, optionIndex) ? 'selected' : 'idle';
     }
+
     const correctIdx = this.getCorrectOptionIndex(question);
     if (optionIndex === correctIdx) return 'correct';
     if (this.isOptionSelected(question._id, optionIndex)) return 'wrong';
@@ -339,6 +362,15 @@ export class QuizSessionPageComponent {
   protected selectAnswer(questionId: string, optionIndex: number): void {
     if (this.isExamMode() && (this.examLocked() || this.result())) {
       return;
+    }
+
+    if (this.isChapterMode()) {
+      if (this.savedChapterAnswerIds().has(questionId)) {
+        return;
+      }
+      if (this.chapterAnswerFeedback()) {
+        return;
+      }
     }
 
     this.answers.update((map) => {
@@ -423,6 +455,35 @@ export class QuizSessionPageComponent {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe();
     }
+  }
+
+  protected explainWithAI(): void {
+    const fb = this.currentFeedback();
+    if (!fb) return;
+
+    const q = fb.question;
+    const englishOptions = q.options ?? [];
+    const arabicOptions = q.optionsAR ?? [];
+    const idx = fb.selectedOptionIndex;
+
+    const context: QuizQuestionContext = {
+      questionText: this.normalizeText(q.question) ?? '',
+      questionTextAR: this.normalizeText(q.questionAR) ?? '',
+      selectedAnswer: englishOptions[idx] ?? '',
+      selectedAnswerAR: arabicOptions[idx] ?? '',
+      correctAnswer: this.normalizeText(q.correctAnswer) ?? '',
+      correctAnswerAR: this.normalizeText(q.correctAnswerAR) ?? '',
+      explanation: this.normalizeText(q.explanation) ?? '',
+      explanationAR: this.normalizeText(q.explanationAR) ?? '',
+      chapterTitle: this.normalizeText(q.chapterTitle) ?? '',
+      chapterTitleAR: this.normalizeText(q.chapterTitleAR) ?? '',
+      chapterKey: q.chapterKey ?? '',
+      isCorrect: fb.isCorrect,
+    };
+
+    void this.router.navigate(['/assistant'], {
+      state: { [QUIZ_CONTEXT_NAV_KEY]: context },
+    });
   }
 
   protected skipQuestion(): void {

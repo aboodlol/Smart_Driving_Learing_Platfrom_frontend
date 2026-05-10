@@ -11,12 +11,15 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   ChatMessage,
   ConversationDetail,
   ConversationSummary,
+  QUIZ_CONTEXT_NAV_KEY,
+  QuizQuestionContext,
 } from '../../../core/models/assistant.models';
 import { AssistantApiService } from '../../../core/services/assistant-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
@@ -36,6 +39,7 @@ const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
 })
 export class AssistantPageComponent implements OnInit {
   private readonly assistantApi = inject(AssistantApiService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly chatContainer = viewChild<ElementRef<HTMLDivElement>>('chatContainer');
   private readonly imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
@@ -78,7 +82,12 @@ export class AssistantPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadConversations();
+    const quizContext = this.readQuizContextFromHistory();
+    if (quizContext) {
+      this.bootstrapWithQuizContext(quizContext);
+    } else {
+      this.loadConversations();
+    }
     // Defer enabling drawer transitions until after the initial paint, so the
     // closed-state transform doesn't animate from `none` on mount.
     if (typeof requestAnimationFrame === 'function') {
@@ -644,5 +653,157 @@ export class AssistantPageComponent implements OnInit {
         container.scrollTop = container.scrollHeight;
       }
     });
+  }
+
+  private readQuizContextFromHistory(): QuizQuestionContext | null {
+    const navState =
+      this.router.getCurrentNavigation()?.extras?.state ??
+      (typeof history !== 'undefined' ? history.state : null);
+    const candidate = navState?.[QUIZ_CONTEXT_NAV_KEY];
+    if (!candidate || typeof candidate !== 'object') {
+      return null;
+    }
+
+    const ctx = candidate as Partial<QuizQuestionContext>;
+    if (!ctx.questionText && !ctx.questionTextAR) {
+      return null;
+    }
+
+    return {
+      questionText: String(ctx.questionText ?? ''),
+      questionTextAR: String(ctx.questionTextAR ?? ''),
+      selectedAnswer: String(ctx.selectedAnswer ?? ''),
+      selectedAnswerAR: String(ctx.selectedAnswerAR ?? ''),
+      correctAnswer: String(ctx.correctAnswer ?? ''),
+      correctAnswerAR: String(ctx.correctAnswerAR ?? ''),
+      explanation: String(ctx.explanation ?? ''),
+      explanationAR: String(ctx.explanationAR ?? ''),
+      chapterTitle: String(ctx.chapterTitle ?? ''),
+      chapterTitleAR: String(ctx.chapterTitleAR ?? ''),
+      chapterKey: String(ctx.chapterKey ?? ''),
+      isCorrect: Boolean(ctx.isCorrect),
+    };
+  }
+
+  private bootstrapWithQuizContext(context: QuizQuestionContext): void {
+    this.clearQuizContextFromHistory();
+    this.creatingConversation.set(true);
+    this.sidebarError.set('');
+    this.pageError.set('');
+
+    this.assistantApi
+      .getConversations()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (conversations) => {
+          this.conversations.set(
+            this.sortConversations(conversations.map((c) => this.mapConversationSummary(c))),
+          );
+        },
+        error: () => {
+          // Sidebar list is best-effort; failure shouldn't block the new chat.
+        },
+      });
+
+    this.assistantApi
+      .createConversation()
+      .pipe(
+        finalize(() => this.creatingConversation.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (conversation) => {
+          const mapped = this.mapConversationDetail(conversation);
+          this.upsertConversationSummary(mapped);
+          this.activeConversationId.set(mapped._id);
+          this.persistLastConversationId(mapped._id);
+          this.messages.set(mapped.messages);
+
+          const prompt = this.buildQuizContextPrompt(context);
+          const previousMessages = this.messages();
+          const optimistic = this.buildOptimisticUserMessage(prompt, null, null);
+          this.messages.set([...previousMessages, optimistic]);
+          this.loading.set(true);
+          this.scrollToBottom();
+          this.dispatchMessage(mapped._id, prompt, null, null, previousMessages);
+        },
+        error: (error: unknown) => {
+          this.pageError.set(
+            this.toErrorMessage(error, 'Failed to start a chat for the quiz question.'),
+          );
+          this.loadConversations();
+        },
+      });
+  }
+
+  private buildQuizContextPrompt(context: QuizQuestionContext): string {
+    const isArabic = this.i18n.currentLang() === 'ar';
+
+    const questionText =
+      (isArabic ? context.questionTextAR : context.questionText) ||
+      context.questionText ||
+      context.questionTextAR;
+    const selectedAnswer =
+      (isArabic ? context.selectedAnswerAR : context.selectedAnswer) ||
+      context.selectedAnswer ||
+      context.selectedAnswerAR;
+    const correctAnswer =
+      (isArabic ? context.correctAnswerAR : context.correctAnswer) ||
+      context.correctAnswer ||
+      context.correctAnswerAR;
+    const explanation =
+      (isArabic ? context.explanationAR : context.explanation) ||
+      context.explanation ||
+      context.explanationAR;
+    const chapterTitle =
+      (isArabic ? context.chapterTitleAR : context.chapterTitle) ||
+      context.chapterTitle ||
+      context.chapterTitleAR ||
+      context.chapterKey;
+
+    if (isArabic) {
+      const lines = [
+        'هل يمكنك شرح سؤال اختبار القيادة هذا بمزيد من التفصيل؟',
+        '',
+      ];
+      if (chapterTitle) lines.push(`الفصل: ${chapterTitle}`);
+      lines.push(`السؤال: ${questionText}`);
+      if (selectedAnswer) lines.push(`إجابتي: ${selectedAnswer}`);
+      if (correctAnswer) lines.push(`الإجابة الصحيحة: ${correctAnswer}`);
+      lines.push(`النتيجة: ${context.isCorrect ? 'إجابة صحيحة' : 'إجابة خاطئة'}`);
+      if (explanation) lines.push(`الشرح المتاح: ${explanation}`);
+      lines.push('');
+      lines.push(
+        'من فضلك اشرح لي السؤال بطريقة أوضح، ولماذا الإجابة الصحيحة صحيحة، وما الفكرة التي يجب أن أتذكرها لاحقاً.',
+      );
+      return lines.join('\n');
+    }
+
+    const lines = [
+      'Please explain this driving quiz question in more detail.',
+      '',
+    ];
+    if (chapterTitle) lines.push(`Chapter: ${chapterTitle}`);
+    lines.push(`Question: ${questionText}`);
+    if (selectedAnswer) lines.push(`My answer: ${selectedAnswer}`);
+    if (correctAnswer) lines.push(`Correct answer: ${correctAnswer}`);
+    lines.push(`Result: ${context.isCorrect ? 'I answered correctly' : 'I answered incorrectly'}`);
+    if (explanation) lines.push(`Existing explanation: ${explanation}`);
+    lines.push('');
+    lines.push(
+      'Can you walk me through this question in a clearer way, explain why the correct answer is right, and give me one tip to remember it next time?',
+    );
+    return lines.join('\n');
+  }
+
+  private clearQuizContextFromHistory(): void {
+    if (typeof history === 'undefined' || !history.state) return;
+    try {
+      const next: Record<string, unknown> = { ...(history.state as Record<string, unknown>) };
+      delete next[QUIZ_CONTEXT_NAV_KEY];
+      history.replaceState(next, '');
+    } catch {
+      // Ignore — clearing is best-effort.
+    }
   }
 }
