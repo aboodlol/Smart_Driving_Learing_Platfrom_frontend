@@ -163,7 +163,7 @@
 
 [dir='rtl'] .dw-collapse .material-icons { transform: rotate(180deg); }
 
-@media (min-width: 901px) {
+@media (min-width: 1025px) {
   .dw-collapse { display: inline-flex; }
 }
 
@@ -356,9 +356,15 @@
 .dw-shell {
   margin-inline-start: var(--dw-side-w);
   min-height: 100dvh;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   transition: margin-inline-start .25s var(--dw-ease);
+}
+
+.dw-shell .app-content {
+  min-width: 0;
+  max-width: 100%;
 }
 
 :host(.sidebar-collapsed) .dw-shell { margin-inline-start: var(--dw-side-w-collapsed); }
@@ -428,19 +434,36 @@
   pointer-events: auto;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .dw-mobile-toggle { display: inline-flex; }
   .dw-backdrop { display: block; }
 
   .dw-sidebar {
     width: var(--dw-side-w);
-    transform: translateX(-100%);
+    /* -110% so any sub-pixel rounding or shadow bleed stays off-screen */
+    transform: translateX(-110%);
+    visibility: hidden;
+    pointer-events: none;
     box-shadow: var(--dw-shadow-lg);
+    /* Delay `visibility` until after the slide-out finishes so the
+       animation is still visible while closing. */
+    transition:
+      transform .28s var(--dw-ease),
+      visibility 0s linear .28s;
   }
 
-  [dir='rtl'] .dw-sidebar { transform: translateX(100%); }
+  [dir='rtl'] .dw-sidebar { transform: translateX(110%); }
 
-  .dw-sidebar.is-open { transform: translateX(0); }
+  .dw-sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      transform .28s var(--dw-ease),
+      visibility 0s linear 0s;
+  }
+
+  [dir='rtl'] .dw-sidebar.is-open { transform: translateX(0); }
 
   :host(.sidebar-collapsed) .dw-sidebar { width: var(--dw-side-w); }
 
@@ -450,6 +473,12 @@
   :host(.is-authenticated) .app-content { padding-top: 64px; }
 
   .dw-collapse { display: none !important; }
+}
+
+/* Tighter mobile toggle on small phones */
+@media (max-width: 480px) {
+  .dw-mobile-toggle { top: 10px; inset-inline-start: 10px; width: 40px; height: 40px; border-radius: 12px; }
+  :host(.is-authenticated) .app-content { padding-top: 60px; }
 }
 
 /* ═══════════════════════════════════════════════════════════

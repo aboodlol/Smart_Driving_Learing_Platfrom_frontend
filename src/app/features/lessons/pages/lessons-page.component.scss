@@ -267,6 +267,19 @@
   .dw-lessons { padding: 24px 18px; }
   .dw-head__title h1 { font-size: 26px; }
   .dw-overall { gap: 16px; }
+  .dw-head { align-items: flex-start; }
+  .dw-filters { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .dw-filter { white-space: nowrap; }
+}
+
+@media (max-width: 480px) {
+  .dw-lessons { padding: 18px 14px; }
+  .dw-head__title h1 { font-size: 22px; }
+  .dw-overall { padding: 18px; }
+  .dw-overall__num { font-size: 24px; }
+  .dw-chapter { padding: 18px; }
+  .dw-chapter__num { font-size: 22px; }
+  .dw-chapter__icon { width: 48px; height: 48px; .material-icons { font-size: 24px; } }
 }
 
 /* ─── Chapter card ─── */

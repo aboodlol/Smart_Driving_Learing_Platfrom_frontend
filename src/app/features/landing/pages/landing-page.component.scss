@@ -236,6 +236,7 @@
 /* ─── Hero illustration card ─── */
 .dw-hero__art {
   position: relative;
+  min-width: 0;
 }
 
 .dw-hero-card {
@@ -319,7 +320,28 @@
 }
 
 @media (max-width: 540px) {
-  .dw-floating { padding: 10px; gap: 8px; }
+  .dw-floating { padding: 10px; gap: 8px; border-radius: 16px; }
+  .dw-floating--start { transform: rotate(-3deg); }
+  .dw-floating--end   { transform: rotate(2deg); }
+  [dir='rtl'] .dw-floating--start { transform: rotate(3deg); }
+  [dir='rtl'] .dw-floating--end   { transform: rotate(-2deg); }
+  .dw-mini-sign { width: 36px; height: 36px; }
+  .dw-floating__success { width: 36px; height: 36px; border-radius: 12px; .material-icons { font-size: 18px; } }
+  .dw-floating__title { font-size: 12px; }
+  .dw-floating__caption { font-size: 11px; }
+  .dw-floating__score { font-size: 14px; }
+}
+
+@media (max-width: 380px) {
+  .dw-hero { padding: 22px 14px 18px; gap: 32px; }
+  .dw-hero__sub { font-size: 16px; }
+  .dw-hero-card { padding: 14px; border-radius: 22px; }
+  .dw-floating--start { inset-inline-start: 4px; top: -12px; }
+  .dw-floating--end   { inset-inline-end: 4px; bottom: 10px; }
+  .dw-features { padding: 32px 14px; }
+  .dw-cta-section { padding: 18px 14px; }
+  .dw-cta { padding: 24px 18px; }
+  .dw-foot { padding: 24px 14px 32px; }
 }
 
 .dw-mini-sign {

@@ -56,8 +56,47 @@ html,
 body {
   height: 100%;
   margin: 0;
+  max-width: 100%;
+  /* `clip` over `hidden` so we don't establish a new scroll container —
+     keeps `position: sticky` working in nested layouts. */
+  overflow-x: clip;
   scrollbar-width: thin;
   scrollbar-color: #334155 transparent;
+}
+
+/* ─── Responsive media defaults ─── */
+img,
+video,
+svg:not(.dw-road):not(.dw-mini-sign):not(.dw-sticker) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Wrap long words/links inside text-bearing blocks so they don't push layout */
+p,
+li,
+h1, h2, h3, h4, h5, h6,
+.dw-q-card__title,
+.dw-msg__text,
+.dw-ai-msg__text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Prevent rogue tables from overflowing — wrap them where missed */
+table {
+  max-width: 100%;
+}
+
+/* ─── Lock body scroll when the mobile/tablet drawer is open ───
+   `:has(app-root.sidebar-open)` lets us react to the host class without
+   needing JS to toggle a body class. Only active under the drawer breakpoint
+   so desktop is unaffected. */
+@media (max-width: 1024px) {
+  body:has(app-root.sidebar-open) {
+    overflow: hidden;
+    touch-action: none;
+  }
 }
 
 html::-webkit-scrollbar {

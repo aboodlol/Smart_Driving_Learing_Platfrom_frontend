@@ -91,6 +91,20 @@
 
 @media (max-width: 720px) {
   .dw-home { padding: 22px 18px; }
+  .dw-hero__lead h1 { font-size: 28px; }
+  .dw-hero__actions .dw-btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .dw-home { padding: 18px 14px; }
+  .dw-hero { padding: 20px 18px; border-radius: 18px; }
+  .dw-hero__lead h1 { font-size: 24px; letter-spacing: -0.4px; }
+  .dw-hero__lead p { font-size: 14px; }
+  .dw-stat { padding: 16px; min-height: 0; }
+  .dw-stat__value { font-size: 24px; }
+  .dw-action { padding: 14px; gap: 10px; }
+  .dw-action__icon { width: 36px; height: 36px; }
+  .dw-section-head h2 { font-size: 16px; }
 }
 
 /* ─── Loading ─── */

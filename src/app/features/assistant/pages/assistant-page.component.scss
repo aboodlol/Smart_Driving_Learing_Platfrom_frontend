@@ -391,6 +391,17 @@
 
 @media (max-width: 720px) {
   .dw-ai-scroll { padding: 22px 16px; }
+  .dw-ai-msg__col { max-width: 85%; }
+  .dw-ai-msg__bubble { font-size: 14px; padding: 12px 14px; }
+}
+
+@media (max-width: 480px) {
+  .dw-ai-scroll { padding: 16px 12px; }
+  .dw-ai-msg { gap: 8px; }
+  .dw-ai-msg__col { max-width: 88%; }
+  .dw-ai-msg__avatar { width: 30px; height: 30px; border-radius: 10px; font-size: 12px; }
+  .dw-ai-empty-state h2 { font-size: 22px; }
+  .dw-ai-empty-state__logo { width: 64px; height: 64px; border-radius: 18px; }
 }
 
 .dw-ai-loading {

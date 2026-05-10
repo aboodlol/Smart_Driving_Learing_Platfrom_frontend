@@ -86,6 +86,26 @@
 
 @media (max-width: 720px) {
   .dw-progress-page { padding: 22px 18px; }
+  .dw-page-head__title h1 { font-size: 26px; }
+  .dw-range { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .dw-range__btn { white-space: nowrap; }
+  .dw-bars { height: 140px; gap: 4px; padding: 14px 0; }
+  .dw-activity { padding: 18px; }
+  .dw-history { padding: 18px; }
+  .dw-weakest { padding: 18px; }
+}
+
+@media (max-width: 480px) {
+  .dw-progress-page { padding: 16px 12px; }
+  .dw-page-head__title h1 { font-size: 22px; }
+  .dw-stat { padding: 14px; min-height: 0; }
+  .dw-stat__value { font-size: 22px; }
+  .dw-bars { height: 120px; gap: 3px; }
+  .dw-activity { padding: 14px; }
+  .dw-history { padding: 14px; }
+  .dw-weakest { padding: 14px; }
+  .dw-attempt__stats { grid-template-columns: 1fr; }
+  .dw-reset { padding: 14px; }
 }
 
 /* ─── Header ─── */

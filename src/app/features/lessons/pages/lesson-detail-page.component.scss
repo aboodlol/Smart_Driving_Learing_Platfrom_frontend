@@ -445,10 +445,29 @@
   .dw-current__media {
     margin: 18px 16px 0;
     padding: 18px;
-    min-height: 180px;
+    min-height: 160px;
 
-    img { height: 240px; }
+    img { height: auto; max-height: 240px; }
   }
+}
+
+@media (max-width: 480px) {
+  .dw-hero { padding: 20px 14px; }
+  .dw-hero__lead h1 { font-size: 24px; }
+  .dw-hero__lead > p { font-size: 14px; }
+  .dw-body { padding: 20px 14px; gap: 16px; }
+  .dw-current__body { padding: 18px 16px 20px; }
+  .dw-current__body h2 { font-size: 18px; }
+  .dw-current__media {
+    margin: 14px 12px 0;
+    padding: 12px;
+    min-height: 140px;
+
+    img { max-height: 200px; }
+  }
+  .dw-stickers .dw-sticker { width: 64px; height: 64px; }
+  .dw-btn--grow { min-width: 0; flex: 1 1 100%; }
+  .dw-current__actions .dw-btn--icon { flex: 0 0 auto; }
 }
 
 .dw-current__body {

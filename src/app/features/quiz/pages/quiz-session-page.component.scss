@@ -165,6 +165,21 @@
 
 @media (max-width: 720px) {
   .dw-session { padding: 18px 16px; }
+  .dw-q-card { padding: 20px 18px; }
+  .dw-q-card__title { font-size: 20px; }
+  .dw-q-card__media { padding: 18px; min-height: 140px; img, video { max-height: 240px; } }
+  .dw-option { padding: 14px 14px; font-size: 14px; gap: 10px; }
+  .dw-option__badge { width: 28px; height: 28px; }
+  .dw-q-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .dw-session { padding: 14px 12px; }
+  .dw-q-card { padding: 16px 14px; }
+  .dw-q-card__title { font-size: 18px; }
+  .dw-q-grid { grid-template-columns: repeat(5, 1fr); }
+  .dw-q-head { gap: 8px; }
+  .dw-q-head__progress { min-width: 0; flex: 1; }
 }
 
 /* ─── Question card ─── */
@@ -640,8 +655,18 @@
 @media (max-width: 720px) {
   .dw-exam-bar { padding: 14px 16px; gap: 10px; }
   .dw-exam-bar__timer { font-size: 16px; padding: 8px 12px; }
+  .dw-exam-bar__progress { flex: 1 1 100%; min-width: 0; order: 3; }
   .dw-exam-main { padding: 24px 16px; }
   .dw-exam-main .dw-q-card { padding: 22px 18px; }
+  .dw-exam-main .dw-q-card__title { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+  .dw-exam-bar { padding: 12px 12px; }
+  .dw-exam-bar__timer { font-size: 14px; padding: 6px 10px; }
+  .dw-exam-main { padding: 16px 12px; }
+  .dw-exam-main .dw-q-card { padding: 16px 14px; }
+  .dw-exam-main .dw-q-card__title { font-size: 18px; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -814,6 +839,15 @@
 
 @media (max-width: 720px) {
   .dw-result-grid { grid-template-columns: repeat(8, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .dw-result-grid { grid-template-columns: repeat(6, 1fr); }
+  .dw-result__hero h1 { font-size: 28px; }
+  .dw-result__score { font-size: 44px; }
+  .dw-result__dial { width: 160px; height: 160px; }
+  .dw-result__stats { grid-template-columns: 1fr; }
+  .dw-stat__value { font-size: 22px; }
 }
 
 .dw-result-detail {
