@@ -67,6 +67,7 @@
       <section class="dw-card dw-side-card">
         <header class="dw-side-card__head">
           <h3>{{ 'quiz.questionMix' | translate }}</h3>
+          <span class="dw-side-card__count">{{ totalAllocated() }} / 60 · 100%</span>
         </header>
         @if (loadingMix()) {
           <div class="dw-side-loading">
@@ -79,12 +80,12 @@
             <div class="dw-mix-row">
               <div class="dw-mix-row__top">
                 <span class="dw-mix-row__label">{{ row.title }}</span>
-                <span class="dw-mix-row__count">{{ row.count }}</span>
+                <span class="dw-mix-row__count">{{ row.count }} · {{ row.percent }}%</span>
               </div>
               <div class="dw-progress dw-progress--xs">
                 <div
                   class="dw-progress__fill dw-progress__fill--{{ row.accent }}"
-                  [style.width.%]="mixPercent(row.count)"></div>
+                  [style.width.%]="row.percent"></div>
               </div>
             </div>
           }

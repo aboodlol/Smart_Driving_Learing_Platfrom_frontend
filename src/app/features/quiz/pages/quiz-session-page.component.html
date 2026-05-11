@@ -24,12 +24,12 @@
               <circle
                 cx="100" cy="100" r="80"
                 stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round"
-                [attr.stroke-dasharray]="((localizedCorrectCount() / (localizedTotalQuestions() || 1)) * 502) + ' 502'"
+                [attr.stroke-dasharray]="((examResultCorrect() / (examResultTotal() || 1)) * 502) + ' 502'"
                 transform="rotate(-90 100 100)" />
             </svg>
             <div class="dw-result__dial-text">
-              <div class="dw-result__score">{{ localizedCorrectCount() }}</div>
-              <div class="dw-result__total">/ {{ localizedTotalQuestions() }}</div>
+              <div class="dw-result__score">{{ examResultCorrect() }}</div>
+              <div class="dw-result__total">/ {{ examResultTotal() }}</div>
             </div>
           </div>
         </div>
@@ -39,22 +39,22 @@
             <div class="dw-stat__head">
               <span class="dw-stat__icon"><span class="material-icons">check</span></span>
             </div>
-            <div class="dw-stat__value">{{ formatIndex(localizedCorrectCount() - 1) }}</div>
+            <div class="dw-stat__value">{{ examResultCorrect() }} / {{ examResultTotal() }}</div>
             <div class="dw-stat__label">{{ 'quiz.examCorrect' | translate }}</div>
           </div>
           <div class="dw-stat dw-stat--amber">
             <div class="dw-stat__head">
               <span class="dw-stat__icon"><span class="material-icons">close</span></span>
             </div>
-            <div class="dw-stat__value">{{ formatIndex(resultWrongCount() - 1) }}</div>
+            <div class="dw-stat__value">{{ examResultWrong() }}</div>
             <div class="dw-stat__label">{{ 'quiz.examWrong' | translate }}</div>
           </div>
           <div class="dw-stat dw-stat--info">
             <div class="dw-stat__head">
-              <span class="dw-stat__icon"><span class="material-icons">bookmark</span></span>
+              <span class="dw-stat__icon"><span class="material-icons">help_outline</span></span>
             </div>
-            <div class="dw-stat__value">{{ formatIndex(resultEmptyCount() - 1) }}</div>
-            <div class="dw-stat__label">{{ 'quiz.skipped' | translate }}</div>
+            <div class="dw-stat__value">{{ examResultAnswered() }}</div>
+            <div class="dw-stat__label">{{ 'quiz.questionsOverview' | translate }}</div>
           </div>
           <div class="dw-stat dw-stat--teal">
             <div class="dw-stat__head">
@@ -241,27 +241,64 @@
 
     <!-- ═══════════════════════════════ EXAM SESSION ═══════════════════════════════ -->
     <header class="dw-exam-bar">
-      <span class="dw-exam-bar__chip">
-        <span class="material-icons">military_tech</span>
-        {{ 'quiz.examMode' | translate }}
+      <span class="dw-exam-bar__timer">
+        <span class="material-icons">schedule</span>
+        {{ remainingTimeLabel() || '—:—' }}
       </span>
       <span class="dw-exam-bar__counter">
         {{ 'quiz.question' | translate }} {{ formatIndex(currentIndex()) }} / {{ formatIndex(questions().length - 1) }}
+      </span>
+      <span class="dw-exam-bar__stat dw-exam-bar__stat--success">
+        <span class="material-icons">check</span>
+        {{ examCorrectCount() }}
+      </span>
+      <span class="dw-exam-bar__stat dw-exam-bar__stat--error">
+        <span class="material-icons">close</span>
+        {{ examWrongCount() }}
+      </span>
+      <span class="dw-exam-bar__stat dw-exam-bar__stat--amber">
+        <span class="material-icons">skip_next</span>
+        {{ 'quiz.skipsLabel' | translate }}: {{ skipsRemaining() }} / {{ maxSkips }}
       </span>
       <div class="dw-exam-bar__progress">
         <div class="dw-progress dw-progress--xs">
           <div class="dw-progress__fill" [style.width.%]="progressPercent()"></div>
         </div>
       </div>
-      <span class="dw-exam-bar__timer">
-        <span class="material-icons">schedule</span>
-        {{ remainingTimeLabel() || '—:—' }}
-      </span>
-      <a [routerLink]="backRoute()" class="dw-btn dw-btn--ghost dw-btn--sm">
-        <span class="material-icons">close</span>
-        {{ 'quiz.end' | translate }}
-      </a>
+      <button
+        type="button"
+        class="dw-btn dw-btn--ghost dw-btn--sm dw-exam-bar__end"
+        [disabled]="submitting() || examLocked()"
+        (click)="endExamManually()">
+        <span class="material-icons">flag</span>
+        {{ 'quiz.endExam' | translate }}
+      </button>
     </header>
+
+    <section class="dw-exam-overview" [attr.aria-label]="'quiz.questionsOverview' | translate">
+      <header class="dw-exam-overview__head">
+        <h3>{{ 'quiz.questionsOverview' | translate }}</h3>
+        <div class="dw-legend dw-legend--compact">
+          <span><span class="dw-legend__dot dw-legend__dot--success"></span>{{ 'quiz.navCorrect' | translate }}</span>
+          <span><span class="dw-legend__dot dw-legend__dot--error"></span>{{ 'quiz.navWrong' | translate }}</span>
+          <span><span class="dw-legend__dot dw-legend__dot--amber"></span>{{ 'quiz.navSkipped' | translate }}</span>
+          <span><span class="dw-legend__dot dw-legend__dot--current"></span>{{ 'quiz.navCurrent' | translate }}</span>
+        </div>
+      </header>
+      <div class="dw-q-grid dw-q-grid--exam">
+        @for (q of questions(); track q._id; let i = $index) {
+          @let state = questionNavStates()[i];
+          <span
+            class="dw-q-grid__cell"
+            [class.is-current]="i === currentIndex()"
+            [class.is-correct]="state === 'correct'"
+            [class.is-wrong]="state === 'wrong'"
+            [class.is-skipped]="state === 'skipped'">
+            {{ formatIndex(i) }}
+          </span>
+        }
+      </div>
+    </section>
 
     <main class="dw-exam-main">
       @if (currentQuestion(); as q) {
@@ -291,43 +328,68 @@
 
           <div class="dw-options">
             @for (option of currentQuestionOptions(); track $index; let i = $index) {
+              @let st = examOptionStatus(q, i);
               <button
                 type="button"
                 class="dw-option"
-                [class.is-selected]="isOptionSelected(q._id, i)"
-                [disabled]="examSavingAnswer() || examLocked()"
+                [class.is-selected]="st === 'selected'"
+                [class.is-correct]="st === 'correct'"
+                [class.is-wrong]="st === 'wrong'"
+                [disabled]="examSavingAnswer() || examLocked() || currentExamReveal()"
                 (click)="selectAnswer(q._id, i)">
-                <span class="dw-option__badge">{{ optionLetter(i) }}</span>
+                <span class="dw-option__badge">
+                  @if (st === 'correct') { <span class="material-icons">check</span> }
+                  @else if (st === 'wrong') { <span class="material-icons">close</span> }
+                  @else { {{ optionLetter(i) }} }
+                </span>
                 <span class="dw-option__text">{{ option }}</span>
               </button>
             }
           </div>
 
+          @if (currentExamFeedback(); as fb) {
+            <div class="dw-feedback" [class.is-correct]="fb.isCorrect">
+              <div class="dw-feedback__head">
+                <span class="material-icons">{{ fb.isCorrect ? 'check_circle' : 'cancel' }}</span>
+                <span class="dw-feedback__label">
+                  {{ (fb.isCorrect ? 'quiz.correct' : 'quiz.incorrect') | translate }}
+                </span>
+              </div>
+              @if (!fb.isCorrect && examFeedbackCorrectAnswerText()) {
+                <p class="dw-feedback__answer">
+                  <strong>{{ 'quiz.correctAnswerLabel' | translate }}</strong>
+                  {{ examFeedbackCorrectAnswerText() }}
+                </p>
+              }
+            </div>
+          }
+
           <footer class="dw-q-card__foot">
             <span class="dw-q-card__hint">
               <span class="material-icons">info</span>
-              {{ 'quiz.noGoBack' | translate }}
+              @if (!answers().has(q._id) && !currentExamFeedback()) {
+                {{ 'quiz.examMustAnswer' | translate }}
+              } @else {
+                {{ 'quiz.noGoBack' | translate }}
+              }
             </span>
             <div class="dw-q-card__foot-actions">
               <button
                 type="button"
                 class="dw-btn dw-btn--ghost dw-btn--sm"
-                [disabled]="skipsRemaining() <= 0 || answers().has(q._id) || examLocked()"
+                [disabled]="skipsRemaining() <= 0 || examLocked() || examSavingAnswer() || !!currentExamFeedback()"
                 (click)="skipQuestion()">
+                <span class="material-icons">skip_next</span>
                 {{ 'quiz.skipQuestion' | translate }} · {{ skipsRemaining() }}
               </button>
-              @if (currentIndex() === questions().length - 1 || allAnswered()) {
+              @if (currentExamFeedback()) {
                 <button
                   type="button"
                   class="dw-btn dw-btn--primary"
-                  [disabled]="submitting()"
-                  (click)="submitQuiz()">
-                  @if (submitting()) {
-                    <span class="dw-spinner dw-spinner--sm"></span>
-                  } @else {
-                    {{ 'quiz.submitExam' | translate }}
-                    <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
-                  }
+                  [disabled]="submitting() || examLocked()"
+                  (click)="continueExamAfterFeedback()">
+                  {{ 'quiz.continueExam' | translate }}
+                  <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
                 </button>
               } @else {
                 <button
@@ -377,10 +439,19 @@
             <span class="dw-eyebrow">
               {{ 'quiz.question' | translate }} {{ formatIndex(currentIndex()) }}
             </span>
-            <span class="dw-chip dw-chip--neutral">
-              <span class="material-icons">bookmark</span>
-              {{ 'quiz.save' | translate }}
-            </span>
+            <button
+              type="button"
+              class="dw-chip dw-chip--neutral dw-chip--btn"
+              [class.is-bookmarked]="isCurrentQuestionBookmarked()"
+              [disabled]="isBookmarkPending(q._id)"
+              (click)="toggleCurrentBookmark()"
+              [attr.aria-pressed]="isCurrentQuestionBookmarked()"
+              [attr.aria-label]="(isCurrentQuestionBookmarked() ? 'quiz.removeBookmark' : 'quiz.addBookmark') | translate">
+              <span class="material-icons">
+                {{ isCurrentQuestionBookmarked() ? 'bookmark' : 'bookmark_border' }}
+              </span>
+              {{ (isCurrentQuestionBookmarked() ? 'quiz.bookmarked' : 'quiz.save') | translate }}
+            </button>
           </div>
 
           <h2 class="dw-q-card__title">{{ currentQuestionText() }}</h2>
@@ -543,7 +614,86 @@
             </div>
           </div>
         </section>
+
+        <section class="dw-card dw-side-card">
+          <header class="dw-side-card__head">
+            <h3>{{ 'quiz.bookmarksTitle' | translate }}</h3>
+            <span class="dw-side-card__count">{{ bookmarkedQuestions().length }}</span>
+          </header>
+          <button
+            type="button"
+            class="dw-btn dw-btn--ghost dw-btn--full"
+            [disabled]="bookmarkedQuestions().length === 0"
+            (click)="openBookmarks()">
+            <span class="material-icons">bookmark</span>
+            {{ 'quiz.viewBookmarks' | translate }}
+          </button>
+          @if (bookmarkedQuestions().length === 0) {
+            <p class="dw-bookmarks-empty">{{ 'quiz.bookmarksEmptyHint' | translate }}</p>
+          }
+        </section>
       </aside>
     </div>
+
+    @if (bookmarksOpen()) {
+      <div class="dw-bookmarks-modal" role="dialog" aria-modal="true">
+        <button
+          type="button"
+          class="dw-bookmarks-modal__backdrop"
+          aria-hidden="true"
+          tabindex="-1"
+          (click)="closeBookmarks()"></button>
+        <div class="dw-bookmarks-modal__panel">
+          <header class="dw-bookmarks-modal__head">
+            <h3>{{ 'quiz.bookmarksTitle' | translate }} · {{ displayChapterTitle() }}</h3>
+            <button
+              type="button"
+              class="dw-btn dw-btn--ghost dw-btn--sm"
+              (click)="closeBookmarks()"
+              [attr.aria-label]="'quiz.close' | translate">
+              <span class="material-icons">close</span>
+            </button>
+          </header>
+          <div class="dw-bookmarks-modal__body">
+            @if (bookmarkedQuestions().length === 0) {
+              <p class="dw-bookmarks-empty">{{ 'quiz.bookmarksEmpty' | translate }}</p>
+            } @else {
+              <ul class="dw-bookmarks-list">
+                @for (entry of bookmarkedQuestions(); track entry.bookmark._id) {
+                  <li class="dw-bookmarks-list__item">
+                    <button
+                      type="button"
+                      class="dw-bookmarks-list__main"
+                      (click)="jumpToBookmark(entry.bookmark.questionId)">
+                      <p class="dw-bookmarks-list__q">{{ getBookmarkQuestionText(entry.question) }}</p>
+                      @if (getBookmarkImage(entry.question); as img) {
+                        <img class="dw-bookmarks-list__img" [src]="img" [alt]="getBookmarkQuestionText(entry.question)" loading="lazy" />
+                      }
+                      @if (getBookmarkCorrectAnswer(entry.question); as ans) {
+                        <p class="dw-bookmarks-list__row">
+                          <span class="dw-bookmarks-list__label">{{ 'quiz.correctAnswerLabel' | translate }}</span>
+                          <span>{{ ans }}</span>
+                        </p>
+                      }
+                      @if (getBookmarkExplanation(entry.question); as expl) {
+                        <p class="dw-bookmarks-list__expl">{{ expl }}</p>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="dw-bookmarks-list__remove"
+                      [disabled]="isBookmarkPending(entry.bookmark.questionId)"
+                      (click)="toggleBookmark(entry.bookmark.questionId)"
+                      [attr.aria-label]="'quiz.removeBookmark' | translate">
+                      <span class="material-icons">delete_outline</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>

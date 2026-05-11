@@ -51,6 +51,7 @@ export interface QuizResult {
 
 export interface SaveAnswerResponse {
   isCorrect?: boolean;
+  correctIndex?: number | null;
   correctCount?: number;
   wrongCount?: number;
   answeredCount?: number;

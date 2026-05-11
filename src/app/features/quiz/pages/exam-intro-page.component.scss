@@ -224,11 +224,22 @@
 
 .dw-side-card__head {
   margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .dw-side-card__head h3 {
   font-size: 16px; font-weight: 800; margin: 0;
   color: var(--dw-text);
+}
+
+.dw-side-card__count {
+  font-size: 11px;
+  font-family: var(--dw-font-mono);
+  color: var(--dw-text-3);
+  font-weight: 700;
 }
 
 .dw-side-loading {

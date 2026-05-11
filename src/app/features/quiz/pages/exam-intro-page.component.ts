@@ -13,9 +13,11 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 interface ChapterMix {
   title: string;
   count: number;
+  percent: number;
   accent: 'teal' | 'amber' | 'info' | 'success' | 'neutral';
 }
 
+const EXAM_TARGET_COUNT = 60;
 const ACCENT_ROTATION: ChapterMix['accent'][] = ['amber', 'info', 'success', 'teal', 'neutral'];
 
 @Component({
@@ -43,7 +45,7 @@ export class ExamIntroPageComponent {
 
   protected readonly loadingMix = signal(true);
   protected readonly chapterMix = signal<ChapterMix[]>([]);
-  protected readonly totalQuestions = signal(0);
+  protected readonly totalAllocated = signal(0);
 
   protected readonly examInstructions = [
     { icon: 'quiz', key: 'quiz.examInstr1' },
@@ -51,6 +53,8 @@ export class ExamIntroPageComponent {
     { icon: 'arrow_forward', key: 'quiz.examInstr3' },
     { icon: 'shield', key: 'quiz.examInstr4' },
     { icon: 'emoji_events', key: 'quiz.examInstr5' },
+    { icon: 'skip_next', key: 'quiz.examInstr6' },
+    { icon: 'rule', key: 'quiz.examInstr7' },
   ];
 
   constructor() {
@@ -97,17 +101,22 @@ export class ExamIntroPageComponent {
       });
   }
 
+  // Mirrors the backend's proportional allocation in services/quizService.getExamQuestions:
+  // each chapter's allocated count = round(chapterCount / totalAvailable * TARGET_COUNT),
+  // distributed by largest remainder, with at-least-1 for non-empty chapters, and the
+  // total constrained to exactly TARGET_COUNT (60). Every chapter is shown so the user
+  // can see the full 100% mix even when a chapter contributes 0 after rounding.
   private buildChapterMix(questions: QuizQuestion[]): ChapterMix[] {
-    const counts = new Map<string, { en: string; ar: string; count: number }>();
+    const groups = new Map<string, { en: string; ar: string; count: number }>();
 
     for (const q of questions) {
       const key = (q.chapterKey || q.chapterTitle || '').trim().toLowerCase();
       if (!key) continue;
-      const existing = counts.get(key);
+      const existing = groups.get(key);
       if (existing) {
         existing.count += 1;
       } else {
-        counts.set(key, {
+        groups.set(key, {
           en: q.chapterTitle?.trim() || key,
           ar: q.chapterTitleAR?.trim() || q.chapterTitle?.trim() || key,
           count: 1,
@@ -115,20 +124,70 @@ export class ExamIntroPageComponent {
       }
     }
 
-    this.totalQuestions.set(Array.from(counts.values()).reduce((sum, c) => sum + c.count, 0));
+    const totalAvailable = Array.from(groups.values()).reduce((sum, g) => sum + g.count, 0);
+    if (totalAvailable === 0) {
+      this.totalAllocated.set(0);
+      return [];
+    }
 
-    return Array.from(counts.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-      .map((c, i) => ({
-        title: this.isArabicMode() ? c.ar : c.en,
-        count: c.count,
+    interface Allocation {
+      en: string;
+      ar: string;
+      count: number;
+      allocated: number;
+      remainder: number;
+    }
+
+    const allocations: Allocation[] = Array.from(groups.values()).map((g) => {
+      const ideal = totalAvailable <= EXAM_TARGET_COUNT ? g.count : (g.count / totalAvailable) * EXAM_TARGET_COUNT;
+      const floored = Math.min(g.count, Math.floor(ideal));
+      const allocated = g.count > 0 && floored === 0 && totalAvailable > EXAM_TARGET_COUNT ? 1 : floored;
+      return {
+        en: g.en,
+        ar: g.ar,
+        count: g.count,
+        allocated,
+        remainder: ideal - Math.floor(ideal),
+      };
+    });
+
+    let allocated = allocations.reduce((sum, a) => sum + a.allocated, 0);
+    const target = Math.min(EXAM_TARGET_COUNT, totalAvailable);
+
+    if (allocated < target) {
+      const byRemainder = allocations.slice().sort((a, b) => b.remainder - a.remainder);
+      let i = 0;
+      const safety = byRemainder.length * 10;
+      while (allocated < target && i < safety) {
+        const a = byRemainder[i % byRemainder.length];
+        if (a.allocated < a.count) {
+          a.allocated += 1;
+          allocated += 1;
+        }
+        i += 1;
+      }
+    } else if (allocated > target) {
+      const donors = allocations.filter((a) => a.allocated > 1).sort((a, b) => a.remainder - b.remainder);
+      let i = 0;
+      while (allocated > target && donors.length > 0 && i < donors.length * 10) {
+        const donor = donors[i % donors.length];
+        if (donor.allocated > 1) {
+          donor.allocated -= 1;
+          allocated -= 1;
+        }
+        i += 1;
+      }
+    }
+
+    this.totalAllocated.set(allocated);
+
+    return allocations
+      .sort((a, b) => b.allocated - a.allocated || b.count - a.count)
+      .map((a, i) => ({
+        title: this.isArabicMode() ? a.ar : a.en,
+        count: a.allocated,
+        percent: allocated > 0 ? Math.round((a.allocated / allocated) * 100) : 0,
         accent: ACCENT_ROTATION[i % ACCENT_ROTATION.length],
       }));
-  }
-
-  protected mixPercent(count: number): number {
-    const total = Math.max(1, this.totalQuestions());
-    return Math.min(100, Math.round((count / total) * 100));
   }
 }

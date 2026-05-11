@@ -141,6 +141,7 @@ export class ExamAttemptApiService {
       earlyFailed?: boolean;
       result?: unknown;
       isCorrect?: boolean;
+      correctIndex?: unknown;
       correctCount?: unknown;
       wrongCount?: unknown;
       answeredCount?: unknown;
@@ -155,6 +156,13 @@ export class ExamAttemptApiService {
       normalized.isCorrect = source['isCorrect'];
     } else if (typeof payload.isCorrect === 'boolean') {
       normalized.isCorrect = payload.isCorrect;
+    }
+
+    const correctIndexSource = source['correctIndex'];
+    if (typeof correctIndexSource === 'number') {
+      normalized.correctIndex = correctIndexSource;
+    } else if (correctIndexSource === null) {
+      normalized.correctIndex = null;
     }
 
     if (typeof source['correctCount'] === 'number') {
