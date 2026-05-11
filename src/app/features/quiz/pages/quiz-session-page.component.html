@@ -60,96 +60,61 @@
             <div class="dw-stat__head">
               <span class="dw-stat__icon"><span class="material-icons">schedule</span></span>
             </div>
-            <div class="dw-stat__value">{{ remainingTimeLabel() || '—' }}</div>
+            <div class="dw-stat__value">{{ timeUsedLabel() || '—' }}</div>
             <div class="dw-stat__label">{{ 'quiz.timeUsed' | translate }}</div>
           </div>
         </div>
 
-        <div class="dw-result__layout">
-          <article class="dw-card dw-result-review">
-            <header class="dw-section-head">
-              <h3>{{ 'quiz.review' | translate }}</h3>
-              <p>{{ 'quiz.questionReview' | translate }}</p>
-            </header>
-            <div class="dw-result-grid">
-              @for (item of localizedReviewItems(); track item.questionId; let i = $index) {
-                <span
-                  class="dw-result-grid__cell"
-                  [class.is-right]="item.isCorrect"
-                  [class.is-wrong]="!item.isCorrect && item.selectedAnswer?.trim()"
-                  [class.is-skip]="!item.selectedAnswer?.trim()">
-                  {{ formatIndex(i) }}
-                </span>
-              }
-            </div>
-            @if (localizedReviewItems().length > 0) {
-              @let firstWrong = localizedReviewItems()[0];
-              <div class="dw-result-detail">
-                <span class="dw-eyebrow">{{ 'quiz.question' | translate }} 01</span>
-                <p class="dw-result-detail__q">{{ firstWrong.question }}</p>
-                <div class="dw-result-detail__row">
-                  <span class="dw-chip dw-chip--{{ firstWrong.isCorrect ? 'success' : 'error' }}">
-                    {{ 'quiz.yourAnswerLabel' | translate }}
-                  </span>
-                  <span>{{ firstWrong.selectedAnswer || '—' }}</span>
-                </div>
-                @if (!firstWrong.isCorrect) {
-                  <div class="dw-result-detail__row">
-                    <span class="dw-chip dw-chip--success">{{ 'quiz.correctAnswerShort' | translate }}</span>
-                    <span>{{ firstWrong.correctAnswer }}</span>
+        <!-- Single, full-width Exam Review section. The previous compact
+             "Review answers" panel was removed; this is now the only review. -->
+        <article class="dw-card dw-result-review dw-result-review--main">
+          <header class="dw-section-head">
+            <h3>{{ 'quiz.examReviewTitle' | translate }}</h3>
+            <p>{{ 'quiz.questionReview' | translate }}</p>
+          </header>
+          <ul class="dw-review-list dw-review-list--main">
+            @for (item of localizedReviewItems(); track item.questionId; let i = $index) {
+              <li
+                class="dw-review-item"
+                [class.is-correct]="item.isCorrect"
+                [class.is-wrong]="!item.isCorrect">
+                <span class="dw-review-item__num">{{ formatIndex(i) }}</span>
+                <div class="dw-review-item__body">
+                  <p class="dw-review-item__q">{{ item.question }}</p>
+                  @if (item.image) {
+                    <img class="dw-review-item__img" [src]="item.image" [alt]="item.question" loading="lazy" />
+                  }
+                  <div class="dw-review-item__answers">
+                    <span class="dw-review-item__row">
+                      <span class="dw-review-item__label">{{ 'quiz.yourAnswer' | translate }}</span>
+                      <span class="dw-review-item__value" [class.text-success]="item.isCorrect" [class.text-danger]="!item.isCorrect">
+                        {{ item.selectedAnswer || '—' }}
+                      </span>
+                    </span>
+                    @if (!item.isCorrect) {
+                      <span class="dw-review-item__row">
+                        <span class="dw-review-item__label">{{ 'quiz.correctAnswer' | translate }}</span>
+                        <span class="dw-review-item__value text-success">{{ item.correctAnswer }}</span>
+                      </span>
+                    }
+                    @if (item.explanation) {
+                      <p class="dw-review-item__expl">{{ item.explanation }}</p>
+                    }
                   </div>
-                }
-              </div>
+                </div>
+              </li>
             }
-          </article>
+          </ul>
+        </article>
 
-          <aside class="dw-result-aside">
-            <div class="dw-card dw-side-card">
-              <header class="dw-section-head">
-                <h3>{{ 'quiz.questionReview' | translate }}</h3>
-              </header>
-              <ul class="dw-review-list">
-                @for (item of localizedReviewItems(); track item.questionId; let i = $index) {
-                  <li
-                    class="dw-review-item"
-                    [class.is-correct]="item.isCorrect"
-                    [class.is-wrong]="!item.isCorrect">
-                    <span class="dw-review-item__num">{{ formatIndex(i) }}</span>
-                    <div class="dw-review-item__body">
-                      <p class="dw-review-item__q">{{ item.question }}</p>
-                      <div class="dw-review-item__answers">
-                        <span class="dw-review-item__row">
-                          <span class="dw-review-item__label">{{ 'quiz.yourAnswer' | translate }}</span>
-                          <span class="dw-review-item__value" [class.text-success]="item.isCorrect" [class.text-danger]="!item.isCorrect">
-                            {{ item.selectedAnswer || '—' }}
-                          </span>
-                        </span>
-                        @if (!item.isCorrect) {
-                          <span class="dw-review-item__row">
-                            <span class="dw-review-item__label">{{ 'quiz.correctAnswer' | translate }}</span>
-                            <span class="dw-review-item__value text-success">{{ item.correctAnswer }}</span>
-                          </span>
-                        }
-                        @if (item.explanation) {
-                          <p class="dw-review-item__expl">{{ item.explanation }}</p>
-                        }
-                      </div>
-                    </div>
-                  </li>
-                }
-              </ul>
-            </div>
-
-            <div class="dw-result__actions">
-              <button type="button" class="dw-btn dw-btn--primary dw-btn--full" (click)="retakeQuiz()">
-                <span class="material-icons">military_tech</span>
-                {{ 'quiz.retryExam' | translate }}
-              </button>
-              <a routerLink="/home" class="dw-btn dw-btn--ghost dw-btn--full">
-                {{ 'quiz.backToHome' | translate }}
-              </a>
-            </div>
-          </aside>
+        <div class="dw-result__actions dw-result__actions--main">
+          <button type="button" class="dw-btn dw-btn--primary" (click)="retakeQuiz()">
+            <span class="material-icons">military_tech</span>
+            {{ 'quiz.retryExam' | translate }}
+          </button>
+          <a routerLink="/home" class="dw-btn dw-btn--ghost">
+            {{ 'quiz.backToHome' | translate }}
+          </a>
         </div>
       </div>
     } @else {
@@ -251,6 +216,14 @@
       <span class="dw-exam-bar__stat dw-exam-bar__stat--neutral">
         <span class="material-icons">check_circle_outline</span>
         {{ 'quiz.answeredLabel' | translate }}: {{ examAnsweredCount() }} / {{ questions().length }}
+      </span>
+      <span class="dw-exam-bar__stat dw-exam-bar__stat--success">
+        <span class="material-icons">check</span>
+        {{ examCorrectCount() }}
+      </span>
+      <span class="dw-exam-bar__stat dw-exam-bar__stat--error">
+        <span class="material-icons">close</span>
+        {{ examWrongCount() }}
       </span>
       <span class="dw-exam-bar__stat dw-exam-bar__stat--amber">
         <span class="material-icons">skip_next</span>

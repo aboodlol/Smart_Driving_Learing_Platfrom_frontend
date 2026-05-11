@@ -890,6 +890,27 @@
 
 .dw-result-review { padding: 22px; }
 
+/* Exam-result variant — full width, no aside, scrollable list grows naturally. */
+.dw-result-review--main {
+  padding: 28px;
+  margin-top: 4px;
+}
+
+.dw-review-list--main {
+  max-height: none;
+  overflow: visible;
+  gap: 14px;
+}
+
+.dw-result__actions--main {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.dw-result__actions--main .dw-btn { min-width: 200px; }
+
 .dw-section-head h3 { font-size: 16px; font-weight: 800; margin: 0; color: var(--dw-text); }
 .dw-section-head p { font-size: 13px; color: var(--dw-text-3); margin: 4px 0 0; }
 

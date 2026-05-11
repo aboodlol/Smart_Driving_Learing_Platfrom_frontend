@@ -29,6 +29,9 @@ type ChapterQuestionNavState = 'current' | 'correct' | 'wrong' | 'unanswered';
 type ExamQuestionNavState = 'current' | 'answered' | 'skipped' | 'unanswered';
 
 const EXAM_MAX_SKIPS = 4;
+// Full exam duration. Kept in sync with the backend constant
+// EXAM_DURATION_MS in services/examAttemptService.js.
+const EXAM_TOTAL_SECONDS = 60 * 60;
 
 @Component({
   selector: 'app-quiz-session-page',
@@ -61,6 +64,11 @@ export class QuizSessionPageComponent implements OnDestroy {
   protected readonly attemptId = signal<string | null>(null);
   protected readonly expiresAt = signal<string | null>(null);
   protected readonly remainingSeconds = signal<number | null>(null);
+  // Frozen wall-clock duration the user spent on the exam, computed once when
+  // the result lands. Independent from `remainingSeconds` so the result page
+  // can show a stable "Time Used" label even after the countdown stops.
+  protected readonly examStartedAt = signal<string | null>(null);
+  protected readonly timeUsedSeconds = signal<number | null>(null);
   protected readonly savedChapterAnswerIds = signal<Set<string>>(new Set());
   protected readonly chapterAnswerFeedback = signal<ChapterAnswerFeedback | null>(null);
   protected readonly savingChapterAnswer = signal(false);
@@ -136,6 +144,15 @@ export class QuizSessionPageComponent implements OnDestroy {
 
     const minutes = Math.floor(remaining / 60);
     const seconds = remaining % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  });
+  // mm:ss label of the wall-clock time the user spent on the exam. Shown on the
+  // result page in place of the (now-frozen) remaining countdown.
+  protected readonly timeUsedLabel = computed(() => {
+    const used = this.timeUsedSeconds();
+    if (used === null) return '';
+    const minutes = Math.floor(used / 60);
+    const seconds = used % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   });
   protected readonly displayChapterTitle = computed(() => {
@@ -1032,6 +1049,7 @@ export class QuizSessionPageComponent implements OnDestroy {
     this.examSavingAnswer.set(false);
     this.examLocked.set(false);
     this.examPendingAdvanceQuestionId.set(null);
+    this.timeUsedSeconds.set(null);
     this.loading.set(true);
 
     if (this.isExamMode()) {
@@ -1145,6 +1163,11 @@ export class QuizSessionPageComponent implements OnDestroy {
     this.examAnsweredIds.set(answered);
 
     this.expiresAt.set(expiresAt);
+    // Remember when the exam started so we can compute "Time Used" on the
+    // result page. Falls back to now() if the backend didn't supply a value.
+    const rawStartedAt = (attempt as { startedAt?: unknown }).startedAt;
+    this.examStartedAt.set(typeof rawStartedAt === 'string' ? rawStartedAt : new Date().toISOString());
+    this.timeUsedSeconds.set(null);
     this.currentIndex.set(this.findResumeIndex(questions, mappedAnswers, attempt.currentQuestionIndex));
     this.startExamTimer(expiresAt);
 
@@ -1184,6 +1207,38 @@ export class QuizSessionPageComponent implements OnDestroy {
     this.timerSub = interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateRemainingSeconds(expiresAt));
+  }
+
+  // Called from every path that ends the exam (manual end, timer end, early-fail).
+  // Freezes the countdown and captures wall-clock time used so the result page
+  // shows a stable "Time Used" label instead of a live, ticking remaining timer.
+  // Preference order:
+  //   1. submittedAt - startedAt (from the backend result)
+  //   2. now() - examStartedAt (locally recorded)
+  //   3. EXAM_TOTAL_SECONDS - lastRemainingSeconds (safe fallback)
+  private finishExam(result: QuizResult | null): void {
+    this.timerSub?.unsubscribe();
+    this.timerSub = null;
+
+    const startedAtIso = (result as { startedAt?: unknown } | null)?.startedAt as string | undefined
+      ?? this.examStartedAt() ?? undefined;
+    const submittedAtIso = (result as { submittedAt?: unknown } | null)?.submittedAt as string | undefined;
+
+    let usedSeconds: number | null = null;
+    if (startedAtIso) {
+      const start = new Date(startedAtIso).getTime();
+      const end = submittedAtIso ? new Date(submittedAtIso).getTime() : Date.now();
+      if (!Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
+        usedSeconds = Math.max(0, Math.floor((end - start) / 1000));
+      }
+    }
+
+    if (usedSeconds === null) {
+      const remaining = this.remainingSeconds() ?? 0;
+      usedSeconds = Math.max(0, EXAM_TOTAL_SECONDS - remaining);
+    }
+
+    this.timeUsedSeconds.set(usedSeconds);
   }
 
   private updateRemainingSeconds(expiresAt: string): void {
@@ -1335,14 +1390,16 @@ export class QuizSessionPageComponent implements OnDestroy {
           }
 
           if (response.earlyFailed) {
-            this.timerSub?.unsubscribe();
-            this.timerSub = null;
             this.examLocked.set(true);
             this.examPendingAdvanceQuestionId.set(null);
             if (response.result) {
+              this.finishExam(response.result);
               this.result.set(response.result);
               // Exam ended — release the app navigation lock.
               this.examLock.unlock();
+            } else {
+              // No result body — still stop the timer so the bar doesn't keep ticking.
+              this.finishExam(null);
             }
             return;
           }
@@ -1393,6 +1450,7 @@ export class QuizSessionPageComponent implements OnDestroy {
       )
       .subscribe({
         next: (result) => {
+          this.finishExam(result);
           this.result.set(result);
           // Exam ended — release the app navigation lock.
           this.examLock.unlock();
