@@ -1,28 +1,32 @@
 @if (isAuthenticated()) {
-  <!-- ─── Authenticated: sidebar + content ─── -->
-  <button
-    type="button"
-    class="dw-mobile-toggle"
-    (click)="toggleSidebar()"
-    [attr.aria-expanded]="sidebarOpen()"
-    aria-controls="dw-sidebar"
-    [attr.aria-label]="(sidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate">
-    <span class="material-icons">{{ sidebarOpen() ? 'close' : 'menu' }}</span>
-  </button>
+  <!-- ─── Authenticated: sidebar + content. Sidebar is hidden via @if when an
+       exam is locked, but the <router-outlet> below is intentionally kept in
+       the SAME structural branch so toggling examLocked() never destroys the
+       active exam component (which previously caused an infinite reload). ─── -->
+  @if (!examLocked()) {
+    <button
+      type="button"
+      class="dw-mobile-toggle"
+      (click)="toggleSidebar()"
+      [attr.aria-expanded]="sidebarOpen()"
+      aria-controls="dw-sidebar"
+      [attr.aria-label]="(sidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate">
+      <span class="material-icons">{{ sidebarOpen() ? 'close' : 'menu' }}</span>
+    </button>
 
-  <button
-    type="button"
-    class="dw-backdrop"
-    [class.is-visible]="sidebarOpen()"
-    aria-hidden="true"
-    tabindex="-1"
-    (click)="closeSidebar()"></button>
+    <button
+      type="button"
+      class="dw-backdrop"
+      [class.is-visible]="sidebarOpen()"
+      aria-hidden="true"
+      tabindex="-1"
+      (click)="closeSidebar()"></button>
 
-  <aside
-    id="dw-sidebar"
-    class="dw-sidebar"
-    [class.is-open]="sidebarOpen()"
-    [class.is-collapsed]="sidebarCollapsed()">
+    <aside
+      id="dw-sidebar"
+      class="dw-sidebar"
+      [class.is-open]="sidebarOpen()"
+      [class.is-collapsed]="sidebarCollapsed()">
 
     <a routerLink="/home" class="dw-brand" (click)="closeSidebar()">
       <span class="dw-brand__mark" aria-hidden="true">
@@ -123,16 +127,19 @@
       </button>
     </div>
   </aside>
+  }
 
-  <div class="dw-shell">
-    <main class="app-content">
+  <div class="dw-shell" [class.dw-shell--locked]="examLocked()">
+    <main class="app-content" [class.app-content--exam-locked]="examLocked()">
       <router-outlet></router-outlet>
     </main>
-    <footer class="app-footer">
-      <div class="footer-inner">
-        <small>&copy; 2026 {{ 'brand' | translate }} &mdash; {{ 'tagline' | translate }}</small>
-      </div>
-    </footer>
+    @if (!examLocked()) {
+      <footer class="app-footer">
+        <div class="footer-inner">
+          <small>&copy; 2026 {{ 'brand' | translate }} &mdash; {{ 'tagline' | translate }}</small>
+        </div>
+      </footer>
+    }
   </div>
 } @else if (showLandingTopbar()) {
   <!-- ─── Landing only: marketing TopBar ─── -->

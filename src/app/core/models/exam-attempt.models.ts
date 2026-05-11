@@ -18,6 +18,8 @@ export interface ExamAttemptAnswer {
   selectedIndex?: number;
   skipped?: boolean;
   isCorrect?: boolean | null;
+  /** Optional — persists the user's current question pointer alongside the answer save. */
+  currentQuestionIndex?: number;
 }
 
 export interface ExamAttempt {
@@ -33,4 +35,6 @@ export interface ExamAttempt {
   totalQuestions?: number;
   submittedAt?: string | null;
   results?: unknown;
+  /** Zero-based index of the question the user was on when they last interacted. */
+  currentQuestionIndex?: number;
 }

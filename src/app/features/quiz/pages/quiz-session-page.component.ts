@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, interval, Subscription } from 'rxjs';
@@ -16,6 +16,7 @@ import { QuizBookmarkApiService } from '../../../core/services/quiz-bookmark-api
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
+import { ExamLockService } from '../../../core/services/exam-lock.service';
 
 interface ChapterAnswerFeedback {
   isCorrect: boolean;
@@ -24,14 +25,8 @@ interface ChapterAnswerFeedback {
   isLastQuestion: boolean;
 }
 
-interface ExamAnswerFeedback {
-  questionId: string;
-  selectedOptionIndex: number;
-  correctOptionIndex: number | null;
-  isCorrect: boolean;
-}
-
 type ChapterQuestionNavState = 'current' | 'correct' | 'wrong' | 'unanswered';
+type ExamQuestionNavState = 'current' | 'answered' | 'skipped' | 'unanswered';
 
 const EXAM_MAX_SKIPS = 4;
 
@@ -42,7 +37,7 @@ const EXAM_MAX_SKIPS = 4;
   styleUrl: './quiz-session-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuizSessionPageComponent {
+export class QuizSessionPageComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly quizApi = inject(QuizApiService);
@@ -51,6 +46,7 @@ export class QuizSessionPageComponent {
   private readonly quizBookmarkApi = inject(QuizBookmarkApiService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
+  private readonly examLock = inject(ExamLockService);
   private readonly destroyRef = inject(DestroyRef);
   private timerSub: Subscription | null = null;
 
@@ -75,8 +71,9 @@ export class QuizSessionPageComponent {
   protected readonly examSavingAnswer = signal(false);
   protected readonly examLocked = signal(false);
   protected readonly examPendingAdvanceQuestionId = signal<string | null>(null);
-  protected readonly examCorrectIndexes = signal<Map<string, number>>(new Map());
-  protected readonly examAnswerFeedback = signal<ExamAnswerFeedback | null>(null);
+  // Tracks per-question "answered" state during a running exam so the navigator
+  // can show neutral "answered" without leaking correct/wrong before submit.
+  protected readonly examAnsweredIds = signal<Set<string>>(new Set());
   protected readonly bookmarks = signal<QuizBookmark[]>([]);
   protected readonly bookmarkPending = signal<Set<string>>(new Set());
   protected readonly bookmarksOpen = signal(false);
@@ -206,49 +203,37 @@ export class QuizSessionPageComponent {
 
   protected readonly skipsRemaining = computed(() => Math.max(0, EXAM_MAX_SKIPS - this.skippedIds().size));
   protected readonly maxSkips = EXAM_MAX_SKIPS;
+  // Count of questions answered in the current running exam — shown to the user
+  // as neutral progress information (does NOT reveal correct/wrong).
+  protected readonly examAnsweredCount = computed(() => this.examAnsweredIds().size);
+  protected readonly examSkippedCount = computed(() => this.skippedIds().size);
 
-  // True after the user has answered the current exam question and we have shown
-  // feedback (green/red). The footer swaps Next for Continue while this is set so
-  // the user always sees the result before advancing.
-  protected readonly currentExamFeedback = computed<ExamAnswerFeedback | null>(() => {
-    const fb = this.examAnswerFeedback();
-    if (!fb) return null;
-    const q = this.currentQuestion();
-    return q && q._id === fb.questionId ? fb : null;
-  });
-
-  protected readonly currentExamReveal = computed(() => this.currentExamFeedback() !== null);
-  protected readonly examFeedbackCorrectAnswerText = computed(() => {
-    const fb = this.currentExamFeedback();
-    if (!fb || fb.correctOptionIndex === null) return '';
-    const options = this.currentQuestionOptions();
-    return options[fb.correctOptionIndex] ?? '';
-  });
-
+  // Post-result navigator (review mode): expose correct/wrong from the backend result.
   protected readonly questionNavStates = computed<
     Array<'current' | 'correct' | 'wrong' | 'skipped' | 'unanswered'>
   >(() => {
     const qs = this.questions();
-    const skipped = this.skippedIds();
-    const current = this.currentIndex();
-    const states = this.examQuestionStates();
     const result = this.result();
+    if (!result) return [];
+    const resultMap = new Map<string, boolean>(
+      result.results.map((item) => [item.questionId, item.isCorrect]),
+    );
+    return qs.map((q) => {
+      if (resultMap.has(q._id)) return resultMap.get(q._id) ? 'correct' : 'wrong';
+      return 'unanswered';
+    });
+  });
 
-    if (result) {
-      // After result: use backend isCorrect exclusively
-      const resultMap = new Map<string, boolean>(
-        result.results.map((item) => [item.questionId, item.isCorrect]),
-      );
-      return qs.map((q) => {
-        if (resultMap.has(q._id)) return resultMap.get(q._id) ? 'correct' : 'wrong';
-        return 'unanswered';
-      });
-    }
-
-    // During running exam: use backend correctness immediately for navigator colors.
+  // Running-exam navigator: never reveals correctness. Only shows current / answered /
+  // skipped / unanswered so the user can see their flow without a live result hint.
+  protected readonly examNavStates = computed<ExamQuestionNavState[]>(() => {
+    const qs = this.questions();
+    const current = this.currentIndex();
+    const answered = this.examAnsweredIds();
+    const skipped = this.skippedIds();
     return qs.map((q, i) => {
       if (i === current) return 'current';
-      if (states.has(q._id)) return states.get(q._id) ? 'correct' : 'wrong';
+      if (answered.has(q._id)) return 'answered';
       if (skipped.has(q._id)) return 'skipped';
       return 'unanswered';
     });
@@ -390,22 +375,10 @@ export class QuizSessionPageComponent {
     return 'idle';
   }
 
-  // Exam-mode option coloring: kicks in after the user has answered the current
-  // question and we have shown live feedback. Correct option is highlighted green
-  // and the (wrong) selected option is highlighted red, matching the spec.
-  protected examOptionStatus(question: QuizQuestion, optionIndex: number): 'correct' | 'wrong' | 'selected' | 'idle' {
-    const fb = this.currentExamFeedback();
-    if (!fb || fb.questionId !== question._id) {
-      return this.isOptionSelected(question._id, optionIndex) ? 'selected' : 'idle';
-    }
-
-    if (fb.correctOptionIndex !== null && optionIndex === fb.correctOptionIndex) {
-      return 'correct';
-    }
-    if (!fb.isCorrect && optionIndex === fb.selectedOptionIndex) {
-      return 'wrong';
-    }
-    return 'idle';
+  // Exam-mode option styling: ONLY shows selection state during the running exam.
+  // No correct/wrong colors are leaked before the exam ends.
+  protected examOptionStatus(question: QuizQuestion, optionIndex: number): 'selected' | 'idle' {
+    return this.isOptionSelected(question._id, optionIndex) ? 'selected' : 'idle';
   }
 
   protected formatIndex(i: number): string {
@@ -452,11 +425,6 @@ export class QuizSessionPageComponent {
       return;
     }
 
-    if (this.isExamMode() && this.currentExamFeedback()) {
-      // Don't allow changing the answer once feedback is showing.
-      return;
-    }
-
     if (this.isChapterMode()) {
       if (this.savedChapterAnswerIds().has(questionId)) {
         return;
@@ -499,20 +467,6 @@ export class QuizSessionPageComponent {
     }
   }
 
-  // Called when the user clicks "Continue" after seeing the live answer feedback
-  // (green correct / red wrong) on the current exam question.
-  // When this was the last question in the flow we submit instead of navigating.
-  protected continueExamAfterFeedback(): void {
-    if (!this.isExamMode()) return;
-    const from = this.currentIndex();
-    const nextIndex = this.findNextFlowIndex(from);
-    this.examAnswerFeedback.set(null);
-    if (nextIndex === from) {
-      this.submitExamAttempt();
-      return;
-    }
-    this.currentIndex.set(nextIndex);
-  }
 
   protected previousQuestion(): void {
     if (this.isExamMode()) {
@@ -763,13 +717,33 @@ export class QuizSessionPageComponent {
       next.delete(q._id);
       return next;
     });
-    this.examAnswerFeedback.set(null);
+    this.examAnsweredIds.update((prev) => {
+      if (!prev.has(q._id)) return prev;
+      const next = new Set(prev);
+      next.delete(q._id);
+      return next;
+    });
     this.skippedIds.update((prev) => {
       const next = new Set(prev);
       next.add(q._id);
       return next;
     });
+    // Persist the skip so a refresh / reopen restores the skipped state.
+    this.persistSkip(q._id);
     this.navigateToNextFlowQuestion();
+  }
+
+  // Fire-and-forget persistence of an explicit skip. Backend marks the answer
+  // record with skipped:true so skipped questions survive a session restart.
+  private persistSkip(questionId: string): void {
+    const attemptId = this.attemptId();
+    if (!attemptId) return;
+    this.examAttemptApi
+      .saveAnswer(attemptId, { questionId, skipped: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (err: Error) => this.toast.error(err.message),
+      });
   }
 
   // Confirms then ends the exam now. Backend filters results to only the
@@ -781,7 +755,6 @@ export class QuizSessionPageComponent {
     if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
       if (!window.confirm(confirmMsg)) return;
     }
-    this.examAnswerFeedback.set(null);
     this.submitExamAttempt();
   }
 
@@ -838,8 +811,16 @@ export class QuizSessionPageComponent {
   }
 
   private navigateToNextFlowQuestion(): void {
-    this.examAnswerFeedback.set(null);
-    this.currentIndex.set(this.findNextFlowIndex(this.currentIndex()));
+    const from = this.currentIndex();
+    const nextIndex = this.findNextFlowIndex(from);
+    if (nextIndex === from) {
+      // No more questions to flow to (user has answered/skipped everything) →
+      // auto-submit so they don't get stuck on the last screen.
+      this.submitExamAttempt();
+      return;
+    }
+    this.currentIndex.set(nextIndex);
+    this.persistCurrentPosition(nextIndex);
   }
 
   private advanceExamAfterSave(): void {
@@ -854,16 +835,32 @@ export class QuizSessionPageComponent {
 
     const selectedIndex = this.answers().get(currentQuestion._id);
     if (selectedIndex === undefined) {
-      // Defensive: the Next button is disabled in this state, but never trust
-      // the UI to enforce business rules — bail out if the user somehow gets here.
+      // Defensive: Next is disabled in this state, but never trust the UI to
+      // enforce business rules — bail out if the user somehow gets here.
       return;
     }
 
-    const savedState = this.examQuestionStates().get(currentQuestion._id);
-    if (typeof savedState === 'boolean') {
-      // Answer already saved on a previous pass — re-show feedback so the user
-      // still sees the colored answer before clicking Continue.
-      this.showExamFeedback(currentQuestion, selectedIndex, savedState, this.examCorrectIndexes().get(currentQuestion._id) ?? null);
+    // Mark as answered immediately so the navigator reflects the new state even
+    // while the network request is in flight. We don't reveal correct/wrong.
+    this.examAnsweredIds.update((prev) => {
+      if (prev.has(currentQuestion._id)) return prev;
+      const next = new Set(prev);
+      next.add(currentQuestion._id);
+      return next;
+    });
+    // A skipped question that the user has now answered should leave the skipped
+    // state — it's no longer pending a return visit.
+    if (this.skippedIds().has(currentQuestion._id)) {
+      this.skippedIds.update((prev) => {
+        const next = new Set(prev);
+        next.delete(currentQuestion._id);
+        return next;
+      });
+    }
+
+    if (this.examQuestionStates().has(currentQuestion._id)) {
+      // Answer was already saved on a previous pass — just navigate.
+      this.navigateToNextFlowQuestion();
       return;
     }
 
@@ -874,15 +871,6 @@ export class QuizSessionPageComponent {
 
     this.examPendingAdvanceQuestionId.set(currentQuestion._id);
     this.saveExamAnswer(currentQuestion._id, selectedIndex);
-  }
-
-  private showExamFeedback(question: QuizQuestion, selectedIndex: number, isCorrect: boolean, correctIndex: number | null): void {
-    this.examAnswerFeedback.set({
-      questionId: question._id,
-      selectedOptionIndex: selectedIndex,
-      correctOptionIndex: correctIndex,
-      isCorrect,
-    });
   }
 
   private findNextFlowIndex(from: number): number {
@@ -1038,8 +1026,7 @@ export class QuizSessionPageComponent {
     this.chapterAnswerFeedback.set(null);
     this.skippedIds.set(new Set());
     this.examQuestionStates.set(new Map());
-    this.examCorrectIndexes.set(new Map());
-    this.examAnswerFeedback.set(null);
+    this.examAnsweredIds.set(new Set());
     this.examCorrectCount.set(0);
     this.examWrongCount.set(0);
     this.examSavingAnswer.set(false);
@@ -1132,8 +1119,6 @@ export class QuizSessionPageComponent {
     this.attemptId.set(resolvedId);
     this.questions.set(questions);
     this.examQuestionStates.set(new Map());
-    this.examCorrectIndexes.set(new Map());
-    this.examAnswerFeedback.set(null);
     this.examCorrectCount.set(0);
     this.examWrongCount.set(0);
     this.examSavingAnswer.set(false);
@@ -1142,12 +1127,43 @@ export class QuizSessionPageComponent {
 
     const mappedAnswers = this.mapAttemptAnswers(attempt, questions);
     this.answers.set(mappedAnswers);
+
+    // Restore skipped + answered sets from the attempt's persisted answers so
+    // the user resumes exactly where they left off (skip count, navigator state).
+    const rawAnswers = this.extractAttemptAnswers(attempt);
+    const skipped = new Set<string>();
+    const answered = new Set<string>();
+    for (const answer of rawAnswers) {
+      if (!answer.questionId) continue;
+      if (answer.skipped === true) {
+        skipped.add(answer.questionId);
+      } else if (mappedAnswers.has(answer.questionId)) {
+        answered.add(answer.questionId);
+      }
+    }
+    this.skippedIds.set(skipped);
+    this.examAnsweredIds.set(answered);
+
     this.expiresAt.set(expiresAt);
-    this.currentIndex.set(this.findResumeIndex(questions, mappedAnswers));
+    this.currentIndex.set(this.findResumeIndex(questions, mappedAnswers, attempt.currentQuestionIndex));
     this.startExamTimer(expiresAt);
+
+    // Lock the app shell so the user can't wander away from a live exam.
+    this.examLock.lock();
   }
 
-  private findResumeIndex(questions: QuizQuestion[], answers: Map<string, number>): number {
+  // Prefer the explicitly-persisted pointer from the backend so a refresh resumes
+  // on the exact question the user was on (including unanswered questions later in
+  // the flow). Fall back to first-unanswered for older attempts that don't carry
+  // a currentQuestionIndex field.
+  private findResumeIndex(
+    questions: QuizQuestion[],
+    answers: Map<string, number>,
+    persistedIndex?: number,
+  ): number {
+    if (typeof persistedIndex === 'number' && persistedIndex >= 0 && persistedIndex < questions.length) {
+      return persistedIndex;
+    }
     const firstUnanswered = questions.findIndex((q) => !answers.has(q._id));
     return firstUnanswered >= 0 ? firstUnanswered : Math.max(0, questions.length - 1);
   }
@@ -1301,20 +1317,11 @@ export class QuizSessionPageComponent {
       )
       .subscribe({
         next: (response: SaveAnswerResponse) => {
-          const isCorrect = typeof response.isCorrect === 'boolean' ? response.isCorrect : false;
           if (typeof response.isCorrect === 'boolean') {
+            // Persisted for the post-exam review only — never read while running.
             this.examQuestionStates.update((prev) => {
               const next = new Map(prev);
-              next.set(questionId, isCorrect);
-              return next;
-            });
-          }
-
-          const correctIndex = typeof response.correctIndex === 'number' ? response.correctIndex : null;
-          if (correctIndex !== null) {
-            this.examCorrectIndexes.update((prev) => {
-              const next = new Map(prev);
-              next.set(questionId, correctIndex);
+              next.set(questionId, response.isCorrect as boolean);
               return next;
             });
           }
@@ -1332,29 +1339,40 @@ export class QuizSessionPageComponent {
             this.timerSub = null;
             this.examLocked.set(true);
             this.examPendingAdvanceQuestionId.set(null);
-            this.examAnswerFeedback.set(null);
             if (response.result) {
               this.result.set(response.result);
+              // Exam ended — release the app navigation lock.
+              this.examLock.unlock();
             }
             return;
           }
 
           if (this.examPendingAdvanceQuestionId() === questionId) {
             this.examPendingAdvanceQuestionId.set(null);
-            // Show feedback (green/red) instead of auto-advancing so the user
-            // always sees the result before navigating to the next question.
-            const question = this.questions().find((q) => q._id === questionId);
-            if (question) {
-              this.showExamFeedback(question, optionIndex, isCorrect, correctIndex);
-            } else {
-              this.navigateToNextFlowQuestion();
-            }
+            // No live feedback — go straight to the next question.
+            this.navigateToNextFlowQuestion();
           }
         },
         error: (err: Error) => {
           this.examPendingAdvanceQuestionId.set(null);
           this.toast.error(err.message);
         },
+      });
+  }
+
+  // Best-effort fire-and-forget persistence of the user's current question pointer.
+  // Used so an exam refresh / reopen resumes on the exact question the user was on.
+  private persistCurrentPosition(index: number): void {
+    const attemptId = this.attemptId();
+    if (!attemptId || !this.isExamMode() || this.result() || this.examLocked()) return;
+    if (index < 0 || index >= this.questions().length) return;
+    this.examAttemptApi
+      .savePosition(attemptId, index)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        // Position persistence is non-essential — swallow errors so a transient
+        // network failure does not interrupt the exam.
+        error: () => undefined,
       });
   }
 
@@ -1376,6 +1394,8 @@ export class QuizSessionPageComponent {
       .subscribe({
         next: (result) => {
           this.result.set(result);
+          // Exam ended — release the app navigation lock.
+          this.examLock.unlock();
           this.toast.success(`Quiz submitted! Score: ${result.score}%`);
         },
         error: (err: Error) => {
@@ -1488,6 +1508,19 @@ export class QuizSessionPageComponent {
 
   private getMediaUrl(value?: string | null): string | null {
     return this.normalizeText(value) ?? null;
+  }
+
+  ngOnDestroy(): void {
+    // Only release the lock if the user has finished the exam (result is set).
+    // If the component is being torn down for any other reason while an exam is
+    // still active, keep the lock so the user is bounced back to the session
+    // route — this prevents an infinite mount/unmount loop when the shell
+    // template re-renders in response to the lock signal flipping.
+    if (this.result() !== null) {
+      this.examLock.unlock();
+    }
+    this.timerSub?.unsubscribe();
+    this.timerSub = null;
   }
 
   private normalizeText(value?: string | null): string | undefined {

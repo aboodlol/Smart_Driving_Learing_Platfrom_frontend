@@ -57,6 +57,17 @@ export class ExamAttemptApiService {
       );
   }
 
+  // Persist only the user's current question pointer; the backend uses this to
+  // resume an in-progress exam after a refresh / browser close.
+  savePosition(attemptId: string, currentQuestionIndex: number): Observable<void> {
+    return this.http
+      .patch<unknown>(`${this.baseUrl}/${attemptId}/position`, { currentQuestionIndex })
+      .pipe(
+        map(() => undefined),
+        catchError((error: HttpErrorResponse) => this.mapApiError(error)),
+      );
+  }
+
   submitAttempt(attemptId: string): Observable<QuizResult> {
     return this.http
       .post<unknown>(`${this.baseUrl}/${attemptId}/submit`, {})
@@ -88,6 +99,11 @@ export class ExamAttemptApiService {
     // Normalize: use id as fallback for _id for backends that return id instead of _id
     if (!attempt._id && attempt.id) {
       attempt = { ...attempt, _id: attempt.id };
+    }
+
+    const rawIndex = (attempt as { currentQuestionIndex?: unknown }).currentQuestionIndex;
+    if (typeof rawIndex === 'number' && Number.isFinite(rawIndex) && rawIndex >= 0) {
+      attempt = { ...attempt, currentQuestionIndex: rawIndex };
     }
 
     return attempt;
