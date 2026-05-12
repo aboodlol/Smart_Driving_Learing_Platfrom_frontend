@@ -295,6 +295,18 @@
 
 .dw-bar.is-highlight { background: var(--dw-amber-500); }
 
+.dw-bar.is-empty {
+  background: var(--dw-surface-3);
+  opacity: 0.6;
+}
+
+.dw-bars--loading {
+  display: grid;
+  place-items: center;
+  height: 180px;
+  padding: 20px 0;
+}
+
 .dw-bars__axis {
   display: flex;
   justify-content: space-between;
@@ -359,12 +371,42 @@
 }
 
 /* ─── History ─── */
-.dw-history { padding: 22px; }
+.dw-history {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100vh - 220px);
+}
 
 .dw-history__loading {
   padding: 24px 0;
   display: grid;
   place-items: center;
+}
+
+/* Internal scroll container — keeps the exam history card bound to the
+   viewport so a long history doesn't stretch the whole Progress page. */
+.dw-history__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 4px;
+  scrollbar-gutter: stable;
+}
+
+.dw-history__list::-webkit-scrollbar { width: 6px; }
+.dw-history__list::-webkit-scrollbar-thumb {
+  background: var(--dw-border-strong);
+  border-radius: 99px;
+}
+
+@media (max-width: 1100px) {
+  .dw-history { max-height: 70vh; }
+}
+
+@media (max-width: 720px) {
+  .dw-history { max-height: 60vh; }
 }
 
 .dw-hrow {
@@ -548,6 +590,21 @@
 }
 
 .dw-attempt__body { flex: 1; min-width: 0; }
+
+.dw-attempt__media {
+  margin: 0 0 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--dw-surface-2);
+  border: 1px solid var(--dw-border);
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+  }
+}
 
 .dw-attempt__q {
   font-size: 12px; font-weight: 700; color: var(--dw-text); margin: 0 0 6px;

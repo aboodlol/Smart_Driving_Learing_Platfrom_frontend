@@ -1,9 +1,14 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { LessonProgressResponse, ProgressSummary } from '../models/progress.models';
+import {
+  ActivityResponse,
+  LessonProgressResponse,
+  ProgressRange,
+  ProgressSummary,
+} from '../models/progress.models';
 import { CompleteSubLessonResponse } from '../models/lesson.models';
 
 @Injectable({
@@ -37,6 +42,13 @@ export class ProgressApiService {
   resetProgress(): Observable<{ message: string }> {
     return this.http
       .delete<{ message: string }>(`${this.baseUrl}/reset`)
+      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+  }
+
+  getActivity(range: ProgressRange = '30d'): Observable<ActivityResponse> {
+    const params = new HttpParams().set('range', range);
+    return this.http
+      .get<ActivityResponse>(`${this.baseUrl}/activity`, { params })
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 

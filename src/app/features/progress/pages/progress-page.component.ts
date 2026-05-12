@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 import { ExamAttempt, ExamAttemptAnswer, ExamAttemptHistoryItem } from '../../../core/models/exam-attempt.models';
-import { ChapterProgress, ProgressSummary } from '../../../core/models/progress.models';
+import { ActivityResponse, ChapterProgress, ProgressRange, ProgressSummary } from '../../../core/models/progress.models';
 import { QuizQuestion, QuizQuestionResult } from '../../../core/models/quiz.models';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { ExamAttemptApiService } from '../../../core/services/exam-attempt-api.service';
@@ -11,7 +12,7 @@ import { I18nService } from '../../../core/services/i18n.service';
 import { ProgressApiService } from '../../../core/services/progress-api.service';
 import { ToastService } from '../../../core/services/toast.service';
 
-type Range = '7d' | '30d' | 'all';
+type Range = ProgressRange;
 
 interface ExamHistoryRow {
   _id: string;
@@ -32,11 +33,14 @@ interface ExamReviewRow extends QuizQuestionResult {
   explanation: string;
   image?: string | null;
   video?: string | null;
+  resolvedImage?: string;
 }
 
 interface BarSegment {
   height: number;
   highlight: boolean;
+  date: string | null;
+  count: number;
 }
 
 interface ChapterProgressRow {
@@ -80,10 +84,28 @@ export class ProgressPageComponent {
   protected readonly selectedAttemptId = signal<string | null>(null);
   protected readonly selectedAttempt = signal<ExamAttempt | null>(null);
   protected readonly range = signal<Range>('30d');
+  protected readonly activity = signal<ActivityResponse | null>(null);
+  protected readonly activityLoading = signal(false);
 
   protected readonly isArabicMode = computed(() => this.i18n.currentLang() === 'ar');
-  protected readonly hasHistory = computed(() => this.history().length > 0);
+  protected readonly hasHistory = computed(() => this.filteredHistory().length > 0);
   protected readonly reviewItems = computed(() => this.buildReviewItems());
+
+  // Exam history filtered by the selected range. Filtering happens on the
+  // client because /exam-attempts/history returns the full list — we only
+  // hide rows outside the current window without re-fetching.
+  protected readonly filteredHistory = computed<ExamHistoryRow[]>(() => {
+    const rows = this.history();
+    const r = this.range();
+    if (r === 'all') return rows;
+    const days = r === '7d' ? 7 : 30;
+    const cutoff = this.startOfNDaysAgo(days);
+    return rows.filter((row) => {
+      if (!row.rawDate) return false;
+      const t = new Date(row.rawDate).getTime();
+      return !Number.isNaN(t) && t >= cutoff;
+    });
+  });
 
   // ─── Derived stats ───
   protected readonly totalCompletedSubLessons = computed(() => {
@@ -102,7 +124,7 @@ export class ProgressPageComponent {
   });
 
   protected readonly bestScore = computed(() => {
-    const fromHistory = this.history()
+    const fromHistory = this.filteredHistory()
       .map(h => h.score)
       .filter((s): s is number => typeof s === 'number');
     if (fromHistory.length > 0) return Math.max(...fromHistory);
@@ -117,10 +139,10 @@ export class ProgressPageComponent {
 
   protected readonly bestPassed = computed(() => (this.bestScore() ?? 0) >= 85);
 
-  protected readonly streakLabel = computed(() => {
-    const attempts = this.summary()?.quizStats?.totalAttempts ?? 0;
-    if (attempts === 0) return '—';
-    return `${this.localeNumber(attempts)}`;
+  protected readonly activeDaysLabel = computed(() => {
+    const value = this.activity()?.activeDays;
+    if (typeof value !== 'number') return '—';
+    return this.localeNumber(value);
   });
 
   protected readonly questionsAnsweredLabel = computed(() => {
@@ -133,24 +155,38 @@ export class ProgressPageComponent {
     return `${this.localeNumber(avg)}% ✓`;
   });
 
-  // ─── Bar chart (30 bars) ───
+  // ─── Bar chart (real activity by day) ───
+  // Heights are normalized against the peak count in the current window so a
+  // single very active day doesn't flatten the rest of the chart visually.
   protected readonly bars = computed<BarSegment[]>(() => {
-    const lessons = this.summary()?.lessons ?? [];
-    const baseValues = lessons.length > 0
-      ? lessons.map(l => l.totalSubLessons > 0 ? Math.round((l.completedSubLessons / l.totalSubLessons) * 100) : 0)
-      : [0];
+    const buckets = this.activity()?.buckets ?? [];
+    if (buckets.length === 0) return [];
 
-    const bars: BarSegment[] = [];
-    for (let i = 0; i < 30; i++) {
-      const v = baseValues[i % baseValues.length] || 0;
-      // Deterministic gentle wave so bars don't look identical
-      const wave = Math.sin((i * 0.7) + 1.3) * 18;
-      const h = Math.max(8, Math.min(98, Math.round(v * 0.65 + 25 + wave)));
-      // Highlight a couple of "best days" — last week peaks
-      const highlight = i === 22 || i === 28;
-      bars.push({ height: h, highlight });
+    const peak = buckets.reduce((max, b) => Math.max(max, b.count), 0);
+    return buckets.map((b) => {
+      const ratio = peak > 0 ? b.count / peak : 0;
+      // Floor of 6% so empty days still render as a faint tick;
+      // 100% cap so the peak day touches the top of the chart area.
+      const height = b.count === 0 ? 6 : Math.max(12, Math.round(ratio * 100));
+      const highlight = peak > 0 && b.count === peak;
+      return { height, highlight, date: b.date, count: b.count };
+    });
+  });
+
+  protected readonly hasActivity = computed(() => {
+    const buckets = this.activity()?.buckets ?? [];
+    return buckets.some((b) => b.count > 0);
+  });
+
+  protected readonly activityAxisStart = computed(() => {
+    const r = this.range();
+    if (r === '7d') return this.isArabicMode() ? 'قبل ٧ أيام' : '7d ago';
+    if (r === 'all') {
+      const buckets = this.activity()?.buckets ?? [];
+      const first = buckets[0]?.date;
+      return first ? this.formatHistoryDate(first) : '—';
     }
-    return bars;
+    return this.isArabicMode() ? 'قبل ٣٠ يومًا' : '30d ago';
   });
 
   // ─── Chapter progress rows ───
@@ -221,10 +257,17 @@ export class ProgressPageComponent {
   constructor() {
     this.loadSummary();
     this.loadHistory();
+
+    // Re-fetch activity whenever the range changes (including the initial '30d').
+    effect(() => {
+      const r = this.range();
+      this.loadActivity(r);
+    });
   }
 
   // ─── Public actions ───
   protected setRange(r: Range): void {
+    if (this.range() === r) return;
     this.range.set(r);
   }
 
@@ -263,6 +306,16 @@ export class ProgressPageComponent {
     this.selectedAttempt.set(null);
     this.selectedAttemptId.set(null);
     this.selectedAttemptError.set(false);
+  }
+
+  // Quietly hide images that fail to load (deleted/migrated media) so the
+  // attempt row falls back to a text-only layout instead of a broken icon.
+  protected onAttemptImageError(event: Event): void {
+    const target = event.target;
+    if (target instanceof HTMLImageElement) {
+      const figure = target.closest('.dw-attempt__media');
+      if (figure instanceof HTMLElement) figure.style.display = 'none';
+    }
   }
 
   protected resetProgress(): void {
@@ -345,6 +398,52 @@ export class ProgressPageComponent {
       });
   }
 
+  private loadActivity(range: Range): void {
+    this.activityLoading.set(true);
+    this.progressApi
+      .getActivity(range)
+      .pipe(
+        finalize(() => this.activityLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => this.activity.set(response),
+        error: (err: Error) => {
+          this.activity.set(null);
+          this.toast.error(err.message);
+        },
+      });
+  }
+
+  // Local midnight `days` days ago, used to filter the exam-history list.
+  private startOfNDaysAgo(days: number): number {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)).getTime();
+  }
+
+  // Mirrors the helper in quiz-session-page so exam-question images saved as
+  // relative paths (e.g. "/uploads/quiz/123.png") resolve against the configured
+  // backend URL. Absolute URLs pass through untouched.
+  private resolveAbsoluteImageUrl(rawUrl?: string | null): string {
+    const trimmed = this.normalizeText(rawUrl);
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+    const backendUrl = (environment.backendUrl || '').replace(/\/+$/, '');
+    if (backendUrl) {
+      return trimmed.startsWith('/') ? `${backendUrl}${trimmed}` : `${backendUrl}/${trimmed}`;
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        return new URL(trimmed, window.location.origin).toString();
+      } catch {
+        // fall through
+      }
+    }
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  }
+
   private mapHistoryRows(items: ExamAttemptHistoryItem[]): ExamHistoryRow[] {
     return items
       .map<ExamHistoryRow>((item) => {
@@ -402,6 +501,7 @@ export class ProgressPageComponent {
     if (results.length > 0) {
       return results.map((item) => {
         const question = questionById.get(item.questionId);
+        const image = question?.image ?? item.image ?? null;
         return {
           ...item,
           question: this.localizeQuestionText(item.question, item.questionAR, question?.question, question?.questionAR),
@@ -418,8 +518,9 @@ export class ProgressPageComponent {
             question?.explanation,
             question?.explanationAR,
           ),
-          image: question?.image ?? item.image ?? null,
+          image,
           video: question?.video ?? item.video ?? null,
+          resolvedImage: this.resolveAbsoluteImageUrl(image) || undefined,
         };
       });
     }
@@ -448,6 +549,7 @@ export class ProgressPageComponent {
           explanationAR: question.explanationAR,
           image: question.image ?? null,
           video: question.video ?? null,
+          resolvedImage: this.resolveAbsoluteImageUrl(question.image) || undefined,
         },
       ];
     });

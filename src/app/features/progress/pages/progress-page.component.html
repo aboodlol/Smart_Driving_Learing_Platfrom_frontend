@@ -57,14 +57,10 @@
       <article class="dw-stat dw-stat--info">
         <div class="dw-stat__head">
           <span class="dw-stat__icon"><span class="material-icons">local_fire_department</span></span>
-          @if ((summary()?.quizStats?.totalAttempts ?? 0) > 0) {
-            <span class="dw-stat__sub">
-              {{ 'progress.best' | translate }} {{ localeNumber(summary()?.quizStats?.totalAttempts || 0) }}
-            </span>
-          }
+          <span class="dw-stat__sub">{{ 'progress.activeDaysSub' | translate }}</span>
         </div>
-        <div class="dw-stat__value">{{ streakLabel() }}</div>
-        <div class="dw-stat__label">{{ 'progress.currentStreak' | translate }}</div>
+        <div class="dw-stat__value">{{ activeDaysLabel() }}</div>
+        <div class="dw-stat__label">{{ 'progress.activeDays' | translate }}</div>
       </article>
     </section>
 
@@ -76,18 +72,28 @@
           <p>{{ 'progress.studyActivitySub' | translate }}</p>
         </header>
 
-        <div class="dw-bars" aria-hidden="true">
-          @for (bar of bars(); track $index) {
-            <div
-              class="dw-bar"
-              [class.is-highlight]="bar.highlight"
-              [style.height.%]="bar.height"></div>
-          }
-        </div>
-        <div class="dw-bars__axis">
-          <span>{{ 'progress.thirtyDaysAgo' | translate }}</span>
-          <span>{{ 'progress.today' | translate }}</span>
-        </div>
+        @if (activityLoading() && bars().length === 0) {
+          <div class="dw-bars dw-bars--loading">
+            <div class="dw-spinner dw-spinner--sm"></div>
+          </div>
+        } @else if (bars().length === 0 || !hasActivity()) {
+          <p class="dw-empty">{{ 'progress.noActivity' | translate }}</p>
+        } @else {
+          <div class="dw-bars" aria-hidden="true">
+            @for (bar of bars(); track $index) {
+              <div
+                class="dw-bar"
+                [class.is-highlight]="bar.highlight"
+                [class.is-empty]="bar.count === 0"
+                [style.height.%]="bar.height"
+                [attr.title]="bar.date ? bar.date + ' · ' + bar.count : null"></div>
+            }
+          </div>
+          <div class="dw-bars__axis">
+            <span>{{ activityAxisStart() }}</span>
+            <span>{{ 'progress.today' | translate }}</span>
+          </div>
+        }
 
         <header class="dw-section-head dw-section-head--inset">
           <h2>{{ 'progress.chapterProgress' | translate }}</h2>
@@ -128,7 +134,8 @@
           } @else if (!hasHistory()) {
             <p class="dw-empty">{{ 'progress.noExamHistory' | translate }}</p>
           } @else {
-            @for (h of history(); track h._id; let i = $index; let last = $last) {
+          <div class="dw-history__list">
+            @for (h of filteredHistory(); track h._id; let i = $index; let last = $last) {
               <button
                 type="button"
                 class="dw-hrow"
@@ -191,6 +198,15 @@
                           <span class="dw-attempt__num">{{ idx + 1 }}</span>
                           <div class="dw-attempt__body">
                             <p class="dw-attempt__q">{{ item.question }}</p>
+                            @if (item.resolvedImage) {
+                              <figure class="dw-attempt__media">
+                                <img
+                                  [src]="item.resolvedImage"
+                                  [alt]="item.question"
+                                  loading="lazy"
+                                  (error)="onAttemptImageError($event)" />
+                              </figure>
+                            }
                             <div class="dw-attempt__answers">
                               <span class="dw-attempt__answer-row">
                                 <span class="dw-attempt__answer-label">{{ 'progress.selectedAnswer' | translate }}</span>
@@ -216,6 +232,7 @@
                 }
               }
             }
+          </div>
           }
         </section>
 
