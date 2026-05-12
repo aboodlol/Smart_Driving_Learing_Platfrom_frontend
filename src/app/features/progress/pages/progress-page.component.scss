@@ -641,6 +641,81 @@
 .text-success { color: var(--dw-success) !important; font-weight: 700; }
 .text-danger  { color: var(--dw-error) !important; font-weight: 700; }
 
+/* ─── Chapter Strength radar ─── */
+.dw-strength {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dw-strength__loading {
+  display: grid;
+  place-items: center;
+  padding: 32px 0;
+}
+
+/* The radar wrapper is forced to LTR even in Arabic so the SVG geometry
+   (top-of-circle, clockwise vertices) renders the same in both languages —
+   the chapter labels themselves render in their natural script. */
+.dw-radar {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  margin: 4px 0 8px;
+}
+
+.dw-radar__svg {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  overflow: visible; // allow labels to bleed outside the viewBox slightly
+}
+
+.dw-radar__ring {
+  fill: none;
+  stroke: var(--dw-border);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.dw-radar__axis {
+  stroke: var(--dw-border);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.dw-radar__poly {
+  fill: color-mix(in oklch, var(--dw-teal-500) 28%, transparent);
+  stroke: var(--dw-teal-500);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: fill .2s var(--dw-ease);
+}
+
+.dw-radar__dot {
+  fill: var(--dw-teal-600);
+  stroke: var(--dw-surface);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: r .15s var(--dw-ease), fill .15s var(--dw-ease);
+}
+
+.dw-radar__point:hover .dw-radar__dot,
+.dw-radar__point:focus-within .dw-radar__dot {
+  fill: var(--dw-amber-500);
+  r: 6;
+}
+
+.dw-radar__label {
+  font-family: var(--dw-font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--dw-text-2);
+}
+
+[dir='rtl'] .dw-radar__label { font-family: 'Tajawal', var(--dw-font-sans); }
+
 /* ─── Weakest ─── */
 .dw-weakest { padding: 22px; }
 
@@ -657,7 +732,9 @@
 .dw-weak-row:last-child { margin-bottom: 0; }
 
 .dw-weak-row__num {
-  width: 32px; height: 32px;
+  min-width: 48px;
+  height: 32px;
+  padding: 0 8px;
   border-radius: 10px;
   display: grid; place-items: center;
   font-family: var(--dw-font-mono);
@@ -673,16 +750,37 @@
   background: color-mix(in oklch, var(--dw-amber-500) 22%, var(--dw-surface));
   color: var(--dw-amber-600);
 }
+.dw-weak-row__num--success {
+  background: var(--dw-success-bg);
+  color: var(--dw-success);
+}
+.dw-weak-row__num--neutral {
+  background: var(--dw-surface-3);
+  color: var(--dw-text-3);
+}
 
-.dw-weak-row__label {
+.dw-weak-row__body {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dw-weak-row__label {
   font-size: 13px;
   font-weight: 600;
   color: var(--dw-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dw-weak-row__meta {
+  font-size: 11px;
+  color: var(--dw-text-3);
+  font-family: var(--dw-font-mono);
+  font-weight: 600;
 }
 
 /* ─── Buttons ─── */

@@ -236,22 +236,93 @@
           }
         </section>
 
-        <!-- Weakest topics -->
-        <section class="dw-card dw-weakest">
+        <!-- Chapter Strength radar (replaces the old Weakest list) -->
+        <section class="dw-card dw-strength">
           <header class="dw-section-head">
+            <h2>{{ 'progress.chapterStrength' | translate }}</h2>
+            <p>{{ 'progress.chapterStrengthSub' | translate }}</p>
+          </header>
+
+          @if (chapterStrengthLoading() && !chapterStrength()) {
+            <div class="dw-strength__loading">
+              <div class="dw-spinner dw-spinner--sm"></div>
+            </div>
+          } @else if (!radarViewModel().hasData) {
+            <p class="dw-empty">{{ 'progress.noStrengthData' | translate }}</p>
+          } @else {
+            <div class="dw-radar" [attr.dir]="'ltr'">
+              <svg
+                class="dw-radar__svg"
+                [attr.viewBox]="'0 0 ' + radarViewModel().size + ' ' + radarViewModel().size"
+                preserveAspectRatio="xMidYMid meet"
+                role="img"
+                [attr.aria-label]="'progress.chapterStrength' | translate">
+
+                <!-- Concentric reference rings -->
+                @for (ring of radarViewModel().rings; track ring.r) {
+                  <circle
+                    class="dw-radar__ring"
+                    [attr.cx]="radarViewModel().cx"
+                    [attr.cy]="radarViewModel().cy"
+                    [attr.r]="ring.r"></circle>
+                }
+
+                <!-- Axis lines -->
+                @for (axis of radarViewModel().axes; track $index) {
+                  <line
+                    class="dw-radar__axis"
+                    [attr.x1]="radarViewModel().cx"
+                    [attr.y1]="radarViewModel().cy"
+                    [attr.x2]="axis.x2"
+                    [attr.y2]="axis.y2"></line>
+                }
+
+                <!-- Strength polygon -->
+                <polygon class="dw-radar__poly" [attr.points]="radarViewModel().polygonPoints"></polygon>
+
+                <!-- Vertex dots + labels -->
+                @for (p of radarViewModel().points; track p.chapterKey || $index) {
+                  <g class="dw-radar__point">
+                    <circle
+                      class="dw-radar__dot"
+                      [attr.cx]="p.x"
+                      [attr.cy]="p.y"
+                      r="4">
+                      <title>{{ p.tooltip }}</title>
+                    </circle>
+                    <text
+                      class="dw-radar__label"
+                      [attr.x]="p.labelX"
+                      [attr.y]="p.labelY"
+                      [attr.text-anchor]="p.labelAnchor"
+                      dominant-baseline="middle">{{ p.title }}</text>
+                  </g>
+                }
+              </svg>
+            </div>
+          }
+
+          <!-- Weakest chapters list under the radar -->
+          <header class="dw-section-head dw-section-head--inset">
             <h2>{{ 'progress.weakest' | translate }}</h2>
           </header>
-          @if (weakestRows().length === 0) {
+          @if (weakestStrengthRows().length === 0) {
             <p class="dw-empty">{{ 'progress.noWeakest' | translate }}</p>
           } @else {
-            @for (w of weakestRows(); track w.chapterId) {
+            @for (w of weakestStrengthRows(); track w.chapterId) {
               <div class="dw-weak-row">
                 <span class="dw-weak-row__num dw-weak-row__num--{{ w.tone }}">
-                  {{ localeNumber(w.remaining) }}
+                  {{ localeNumber(w.strength) }}%
                 </span>
-                <span class="dw-weak-row__label">{{ w.title }}</span>
-                <a [routerLink]="['/lessons', w.chapterId]" class="dw-btn dw-btn--ghost dw-btn--sm">
-                  {{ 'progress.practice' | translate }}
+                <span class="dw-weak-row__body">
+                  <span class="dw-weak-row__label">{{ w.title }}</span>
+                  <span class="dw-weak-row__meta">
+                    {{ localeNumber(w.correct) }} / {{ localeNumber(w.answered) }}
+                    {{ 'progress.correctSuffix' | translate }}
+                  </span>
+                </span>
+                <a [routerLink]="chapterQuizPath(w)" class="dw-btn dw-btn--ghost dw-btn--sm">
+                  {{ 'progress.train' | translate }}
                 </a>
               </div>
             }

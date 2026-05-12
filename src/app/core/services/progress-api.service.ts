@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ActivityResponse,
+  ChapterStrengthResponse,
   LessonProgressResponse,
   ProgressRange,
   ProgressSummary,
@@ -49,6 +50,13 @@ export class ProgressApiService {
     const params = new HttpParams().set('range', range);
     return this.http
       .get<ActivityResponse>(`${this.baseUrl}/activity`, { params })
+      .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
+  }
+
+  getChapterStrength(range: ProgressRange = '30d'): Observable<ChapterStrengthResponse> {
+    const params = new HttpParams().set('range', range);
+    return this.http
+      .get<ChapterStrengthResponse>(`${this.baseUrl}/chapter-strength`, { params })
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 

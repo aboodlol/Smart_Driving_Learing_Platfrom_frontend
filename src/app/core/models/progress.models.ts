@@ -50,3 +50,24 @@ export interface ActivityResponse {
   totalActiveDays: number;
   totalEvents: number;
 }
+
+export interface ChapterStrength {
+  chapterId: string;
+  chapterKey: string;
+  chapterTitle: string;
+  chapterTitleAR: string | null;
+  /** Exam answers in this chapter that were marked correct. */
+  correct: number;
+  /** Exam answers attempted in this chapter (excludes skipped/empty). */
+  answered: number;
+  /** Rounded `(correct / answered) * 100`, or 0 when `answered === 0`. */
+  strength: number;
+}
+
+export interface ChapterStrengthResponse {
+  range: ProgressRange;
+  days: number | null;
+  chapters: ChapterStrength[];
+  totalAnsweredAcrossChapters: number;
+  attemptsConsidered: number;
+}

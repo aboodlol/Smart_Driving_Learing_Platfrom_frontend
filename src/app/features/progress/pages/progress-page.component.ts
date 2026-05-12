@@ -4,7 +4,13 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ExamAttempt, ExamAttemptAnswer, ExamAttemptHistoryItem } from '../../../core/models/exam-attempt.models';
-import { ActivityResponse, ChapterProgress, ProgressRange, ProgressSummary } from '../../../core/models/progress.models';
+import {
+  ActivityResponse,
+  ChapterProgress,
+  ChapterStrengthResponse,
+  ProgressRange,
+  ProgressSummary,
+} from '../../../core/models/progress.models';
 import { QuizQuestion, QuizQuestionResult } from '../../../core/models/quiz.models';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { ExamAttemptApiService } from '../../../core/services/exam-attempt-api.service';
@@ -50,11 +56,44 @@ interface ChapterProgressRow {
   accent: 'success' | 'amber' | 'info' | 'teal' | 'neutral';
 }
 
-interface WeakestRow {
-  chapterId: string;
+interface RadarPoint {
+  /** SVG coordinate of the data vertex (strength-scaled). */
+  x: number;
+  y: number;
+  /** SVG coordinate of the chapter label anchor (just outside the outer ring). */
+  labelX: number;
+  labelY: number;
+  /** Horizontal anchor for the label, chosen by quadrant for clean alignment. */
+  labelAnchor: 'start' | 'middle' | 'end';
+  /** Tooltip text shown on hover/focus (locale-aware). */
+  tooltip: string;
   title: string;
-  remaining: number;
-  tone: 'error' | 'amber';
+  strength: number;
+  correct: number;
+  answered: number;
+  chapterKey: string;
+}
+
+interface RadarChartViewModel {
+  size: number;
+  cx: number;
+  cy: number;
+  outerRadius: number;
+  rings: { r: number; label: string }[];
+  axes: { x2: number; y2: number }[];
+  polygonPoints: string;
+  points: RadarPoint[];
+  hasData: boolean;
+}
+
+interface WeakestChapterRow {
+  chapterId: string;
+  chapterKey: string;
+  title: string;
+  strength: number;
+  correct: number;
+  answered: number;
+  tone: 'error' | 'amber' | 'success' | 'neutral';
 }
 
 const PASSING_SCORE = 51;
@@ -86,6 +125,8 @@ export class ProgressPageComponent {
   protected readonly range = signal<Range>('30d');
   protected readonly activity = signal<ActivityResponse | null>(null);
   protected readonly activityLoading = signal(false);
+  protected readonly chapterStrength = signal<ChapterStrengthResponse | null>(null);
+  protected readonly chapterStrengthLoading = signal(false);
 
   protected readonly isArabicMode = computed(() => this.i18n.currentLang() === 'ar');
   protected readonly hasHistory = computed(() => this.filteredHistory().length > 0);
@@ -211,23 +252,126 @@ export class ProgressPageComponent {
     });
   });
 
-  // ─── Weakest chapters ───
-  protected readonly weakestRows = computed<WeakestRow[]>(() => {
-    const lessons = this.summary()?.lessons ?? [];
-    return lessons
-      .filter(l => l.status !== 'Completed' && l.totalSubLessons > 0)
-      .map(l => {
-        const remaining = l.totalSubLessons - l.completedSubLessons;
-        const tone: WeakestRow['tone'] = remaining > l.totalSubLessons * 0.6 ? 'error' : 'amber';
-        return {
-          chapterId: l.chapterId,
-          title: this.localizedTitle(l),
-          remaining,
-          tone,
-        };
-      })
-      .sort((a, b) => b.remaining - a.remaining)
-      .slice(0, 3);
+  // ─── Chapter strength rows (driven by exam-attempt accuracy) ───
+  protected readonly hasChapterStrengthData = computed(() => {
+    const data = this.chapterStrength();
+    if (!data) return false;
+    return (data.chapters ?? []).some((c) => c.answered > 0);
+  });
+
+  // Weakest list: lowest-strength chapters first. Only includes chapters that
+  // actually have answered exam questions in the selected window — chapters
+  // the user hasn't been examined on yet would otherwise dominate the bottom
+  // of the list at 0%, which isn't actionable feedback.
+  protected readonly weakestStrengthRows = computed<WeakestChapterRow[]>(() => {
+    const chapters = this.chapterStrength()?.chapters ?? [];
+    return chapters
+      .filter((c) => c.answered > 0)
+      .map<WeakestChapterRow>((c) => ({
+        chapterId: c.chapterId,
+        chapterKey: c.chapterKey,
+        title: this.isArabicMode() && c.chapterTitleAR ? c.chapterTitleAR : c.chapterTitle,
+        strength: c.strength,
+        correct: c.correct,
+        answered: c.answered,
+        tone: this.strengthToneFor(c.strength),
+      }))
+      .sort((a, b) => a.strength - b.strength)
+      .slice(0, 5);
+  });
+
+  // ─── Radar chart viewmodel ───
+  // Inline SVG so we avoid pulling in a chart library; geometry is computed
+  // once per render and recomputed automatically when the range/language/data
+  // signals change.
+  protected readonly radarViewModel = computed<RadarChartViewModel>(() => {
+    const SIZE = 320;
+    const CENTER = SIZE / 2;
+    const OUTER = SIZE * 0.36; // leaves room for chapter labels around the ring
+
+    const chapters = this.chapterStrength()?.chapters ?? [];
+    const arabic = this.isArabicMode();
+
+    const rings = [25, 50, 75, 100].map((pct) => ({
+      r: (OUTER * pct) / 100,
+      label: `${this.localeNumber(pct)}%`,
+    }));
+
+    if (chapters.length < 3) {
+      // A polygon below 3 vertices collapses to a line; render rings only and
+      // mark the chart as data-less so the template shows an empty state.
+      return {
+        size: SIZE,
+        cx: CENTER,
+        cy: CENTER,
+        outerRadius: OUTER,
+        rings,
+        axes: [],
+        polygonPoints: '',
+        points: [],
+        hasData: false,
+      };
+    }
+
+    const step = (Math.PI * 2) / chapters.length;
+    const axes: { x2: number; y2: number }[] = [];
+    const points: RadarPoint[] = [];
+    const polyVerts: string[] = [];
+
+    chapters.forEach((c, i) => {
+      // Start at the top (12 o'clock) and walk clockwise.
+      const angle = -Math.PI / 2 + step * i;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+
+      axes.push({ x2: CENTER + cos * OUTER, y2: CENTER + sin * OUTER });
+
+      const scaled = OUTER * (Math.max(0, Math.min(100, c.strength)) / 100);
+      const x = CENTER + cos * scaled;
+      const y = CENTER + sin * scaled;
+      polyVerts.push(`${x},${y}`);
+
+      // Push labels slightly outside the outer ring; quadrant chooses anchor.
+      const labelOffset = 14;
+      const labelX = CENTER + cos * (OUTER + labelOffset);
+      const labelY = CENTER + sin * (OUTER + labelOffset);
+      const anchor: RadarPoint['labelAnchor'] =
+        cos > 0.25 ? 'start' : cos < -0.25 ? 'end' : 'middle';
+
+      const title = arabic && c.chapterTitleAR ? c.chapterTitleAR : c.chapterTitle;
+      const correctText = this.localeNumber(c.correct);
+      const answeredText = this.localeNumber(c.answered);
+      const pctText = `${this.localeNumber(c.strength)}%`;
+      const tooltip = arabic
+        ? `${title} · ${pctText} · ${correctText}/${answeredText} صحيحة`
+        : `${title} · ${pctText} · ${correctText}/${answeredText} correct`;
+
+      points.push({
+        x,
+        y,
+        labelX,
+        labelY,
+        labelAnchor: anchor,
+        tooltip,
+        title,
+        strength: c.strength,
+        correct: c.correct,
+        answered: c.answered,
+        chapterKey: c.chapterKey,
+      });
+    });
+
+    return {
+      size: SIZE,
+      cx: CENTER,
+      cy: CENTER,
+      outerRadius: OUTER,
+      rings,
+      axes,
+      polygonPoints: polyVerts.join(' '),
+      points,
+      hasData: chapters.some((c) => c.answered > 0),
+    };
   });
 
   // ─── Selected attempt computeds (preserved from original) ───
@@ -258,10 +402,12 @@ export class ProgressPageComponent {
     this.loadSummary();
     this.loadHistory();
 
-    // Re-fetch activity whenever the range changes (including the initial '30d').
+    // Re-fetch activity AND chapter strength whenever the range changes —
+    // includes the initial '30d' run thanks to Angular's eager-effect semantics.
     effect(() => {
       const r = this.range();
       this.loadActivity(r);
+      this.loadChapterStrength(r);
     });
   }
 
@@ -413,6 +559,39 @@ export class ProgressPageComponent {
           this.toast.error(err.message);
         },
       });
+  }
+
+  private loadChapterStrength(range: Range): void {
+    this.chapterStrengthLoading.set(true);
+    this.progressApi
+      .getChapterStrength(range)
+      .pipe(
+        finalize(() => this.chapterStrengthLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => this.chapterStrength.set(response),
+        error: (err: Error) => {
+          this.chapterStrength.set(null);
+          this.toast.error(err.message);
+        },
+      });
+  }
+
+  // Same colour scale as the existing chapter-progress accents, but driven by
+  // strength bands rather than completion %.
+  private strengthToneFor(strength: number): WeakestChapterRow['tone'] {
+    if (strength >= 85) return 'success';
+    if (strength >= 60) return 'amber';
+    if (strength >= 30) return 'error';
+    return 'neutral';
+  }
+
+  // Mirrors `quizRoute()` in lesson-detail: prefer chapterKey, encode for the
+  // URL. Used by the "Train" buttons on the weakest-list rows.
+  protected chapterQuizPath(row: { chapterKey?: string; title: string }): string {
+    const slug = row.chapterKey?.trim() ? row.chapterKey : row.title;
+    return `/quiz/chapter/${encodeURIComponent(slug)}`;
   }
 
   // Local midnight `days` days ago, used to filter the exam-history list.
