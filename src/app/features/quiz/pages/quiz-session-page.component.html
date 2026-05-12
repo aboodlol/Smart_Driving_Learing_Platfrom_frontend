@@ -326,6 +326,8 @@
               <span
                 class="dw-q-grid__cell"
                 [class.is-current]="state === 'current'"
+                [class.is-correct]="state === 'correct'"
+                [class.is-wrong]="state === 'wrong'"
                 [class.is-answered]="state === 'answered'"
                 [class.is-skipped]="state === 'skipped'">
                 {{ formatIndex(i) }}
@@ -334,7 +336,8 @@
           </div>
           <div class="dw-legend">
             <span><span class="dw-legend__dot dw-legend__dot--current"></span>{{ 'quiz.navCurrent' | translate }}</span>
-            <span><span class="dw-legend__dot dw-legend__dot--info"></span>{{ 'quiz.navStateAnswered' | translate }}</span>
+            <span><span class="dw-legend__dot dw-legend__dot--success"></span>{{ 'quiz.navCorrect' | translate }}</span>
+            <span><span class="dw-legend__dot dw-legend__dot--error"></span>{{ 'quiz.navWrong' | translate }}</span>
             <span><span class="dw-legend__dot dw-legend__dot--amber"></span>{{ 'quiz.navSkipped' | translate }}</span>
             <span><span class="dw-legend__dot"></span>{{ 'quiz.navStateNotReached' | translate }}</span>
           </div>

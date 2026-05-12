@@ -26,7 +26,7 @@ interface ChapterAnswerFeedback {
 }
 
 type ChapterQuestionNavState = 'current' | 'correct' | 'wrong' | 'unanswered';
-type ExamQuestionNavState = 'current' | 'answered' | 'skipped' | 'unanswered';
+type ExamQuestionNavState = 'current' | 'correct' | 'wrong' | 'answered' | 'skipped' | 'unanswered';
 
 const EXAM_MAX_SKIPS = 4;
 // Full exam duration. Kept in sync with the backend constant
@@ -241,15 +241,20 @@ export class QuizSessionPageComponent implements OnDestroy {
     });
   });
 
-  // Running-exam navigator: never reveals correctness. Only shows current / answered /
-  // skipped / unanswered so the user can see their flow without a live result hint.
+  // Running-exam navigator: colors reflect stored correctness from the backend
+  // save response (examQuestionStates). The active question card itself never
+  // surfaces correct/wrong info — only this side overview does.
+  // Falls back to a neutral 'answered' state for answered questions whose
+  // correctness has not yet arrived from the backend (transient).
   protected readonly examNavStates = computed<ExamQuestionNavState[]>(() => {
     const qs = this.questions();
     const current = this.currentIndex();
     const answered = this.examAnsweredIds();
     const skipped = this.skippedIds();
+    const states = this.examQuestionStates();
     return qs.map((q, i) => {
       if (i === current) return 'current';
+      if (states.has(q._id)) return states.get(q._id) ? 'correct' : 'wrong';
       if (answered.has(q._id)) return 'answered';
       if (skipped.has(q._id)) return 'skipped';
       return 'unanswered';
@@ -1148,19 +1153,27 @@ export class QuizSessionPageComponent implements OnDestroy {
 
     // Restore skipped + answered sets from the attempt's persisted answers so
     // the user resumes exactly where they left off (skip count, navigator state).
+    // Also restore per-question correctness so the side overview's green/red
+    // colors persist across refreshes — the backend has already evaluated each
+    // saved answer at save time and returns isCorrect alongside it.
     const rawAnswers = this.extractAttemptAnswers(attempt);
     const skipped = new Set<string>();
     const answered = new Set<string>();
+    const correctness = new Map<string, boolean>();
     for (const answer of rawAnswers) {
       if (!answer.questionId) continue;
       if (answer.skipped === true) {
         skipped.add(answer.questionId);
       } else if (mappedAnswers.has(answer.questionId)) {
         answered.add(answer.questionId);
+        if (typeof answer.isCorrect === 'boolean') {
+          correctness.set(answer.questionId, answer.isCorrect);
+        }
       }
     }
     this.skippedIds.set(skipped);
     this.examAnsweredIds.set(answered);
+    this.examQuestionStates.set(correctness);
 
     this.expiresAt.set(expiresAt);
     // Remember when the exam started so we can compute "Time Used" on the
