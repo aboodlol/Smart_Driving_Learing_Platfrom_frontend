@@ -1,287 +1,238 @@
-<div #animWrapper class="dw-landing" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
+<div class="lp">
 
-  <!-- ─── Hero ─── -->
-  <section class="dw-hero">
-    <div class="dw-hero__lead scroll-reveal">
-      <span class="dw-chip dw-chip--amber">
-        <span class="dw-chip__dot" aria-hidden="true"></span>
-        {{ 'landing.heroChip' | translate }}
-      </span>
-
-      <h1 class="dw-hero__title">
-        {{ 'landing.heroTitle' | translate }}
-        <span class="dw-hero__highlight">{{ 'landing.heroTitleHighlight' | translate }}</span>
-      </h1>
-
-      <p class="dw-hero__sub">{{ 'landing.heroSubtitle' | translate }}</p>
-
-      <div class="dw-hero__ctas">
-        <a routerLink="/register" class="dw-btn dw-btn--primary dw-btn--lg">
-          {{ 'landing.ctaStart' | translate }}
-          <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
-        </a>
-        <a routerLink="/login" class="dw-btn dw-btn--ghost dw-btn--lg">
-          <span class="material-icons">play_arrow</span>
-          {{ 'landing.heroTour' | translate }}
-        </a>
+  <!-- ───── HERO ───── -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <span class="eyebrow"><span class="dot"></span> {{ 'landing.heroChip' | translate }}</span>
+        <h1 class="hero-h">{{ 'landing.heroTitle' | translate }} <span class="grad">{{ 'landing.heroTitleHighlight' | translate }}</span></h1>
+        <p class="hero-sub">{{ 'landing.heroSubtitle' | translate }}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" routerLink="/register">
+            {{ 'landing.ctaStart' | translate }}
+            <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path></svg>
+          </a>
+          <a class="btn btn-ghost btn-lg" routerLink="/login">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"></path></svg>
+            {{ 'landing.heroTour' | translate }}
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><div class="v">{{ 'landing.heroStat1Value' | translate }}</div><div class="l">{{ 'landing.heroStat1Label' | translate }}</div></div>
+          <div class="stat"><div class="v">{{ 'landing.heroStat2Value' | translate }}</div><div class="l">{{ 'landing.heroStat2Label' | translate }}</div></div>
+          <div class="stat"><div class="v">{{ 'landing.heroStat3Value' | translate }}</div><div class="l">{{ 'landing.heroStat3Label' | translate }}</div></div>
+        </div>
       </div>
 
-      <div class="dw-hero__stats">
-        <div class="dw-stat">
-          <div class="dw-stat__value">12k+</div>
-          <div class="dw-stat__label">{{ 'landing.studentsPassed' | translate }}</div>
+      <div class="hero-mockup">
+        <div class="browser">
+          <div class="bar">
+            <i></i><i></i><i></i>
+            <div class="url">drivewise.app/home</div>
+          </div>
+          <div class="body">
+            <img src="assets/shot-home.png" [attr.alt]="'landing.heroCardChapter' | translate">
+          </div>
         </div>
-        <div class="dw-stat">
-          <div class="dw-stat__value">94%</div>
-          <div class="dw-stat__label">{{ 'landing.passRate' | translate }}</div>
+
+        <!-- floating overlays -->
+        <div class="float ai">
+          <div class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path>
+            </svg>
+          </div>
+          <div class="t">
+            <b>{{ 'landing.explainSign' | translate }}</b>
+            <small>{{ 'landing.askAi' | translate }}</small>
+          </div>
         </div>
-        <div class="dw-stat">
-          <div class="dw-stat__value">1,800+</div>
-          <div class="dw-stat__label">{{ 'landing.examQuestions' | translate }}</div>
+
+        <div class="float score">
+          <div class="badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>
+          </div>
+          <div class="info">
+            <small>{{ 'landing.bestScore' | translate }}</small>
+            <span class="num">{{ 'landing.scoreNumerator' | translate }} <small class="num-sub">{{ 'landing.scoreDenominator' | translate }}</small></span>
+          </div>
+        </div>
+
+        <div class="float streak">
+          <div class="ic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3s4 4 4 8a4 4 0 0 1-8 0c0-2 1-3 1-3s-1 5 3 5c2 0 0-3 0-6 0-1 0-2 0-4Z"></path></svg>
+          </div>
+          <div>
+            <small class="streak-cap">{{ 'landing.streakLabel' | translate }}</small>
+            <div class="streak-num">{{ 'landing.streakValue' | translate }}</div>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Hero illustration card with floating stickers -->
-    <div class="dw-hero__art scroll-reveal">
-      <div class="dw-hero-card">
-        <div class="dw-hero-card__media" aria-hidden="true">
-          <svg viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" class="dw-road">
-            <defs>
-              <linearGradient id="dw-ill-sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--dw-illustration-sky-top)" />
-                <stop offset="100%" stop-color="var(--dw-illustration-sky-bottom)" />
-              </linearGradient>
-              <linearGradient id="dw-ill-road" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--dw-illustration-road-far)" />
-                <stop offset="100%" stop-color="var(--dw-illustration-road-near)" />
-              </linearGradient>
-              <linearGradient id="dw-ill-car" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--dw-illustration-car-light)" />
-                <stop offset="100%" stop-color="var(--dw-illustration-car-body)" />
-              </linearGradient>
-              <radialGradient id="dw-ill-sun-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="var(--dw-illustration-sun)" stop-opacity="0.55" />
-                <stop offset="100%" stop-color="var(--dw-illustration-sun)" stop-opacity="0" />
-              </radialGradient>
-            </defs>
+  <!-- ───── FEATURES ───── -->
+  <section class="s s-features">
+    <div class="wrap">
+      <div class="s-head">
+        <div class="s-tag">{{ 'landing.featuresEyebrow' | translate }}</div>
+        <h2 class="s-h">{{ 'landing.featuresH2' | translate }}</h2>
+        <p class="s-p">{{ 'landing.featuresSubtitle2' | translate }}</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="ic ic-teal">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"></path><path d="M4 17h14"></path></svg>
+          </div>
+          <h3>{{ 'landing.f1Title' | translate }}</h3>
+          <p>{{ 'landing.f1Desc' | translate }}</p>
+        </div>
+        <div class="feature">
+          <div class="ic ic-pink">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5" stroke-linecap="round"></path><circle cx="12" cy="17" r=".6" fill="currentColor"></circle></svg>
+          </div>
+          <h3>{{ 'landing.f2Title' | translate }}</h3>
+          <p>{{ 'landing.f2Desc' | translate }}</p>
+        </div>
+        <div class="feature">
+          <div class="ic ic-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M8 21h8M12 17v4M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke-linecap="round"></path></svg>
+          </div>
+          <h3>{{ 'landing.f3Title' | translate }}</h3>
+          <p>{{ 'landing.f3Desc' | translate }}</p>
+        </div>
+        <div class="feature">
+          <div class="ic ic-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"></path></svg>
+          </div>
+          <h3>{{ 'landing.f5Title' | translate }}</h3>
+          <p>{{ 'landing.f5Desc' | translate }}</p>
+        </div>
+        <div class="feature">
+          <div class="ic ic-mint">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V4"></path><path d="M4 20h16"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="14" width="3" height="4"></rect></svg>
+          </div>
+          <h3>{{ 'landing.f4Title' | translate }}</h3>
+          <p>{{ 'landing.f4Desc' | translate }}</p>
+        </div>
+        <div class="feature">
+          <div class="ic ic-violet">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke-linecap="round"></path></svg>
+          </div>
+          <h3>{{ 'landing.f6Title' | translate }}</h3>
+          <p>{{ 'landing.f6Desc' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            <!-- Sky -->
-            <rect width="1200" height="720" fill="url(#dw-ill-sky)" />
+  <!-- ───── AI SECTION ───── -->
+  <section class="s s-ai">
+    <div class="wrap showcase">
+      <div class="col-img">
+        <div class="ai-stack">
+          <div class="frame back">
+            <img src="assets/shot-ai.png" [attr.alt]="'landing.aiEyebrow' | translate">
+          </div>
+          <div class="frame front">
+            <img src="assets/shot-quiz.png" [attr.alt]="'landing.f2Title' | translate">
+          </div>
+        </div>
+      </div>
+      <div class="col-text">
+        <span class="eyebrow"><span class="dot"></span> {{ 'landing.aiEyebrow' | translate }}</span>
+        <h2>{{ 'landing.aiH2' | translate }}</h2>
+        <p>{{ 'landing.aiSub' | translate }}</p>
+        <ul>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.aiPoint1' | translate }}</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.aiPoint2' | translate }}</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.aiPoint3' | translate }}</li>
+        </ul>
+        <a class="btn btn-primary" routerLink="/assistant">{{ 'landing.tryAssistant' | translate }}
+          <svg class="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path></svg>
+        </a>
+      </div>
+    </div>
+  </section>
 
-            <!-- Sun glow + sun disc -->
-            <circle cx="920" cy="200" r="140" fill="url(#dw-ill-sun-glow)" />
-            <circle cx="920" cy="200" r="44" fill="var(--dw-illustration-sun)" />
+  <!-- ───── EXAM SIMULATION ───── -->
+  <section class="s s-exam">
+    <div class="wrap showcase reverse">
+      <div class="col-img">
+        <div class="frame">
+          <img src="assets/shot-exam-session.png" [attr.alt]="'landing.examEyebrow' | translate">
+        </div>
+      </div>
+      <div class="col-text">
+        <span class="eyebrow eyebrow-teal">
+          <span class="dot"></span> {{ 'landing.examEyebrow' | translate }}
+        </span>
+        <h2>{{ 'landing.examH2' | translate }}</h2>
+        <p>{{ 'landing.examSub' | translate }}</p>
+        <div class="chips">
+          <span class="chip">{{ 'landing.examChip1' | translate }}</span>
+          <span class="chip amber">{{ 'landing.examChip2' | translate }}</span>
+          <span class="chip">{{ 'landing.examChip3' | translate }}</span>
+          <span class="chip amber">{{ 'landing.examChip4' | translate }}</span>
+        </div>
+        <div class="exam-cta">
+          <a class="btn btn-primary" routerLink="/exam">{{ 'landing.startExam' | translate }}
+            <svg class="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            <!-- Hills (back layer) -->
-            <path d="M0,445 C140,410 300,420 460,432 C620,442 800,408 970,418 C1080,425 1200,438 1200,440 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-1)" />
-            <!-- Hills (mid layer) -->
-            <path d="M0,478 C140,452 300,462 470,478 C620,492 790,462 970,472 C1090,478 1200,488 1200,488 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-2)" />
-            <!-- Hills (front layer) -->
-            <path d="M0,510 C140,490 320,498 500,510 C680,524 860,498 1040,510 C1140,516 1200,520 1200,520 L1200,720 L0,720 Z" fill="var(--dw-illustration-hill-3)" />
+  <!-- ───── PROGRESS ───── -->
+  <section class="s">
+    <div class="wrap showcase">
+      <div class="col-img">
+        <div class="frame">
+          <img src="assets/shot-progress.png" [attr.alt]="'landing.progressEyebrow' | translate">
+        </div>
+      </div>
+      <div class="col-text">
+        <span class="eyebrow eyebrow-mint">
+          <span class="dot"></span> {{ 'landing.progressEyebrow' | translate }}
+        </span>
+        <h2>{{ 'landing.progressH2' | translate }}</h2>
+        <p>{{ 'landing.progressSub' | translate }}</p>
+        <ul>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.progressPoint1' | translate }}</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.progressPoint2' | translate }}</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span> {{ 'landing.progressPoint3' | translate }}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-            <!-- Road surface -->
-            <polygon points="555,440 645,440 1140,720 60,720" fill="url(#dw-ill-road)" />
-            <!-- Road outer edge lines -->
-            <polygon points="555,440 561,440 80,720 60,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
-            <polygon points="639,440 645,440 1140,720 1120,720" fill="var(--dw-illustration-road-line)" opacity="0.92" />
-
-            <!-- Center dashed lane markers (perspective) -->
-            <g fill="var(--dw-illustration-road-line)" opacity="0.95">
-              <polygon points="599,447 601,447 601,452 599,452" />
-              <polygon points="597,462 603,462 603,470 597,470" />
-              <polygon points="594,480 606,480 607,492 593,492" />
-              <polygon points="590,503 610,503 613,520 587,520" />
-              <polygon points="583,535 617,535 622,560 578,560" />
-            </g>
-
-            <!-- Triangle warning sign (left) -->
-            <g>
-              <rect x="277" y="475" width="7" height="160" rx="2" fill="var(--dw-illustration-pole)" />
-              <polygon points="280,395 339,478 221,478" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="7" stroke-linejoin="round" />
-            </g>
-
-            <!-- Speed limit 60 sign (right) -->
-            <g>
-              <rect x="956" y="478" width="7" height="155" rx="2" fill="var(--dw-illustration-pole)" />
-              <circle cx="960" cy="425" r="52" fill="var(--dw-illustration-sign-bg)" stroke="var(--dw-illustration-sign-stroke)" stroke-width="9" />
-              <text x="960" y="442" text-anchor="middle" style="font-family: var(--dw-font-mono); font-weight: 800; font-size: 40px;" fill="var(--dw-illustration-sign-text)">60</text>
-            </g>
-
-            <!-- Car (rear view, Mustang-style coupe) -->
-            <g>
-              <!-- Ground shadow -->
-              <ellipse cx="600" cy="720" rx="248" ry="13" fill="#000" opacity="0.32" />
-
-              <!-- Main body silhouette (yellow, roof-to-bumper) -->
-              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L752,540 Q792,560 812,600 L818,660 Q818,686 798,690 L402,690 Q382,686 382,660 L388,600 Q408,560 448,540 L472,472 Z" fill="url(#dw-ill-car)" />
-
-              <!-- Roof / upper darker shade -->
-              <path d="M472,472 Q484,460 512,458 L688,458 Q716,460 728,472 L740,510 L460,510 Z" fill="var(--dw-illustration-car-shadow)" opacity="0.55" />
-
-              <!-- Rear window (dark gradient glass) -->
-              <path d="M500,480 Q530,472 580,470 L670,472 Q698,476 710,484 L730,538 L470,538 Z" fill="var(--dw-illustration-car-window)" />
-              <!-- Glass inner tint -->
-              <path d="M514,488 Q545,482 580,480 L660,482 Q685,484 695,490 L705,525 L495,525 Z" fill="#34404d" opacity="0.45" />
-              <!-- Glass top sheen -->
-              <path d="M526,481 Q580,474 642,478 L658,488 Q592,484 536,488 Z" fill="#fff" opacity="0.28" />
-
-              <!-- Trunk lid horizontal highlight -->
-              <rect x="458" y="555" width="284" height="3" fill="#fff" opacity="0.35" />
-
-              <!-- Side body highlights (shoulder gloss) -->
-              <path d="M388,600 Q396,594 408,600 L405,672 Q392,670 384,660 Z" fill="#fff" opacity="0.22" />
-              <path d="M812,600 Q804,594 792,600 L795,672 Q808,670 816,660 Z" fill="#fff" opacity="0.22" />
-
-              <!-- Black rear panel (between taillights) -->
-              <path d="M408,598 L792,598 Q798,598 798,604 L798,662 Q798,668 792,668 L408,668 Q402,668 402,662 L402,604 Q402,598 408,598 Z" fill="#0d1115" />
-              <rect x="408" y="598" width="384" height="2" fill="#fff" opacity="0.18" />
-
-              <!-- Left taillight cluster: 3 stacked red bars -->
-              <rect x="416" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="416" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="416" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="420" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
-              <rect x="420" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
-              <rect x="420" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
-
-              <!-- Right taillight cluster: 3 stacked red bars -->
-              <rect x="714" y="610" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="714" y="624" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="714" y="638" width="70" height="9" rx="2" fill="var(--dw-illustration-tail-light)" />
-              <rect x="718" y="612" width="60" height="2" fill="#fff" opacity="0.55" />
-              <rect x="718" y="626" width="60" height="2" fill="#fff" opacity="0.55" />
-              <rect x="718" y="640" width="60" height="2" fill="#fff" opacity="0.55" />
-
-              <!-- Subtle emblem (no brand) -->
-              <ellipse cx="600" cy="612" rx="16" ry="5" fill="#cfd6dc" opacity="0.7" />
-
-              <!-- License plate -->
-              <rect x="548" y="625" width="104" height="28" rx="3" fill="#fff" />
-              <rect x="548" y="625" width="104" height="28" rx="3" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
-
-              <!-- Bumper seam -->
-              <path d="M402,670 L798,670" stroke="rgba(0,0,0,0.22)" stroke-width="1.5" stroke-linecap="round" />
-
-              <!-- Diffuser / lower bumper -->
-              <path d="M412,686 L788,686 Q798,686 798,696 L790,716 Q760,722 720,722 L480,722 Q440,722 410,716 L402,696 Q402,686 412,686 Z" fill="#14181d" />
-
-              <!-- Diffuser fins -->
-              <g fill="#2c333a">
-                <rect x="558" y="694" width="3" height="22" />
-                <rect x="574" y="694" width="3" height="22" />
-                <rect x="590" y="694" width="3" height="22" />
-                <rect x="610" y="694" width="3" height="22" />
-                <rect x="626" y="694" width="3" height="22" />
-                <rect x="642" y="694" width="3" height="22" />
-              </g>
-
-              <!-- Exhaust pipes -->
-              <ellipse cx="468" cy="708" rx="20" ry="9" fill="#080a0d" />
-              <ellipse cx="468" cy="707" rx="14" ry="6" fill="#3a4046" />
-              <ellipse cx="468" cy="707" rx="9" ry="4" fill="#0e1216" />
-              <ellipse cx="732" cy="708" rx="20" ry="9" fill="#080a0d" />
-              <ellipse cx="732" cy="707" rx="14" ry="6" fill="#3a4046" />
-              <ellipse cx="732" cy="707" rx="9" ry="4" fill="#0e1216" />
-            </g>
+  <!-- ───── FINAL CTA ───── -->
+  <section>
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h3>{{ 'landing.ctaH3' | translate }}</h3>
+          <p>{{ 'landing.ctaSub' | translate }}</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-amber btn-lg" routerLink="/register">
+            {{ 'landing.ctaStart' | translate }}
+            <svg class="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path></svg>
+          </a>
+          <a class="btn btn-ghost btn-lg cta-ghost" routerLink="/login">{{ 'landing.ctaSignIn' | translate }}</a>
+        </div>
+        <div class="cta-deco">
+          <svg width="220" height="220" viewBox="0 0 64 64" aria-hidden="true">
+            <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="#fff"></polygon>
+            <text x="32" y="38" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="800" font-size="14" fill="#13716A">STOP</text>
           </svg>
         </div>
-        <div class="dw-hero-card__progress">
-          <div class="dw-hero-card__row">
-            <span class="dw-hero-card__label">{{ 'landing.heroCardChapter' | translate }}</span>
-            <span class="dw-hero-card__count">18 / 24</span>
-          </div>
-          <div class="dw-progress">
-            <div class="dw-progress__fill" [style.width.%]="75"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dw-floating dw-floating--start" aria-hidden="true">
-        <svg viewBox="0 0 64 64" class="dw-mini-sign">
-          <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="var(--dw-error)" stroke="#fff" stroke-width="3"/>
-          <text x="32" y="38" text-anchor="middle" font-family="inherit" font-weight="800" font-size="16" fill="#fff">STOP</text>
-        </svg>
-        <div class="dw-floating__copy">
-          <div class="dw-floating__caption">{{ 'landing.explainSign' | translate }}</div>
-          <div class="dw-floating__title">{{ 'landing.askAi' | translate }}</div>
-        </div>
-      </div>
-
-      <div class="dw-floating dw-floating--end" aria-hidden="true">
-        <span class="dw-floating__success">
-          <span class="material-icons">check</span>
-        </span>
-        <div class="dw-floating__copy">
-          <div class="dw-floating__caption">{{ 'landing.score' | translate }}</div>
-          <div class="dw-floating__score">52 / 60</div>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── Features ─── -->
-  <section class="dw-features">
-    <header class="dw-features__head scroll-reveal">
-      <span class="dw-eyebrow">{{ 'landing.featuresEyebrow' | translate }}</span>
-      <h2>{{ 'landing.featuresH2' | translate }}</h2>
-    </header>
-
-    <div class="dw-features__grid">
-      <article class="dw-feature dw-feature--teal scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">menu_book</span></span>
-        <h3>{{ 'landing.f1Title' | translate }}</h3>
-        <p>{{ 'landing.f1Desc' | translate }}</p>
-      </article>
-      <article class="dw-feature dw-feature--amber scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">quiz</span></span>
-        <h3>{{ 'landing.f2Title' | translate }}</h3>
-        <p>{{ 'landing.f2Desc' | translate }}</p>
-      </article>
-      <article class="dw-feature dw-feature--info scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">military_tech</span></span>
-        <h3>{{ 'landing.f3Title' | translate }}</h3>
-        <p>{{ 'landing.f3Desc' | translate }}</p>
-      </article>
-      <article class="dw-feature dw-feature--success scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">trending_up</span></span>
-        <h3>{{ 'landing.f4Title' | translate }}</h3>
-        <p>{{ 'landing.f4Desc' | translate }}</p>
-      </article>
-      <article class="dw-feature dw-feature--teal scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">auto_awesome</span></span>
-        <h3>{{ 'landing.f5Title' | translate }}</h3>
-        <p>{{ 'landing.f5Desc' | translate }}</p>
-      </article>
-      <article class="dw-feature dw-feature--amber scroll-reveal">
-        <span class="dw-feature__icon"><span class="material-icons">language</span></span>
-        <h3>{{ 'landing.f6Title' | translate }}</h3>
-        <p>{{ 'landing.f6Desc' | translate }}</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─── CTA banner ─── -->
-  <section class="dw-cta-section">
-    <div class="dw-cta scroll-reveal">
-      <div class="dw-cta__copy">
-        <h3>{{ 'landing.ctaH3' | translate }}</h3>
-        <p>{{ 'landing.ctaSub' | translate }}</p>
-      </div>
-      <a routerLink="/register" class="dw-btn dw-btn--amber dw-btn--lg">
-        {{ 'landing.ctaStart' | translate }}
-        <span class="material-icons">{{ i18n.isRtl() ? 'arrow_back' : 'arrow_forward' }}</span>
-      </a>
-      <span class="dw-cta__lane" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
-    </div>
-  </section>
-
-  <!-- ─── Footer ─── -->
-  <footer class="dw-foot">
+  <footer class="lp-foot">
     {{ 'landing.footer' | translate }}
   </footer>
 </div>
