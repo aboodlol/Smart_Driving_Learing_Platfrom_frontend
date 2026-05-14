@@ -2,7 +2,7 @@
   <header class="dw-page-head">
     <div class="dw-page-head__title">
       <h1>{{ 'progress.title' | translate }}</h1>
-      <p>{{ 'progress.subtitle30d' | translate }}</p>
+      <p>{{ headerSubtitleKey() | translate }}</p>
     </div>
     <div class="dw-range" role="tablist">
       <button type="button" class="dw-range__btn" [class.is-active]="range() === '7d'" (click)="setRange('7d')">
@@ -69,7 +69,7 @@
       <article class="dw-card dw-activity">
         <header class="dw-section-head">
           <h2>{{ 'progress.studyActivity' | translate }}</h2>
-          <p>{{ 'progress.studyActivitySub' | translate }}</p>
+          <p>{{ studyActivitySubKey() | translate }}</p>
         </header>
 
         @if (activityLoading() && bars().length === 0) {
@@ -235,20 +235,26 @@
           </div>
           }
         </section>
+      </aside>
+    </div>
 
-        <!-- Chapter Strength radar (replaces the old Weakest list) -->
-        <section class="dw-card dw-strength">
-          <header class="dw-section-head">
-            <h2>{{ 'progress.chapterStrength' | translate }}</h2>
-            <p>{{ 'progress.chapterStrengthSub' | translate }}</p>
-          </header>
+    <!-- ─── Chapter Strength (full-width row) ─── -->
+    <section class="dw-card dw-strength">
+      <header class="dw-section-head dw-strength__head">
+        <h2>{{ 'progress.chapterStrength' | translate }}</h2>
+        <p>{{ 'progress.chapterStrengthSub' | translate }}</p>
+      </header>
 
+      <div class="chapter-strength-layout">
+        <div class="chart-panel">
           @if (chapterStrengthLoading() && !chapterStrength()) {
-            <div class="dw-strength__loading">
+            <div class="chart-panel__state">
               <div class="dw-spinner dw-spinner--sm"></div>
             </div>
           } @else if (!radarViewModel().hasData) {
-            <p class="dw-empty">{{ 'progress.noStrengthData' | translate }}</p>
+            <div class="chart-panel__state">
+              <p class="dw-empty">{{ 'progress.noStrengthData' | translate }}</p>
+            </div>
           } @else {
             <div class="dw-radar" [attr.dir]="'ltr'">
               <svg
@@ -287,7 +293,7 @@
                       class="dw-radar__dot"
                       [attr.cx]="p.x"
                       [attr.cy]="p.y"
-                      r="4">
+                      r="5">
                       <title>{{ p.tooltip }}</title>
                     </circle>
                     <text
@@ -301,35 +307,36 @@
               </svg>
             </div>
           }
+        </div>
 
-          <!-- Weakest chapters list under the radar -->
-          <header class="dw-section-head dw-section-head--inset">
-            <h2>{{ 'progress.weakest' | translate }}</h2>
-          </header>
+        <aside class="weakest-panel">
+          <h3 class="weakest-panel__title">{{ 'progress.weakest' | translate }}</h3>
           @if (weakestStrengthRows().length === 0) {
             <p class="dw-empty">{{ 'progress.noWeakest' | translate }}</p>
           } @else {
-            @for (w of weakestStrengthRows(); track w.chapterId) {
-              <div class="dw-weak-row">
-                <span class="dw-weak-row__num dw-weak-row__num--{{ w.tone }}">
-                  {{ localeNumber(w.strength) }}%
-                </span>
-                <span class="dw-weak-row__body">
-                  <span class="dw-weak-row__label">{{ w.title }}</span>
-                  <span class="dw-weak-row__meta">
-                    {{ localeNumber(w.correct) }} / {{ localeNumber(w.answered) }}
-                    {{ 'progress.correctSuffix' | translate }}
+            <div class="weakest-panel__list">
+              @for (w of weakestStrengthRows(); track w.chapterId) {
+                <div class="dw-weak-row">
+                  <span class="dw-weak-row__num dw-weak-row__num--{{ w.tone }}">
+                    {{ localeNumber(w.strength) }}%
                   </span>
-                </span>
-                <a [routerLink]="chapterQuizPath(w)" class="dw-btn dw-btn--ghost dw-btn--sm">
-                  {{ 'progress.train' | translate }}
-                </a>
-              </div>
-            }
+                  <span class="dw-weak-row__body">
+                    <span class="dw-weak-row__label">{{ w.title }}</span>
+                    <span class="dw-weak-row__meta">
+                      {{ localeNumber(w.correct) }} / {{ localeNumber(w.answered) }}
+                      {{ 'progress.correctSuffix' | translate }}
+                    </span>
+                  </span>
+                  <a [routerLink]="chapterQuizPath(w)" class="dw-btn dw-btn--ghost dw-btn--sm">
+                    {{ 'progress.train' | translate }}
+                  </a>
+                </div>
+              }
+            </div>
           }
-        </section>
-      </aside>
-    </div>
+        </aside>
+      </div>
+    </section>
 
     <!-- ─── Reset section ─── -->
     <section class="dw-reset">

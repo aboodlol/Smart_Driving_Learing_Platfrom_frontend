@@ -92,7 +92,7 @@
   .dw-bars { height: 140px; gap: 4px; padding: 14px 0; }
   .dw-activity { padding: 18px; }
   .dw-history { padding: 18px; }
-  .dw-weakest { padding: 18px; }
+  .dw-weakest, .dw-strength { padding: 18px; }
 }
 
 @media (max-width: 480px) {
@@ -641,35 +641,116 @@
 .text-success { color: var(--dw-success) !important; font-weight: 700; }
 .text-danger  { color: var(--dw-error) !important; font-weight: 700; }
 
-/* ─── Chapter Strength radar ─── */
+/* ─── Chapter Strength (full-width row) ─── */
+/* Desktop: section header on top, then a 7/3 grid — radar chart (left, ~70%)
+   and weakest chapters list (right, ~30%). Below 1024px the two panels stack
+   so the radar always gets full card width on tablets and phones. */
 .dw-strength {
-  padding: 22px;
+  margin-top: 22px;
+  padding: 28px 32px;
+}
+
+.dw-strength__head {
+  margin-bottom: 24px;
+}
+
+.chapter-strength-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(280px, 3fr);
+  gap: 36px;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .chapter-strength-layout { grid-template-columns: 1fr; gap: 24px; }
+}
+
+@media (max-width: 720px) {
+  .dw-strength { padding: 20px; }
+  .chapter-strength-layout { gap: 20px; }
+}
+
+/* Left column: hosts the radar with generous internal padding so chapter
+   labels never clip against the panel edge. The min-height anchors the chart
+   to a comfortable size even when the SVG is still loading. */
+.chart-panel {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 40px;
+  background: var(--dw-surface-2);
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-r-lg);
+  min-height: 480px;
+}
+
+@media (max-width: 720px) {
+  .chart-panel { padding: 18px 14px; min-height: 360px; }
+}
+
+.chart-panel__state {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 240px;
+}
+
+/* Right column: compact vertical card list. */
+.weakest-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weakest-panel__title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--dw-text-3);
+  margin: 0;
+}
+
+.weakest-panel__list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.dw-strength__loading {
-  display: grid;
-  place-items: center;
-  padding: 32px 0;
-}
-
-/* The radar wrapper is forced to LTR even in Arabic so the SVG geometry
-   (top-of-circle, clockwise vertices) renders the same in both languages —
-   the chapter labels themselves render in their natural script. */
+/* Force LTR on the radar wrapper so the SVG geometry (top-of-circle,
+   clockwise vertices) renders identically in both languages — chapter
+   labels still render in their native script via the text elements. */
 .dw-radar {
   width: 100%;
-  display: grid;
-  place-items: center;
-  margin: 4px 0 8px;
+  display: flex;
+  justify-content: center;
 }
 
+/* The SVG fills almost the full width of the chart panel. The internal
+   viewBox already reserves ~100 SVG units of padding around the outer ring
+   for labels, and overflow:visible is a defensive fallback so unusually
+   long labels still render rather than clipping. */
 .dw-radar__svg {
   width: 100%;
-  max-width: 360px;
+  max-width: 540px;
+  aspect-ratio: 1;
   height: auto;
-  overflow: visible; // allow labels to bleed outside the viewBox slightly
+  overflow: visible;
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  .dw-radar__svg { max-width: 480px; }
+}
+
+@media (max-width: 720px) {
+  .dw-radar__svg { max-width: 380px; }
+}
+
+@media (max-width: 480px) {
+  .dw-radar__svg { max-width: 300px; }
 }
 
 .dw-radar__ring {
@@ -704,14 +785,22 @@
 .dw-radar__point:hover .dw-radar__dot,
 .dw-radar__point:focus-within .dw-radar__dot {
   fill: var(--dw-amber-500);
-  r: 6;
+  r: 7;
 }
 
 .dw-radar__label {
   font-family: var(--dw-font-sans);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 700;
   fill: var(--dw-text-2);
+}
+
+@media (max-width: 720px) {
+  .dw-radar__label { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+  .dw-radar__label { font-size: 11px; }
 }
 
 [dir='rtl'] .dw-radar__label { font-family: 'Tajawal', var(--dw-font-sans); }

@@ -38,7 +38,9 @@
       "Bash(sed -n '156,165p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/public/i18n/ar.json)",
       "Bash(grep -n \"dw-ai-sidebar\\\\|dw-ai-backdrop\\\\|dw-ai \\\\|^\\\\.dw-ai$\\\\|position\\\\|transform\\\\|z-index\" /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/features/assistant/pages/assistant-page.component.scss)",
       "Bash(sed -n '85,92p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/app.scss)",
-      "Bash(sed -n '378,415p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/app.scss)"
+      "Bash(sed -n '378,415p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/app.scss)",
+      "Bash(git stash *)",
+      "Bash(npm start *)"
     ],
     "deny": [
       "Bash(git push --force:*)",

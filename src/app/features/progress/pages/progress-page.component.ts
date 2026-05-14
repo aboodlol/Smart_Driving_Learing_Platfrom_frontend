@@ -132,6 +132,22 @@ export class ProgressPageComponent {
   protected readonly hasHistory = computed(() => this.filteredHistory().length > 0);
   protected readonly reviewItems = computed(() => this.buildReviewItems());
 
+  // Range-scoped i18n keys: the page header subtitle and the Study Activity
+  // subtitle both reflect the active filter (7d / 30d / all).
+  protected readonly headerSubtitleKey = computed(() => {
+    const r = this.range();
+    if (r === '7d') return 'progress.subtitle7d';
+    if (r === 'all') return 'progress.subtitleAll';
+    return 'progress.subtitle30d';
+  });
+
+  protected readonly studyActivitySubKey = computed(() => {
+    const r = this.range();
+    if (r === '7d') return 'progress.studyActivitySub7d';
+    if (r === 'all') return 'progress.studyActivitySubAll';
+    return 'progress.studyActivitySub30d';
+  });
+
   // Exam history filtered by the selected range. Filtering happens on the
   // client because /exam-attempts/history returns the full list — we only
   // hide rows outside the current window without re-fetching.
@@ -180,8 +196,12 @@ export class ProgressPageComponent {
 
   protected readonly bestPassed = computed(() => (this.bestScore() ?? 0) >= 85);
 
+  // Streak card displays a filter-independent value, so it reads
+  // totalActiveDays (all-time) rather than activeDays (within the window).
+  // The number is sourced from the same /activity response that drives the
+  // bars chart, so no extra request is needed.
   protected readonly activeDaysLabel = computed(() => {
-    const value = this.activity()?.activeDays;
+    const value = this.activity()?.totalActiveDays;
     if (typeof value !== 'number') return '—';
     return this.localeNumber(value);
   });
@@ -285,9 +305,13 @@ export class ProgressPageComponent {
   // once per render and recomputed automatically when the range/language/data
   // signals change.
   protected readonly radarViewModel = computed<RadarChartViewModel>(() => {
-    const SIZE = 320;
+    const SIZE = 560;
     const CENTER = SIZE / 2;
-    const OUTER = SIZE * 0.36; // leaves room for chapter labels around the ring
+    // OUTER is intentionally well under SIZE/2 so labels rendered just beyond
+    // the outer ring still fit inside the viewBox even before SVG overflow
+    // kicks in. With SIZE=560 and OUTER=0.22, ~157 SVG units remain on every
+    // side for chapter labels — generous headroom for long Arabic titles.
+    const OUTER = SIZE * 0.22;
 
     const chapters = this.chapterStrength()?.chapters ?? [];
     const arabic = this.isArabicMode();
@@ -332,7 +356,7 @@ export class ProgressPageComponent {
       polyVerts.push(`${x},${y}`);
 
       // Push labels slightly outside the outer ring; quadrant chooses anchor.
-      const labelOffset = 14;
+      const labelOffset = 17;
       const labelX = CENTER + cos * (OUTER + labelOffset);
       const labelY = CENTER + sin * (OUTER + labelOffset);
       const anchor: RadarPoint['labelAnchor'] =
