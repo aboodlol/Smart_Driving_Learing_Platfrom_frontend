@@ -40,7 +40,9 @@
       "Bash(sed -n '85,92p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/app.scss)",
       "Bash(sed -n '378,415p' /Users/toma/Desktop/coding/Smart_Driving_Learing_Platfrom_frontend/src/app/app.scss)",
       "Bash(git stash *)",
-      "Bash(npm start *)"
+      "Bash(npm start *)",
+      "Bash(grep -r \"localStorage\\\\\\\\.setItem\\\\|localStorage\\\\\\\\.getItem\" \"c:\\\\Users\\\\ahmad\\\\OneDrive\\\\Desktop\\\\Smart_Driving_Learing_Platfrom_frontend2\\\\Smart_Driving_Learing_Platfrom_frontend\\\\src\\\\app\" --include=\"*.ts\" --include=\"*.tsx\")",
+      "Bash(grep -iE \"\\\\.js$\")"
     ],
     "deny": [
       "Bash(git push --force:*)",
