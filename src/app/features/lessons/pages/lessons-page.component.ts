@@ -1,41 +1,32 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Chapter } from '../../../core/models/lesson.models';
 import { ChapterProgress } from '../../../core/models/progress.models';
-import { LessonApiService } from '../../../core/services/lesson-api.service';
-import { ProgressApiService } from '../../../core/services/progress-api.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
+import { LessonApiService } from '../../../core/services/lesson-api.service';
+import { ProgressApiService } from '../../../core/services/progress-api.service';
+import { ChapterMeta, getChapterMeta } from '../../../core/utils/chapter-meta';
 
 type FilterKey = 'all' | 'inProgress' | 'completed' | 'notStarted';
 type ChapterStatus = 'Not Started' | 'In Progress' | 'Completed';
-type AccentKey = 'teal' | 'amber' | 'info' | 'success' | 'error';
-
-interface ChapterMeta {
-  icon: string;
-  accent: AccentKey;
-}
-
-const CHAPTER_META: ChapterMeta[] = [
-  { icon: 'directions_car', accent: 'teal' },
-  { icon: 'flag', accent: 'amber' },
-  { icon: 'shield', accent: 'info' },
-  { icon: 'schedule', accent: 'success' },
-  { icon: 'shield', accent: 'teal' },
-  { icon: 'menu_book', accent: 'amber' },
-  { icon: 'quiz', accent: 'error' },
-  { icon: 'auto_awesome', accent: 'info' },
-  { icon: 'directions_car', accent: 'success' },
-];
 
 const MIN_PER_SUBLESSON = 2;
 
 @Component({
   selector: 'app-lessons-page',
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, NgComponentOutlet],
   templateUrl: './lessons-page.component.html',
   styleUrl: './lessons-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,7 +54,7 @@ export class LessonsPageComponent {
     const f = this.filter();
     const all = this.chapters();
     if (f === 'all') return all;
-    return all.filter(c => {
+    return all.filter((c) => {
       const status = this.statusFor(c);
       if (f === 'completed') return status === 'Completed';
       if (f === 'inProgress') return status === 'In Progress';
@@ -93,9 +84,10 @@ export class LessonsPageComponent {
     const hours = Math.floor(mins / 60);
     const remMin = mins % 60;
     if (this.isArabicMode()) {
-      const study = hours > 0
-        ? `${this.toArabic(hours)} ساعة${remMin ? ` و${this.toArabic(remMin)} دقيقة` : ''}`
-        : `${this.toArabic(remMin)} دقيقة`;
+      const study =
+        hours > 0
+          ? `${this.toArabic(hours)} ساعة${remMin ? ` و${this.toArabic(remMin)} دقيقة` : ''}`
+          : `${this.toArabic(remMin)} دقيقة`;
       return `${this.toArabic(chapters)} فصول · ${this.toArabic(subs)} درسًا فرعيًا · ${study} للدراسة`;
     }
     const study = hours > 0 ? `${hours}h ${remMin ? `${remMin}m` : ''}`.trim() : `${remMin}m`;
@@ -131,8 +123,8 @@ export class LessonsPageComponent {
     this.filter.set(key);
   }
 
-  protected metaFor(index: number): ChapterMeta {
-    return CHAPTER_META[index % CHAPTER_META.length];
+  protected metaFor(chapter: Chapter, index: number): ChapterMeta {
+    return getChapterMeta(chapter.title, index);
   }
 
   protected statusFor(chapter: Chapter): ChapterStatus {
@@ -176,9 +168,9 @@ export class LessonsPageComponent {
   }
 
   protected continueChapter = computed<Chapter | null>(() => {
-    const inProgress = this.chapters().find(c => this.statusFor(c) === 'In Progress');
+    const inProgress = this.chapters().find((c) => this.statusFor(c) === 'In Progress');
     if (inProgress) return inProgress;
-    return this.chapters().find(c => this.statusFor(c) === 'Not Started') ?? null;
+    return this.chapters().find((c) => this.statusFor(c) === 'Not Started') ?? null;
   });
 
   protected getTextDirection(): 'rtl' | 'ltr' {
@@ -186,6 +178,6 @@ export class LessonsPageComponent {
   }
 
   private toArabic(n: number): string {
-    return n.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]);
+    return n.toString().replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
   }
 }

@@ -29,13 +29,18 @@
         <a
           [routerLink]="['/quiz/chapter', chapter.chapterKey]"
           class="dw-card dw-chapter dw-chapter--{{ chapter.accent }}"
-          [style.animation-delay]="(i * 0.05) + 's'">
+          [style.animation-delay]="i * 0.05 + 's'"
+        >
           <span class="dw-chapter__num">{{ indexLabel(chapter.index) }}</span>
-          <span class="dw-chapter__icon">
-            <span class="material-icons">{{ chapter.icon }}</span>
+          <span class="dw-chapter__icon icon-{{ chapter.accent }}">
+            <ng-container
+              *ngComponentOutlet="chapter.icon; inputs: { size: 28, strokeWidth: 2 }"
+            ></ng-container>
           </span>
           <div class="dw-chapter__head">
-            <span class="dw-eyebrow">{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(chapter.index) }}</span>
+            <span class="dw-eyebrow"
+              >{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(chapter.index) }}</span
+            >
             <h3 [attr.dir]="getTextDirection(chapter)">{{ getChapterTitle(chapter) }}</h3>
           </div>
           <p class="dw-chapter__desc" [attr.dir]="getTextDirection(chapter)">
@@ -48,7 +53,9 @@
             </span>
             <span class="dw-chapter__cta">
               {{ 'quiz.startQuiz' | translate }}
-              <span class="material-icons">{{ isArabicMode() ? 'arrow_back' : 'arrow_forward' }}</span>
+              <span class="material-icons">{{
+                isArabicMode() ? 'arrow_back' : 'arrow_forward'
+              }}</span>
             </span>
           </div>
         </a>

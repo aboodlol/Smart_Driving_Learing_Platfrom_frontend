@@ -12,7 +12,8 @@
           class="dw-filter"
           [class.is-active]="filter() === f.key"
           [attr.aria-selected]="filter() === f.key"
-          (click)="setFilter(f.key)">
+          (click)="setFilter(f.key)"
+        >
           {{ f.labelKey | translate }}
         </button>
       }
@@ -37,9 +38,7 @@
         <div class="dw-progress dw-progress--lg">
           <div class="dw-progress__fill" [style.width.%]="overallPercent()"></div>
         </div>
-        <div class="dw-overall__ticks">
-          <span>0%</span><span>50%</span><span>100%</span>
-        </div>
+        <div class="dw-overall__ticks"><span>0%</span><span>50%</span><span>100%</span></div>
       </div>
       @if (continueChapter(); as chapter) {
         <a [routerLink]="['/lessons', chapter._id]" class="dw-btn dw-btn--primary">
@@ -56,18 +55,23 @@
 
     <section class="dw-grid">
       @for (chapter of visibleChapters(); track chapter._id; let i = $index) {
-        @let displayIdx = (chapter.order ? chapter.order - 1 : chapters().indexOf(chapter));
-        @let meta = metaFor(displayIdx);
+        @let displayIdx = chapter.order ? chapter.order - 1 : chapters().indexOf(chapter);
+        @let meta = metaFor(chapter, displayIdx);
         <a
           [routerLink]="['/lessons', chapter._id]"
           class="dw-card dw-chapter dw-chapter--{{ meta.accent }}"
-          [style.animation-delay]="(i * 0.05) + 's'">
+          [style.animation-delay]="i * 0.05 + 's'"
+        >
           <span class="dw-chapter__num">{{ indexLabel(displayIdx) }}</span>
-          <span class="dw-chapter__icon">
-            <span class="material-icons">{{ meta.icon }}</span>
+          <span class="dw-chapter__icon icon-{{ meta.accent }}">
+            <ng-container
+              *ngComponentOutlet="meta.icon; inputs: { size: 28, strokeWidth: 2 }"
+            ></ng-container>
           </span>
           <div class="dw-chapter__head">
-            <span class="dw-eyebrow">{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(displayIdx) }}</span>
+            <span class="dw-eyebrow"
+              >{{ 'lessons.chapterLabel' | translate }} {{ indexLabel(displayIdx) }}</span
+            >
             <h3>{{ titleFor(chapter) }}</h3>
           </div>
           <div class="dw-chapter__meta">

@@ -1,12 +1,22 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { LowerCasePipe, NgComponentOutlet } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { LowerCasePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { QuizQuestion } from '../../../core/models/quiz.models';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
+import { getChapterMeta } from '../../../core/utils/chapter-meta';
+
+import { Type } from '@angular/core';
 
 interface QuizChapterCard {
   chapterKey: string;
@@ -17,10 +27,13 @@ interface QuizChapterCard {
   questionCount: number;
   index: number;
   accent: 'teal' | 'amber' | 'info' | 'success' | 'error';
-  icon: string;
+  icon: Type<unknown>;
 }
 
-interface BilingualText { en: string; ar: string; }
+interface BilingualText {
+  en: string;
+  ar: string;
+}
 
 const CHAPTER_DESCRIPTION_MAP: Record<string, BilingualText> = {
   'basic driving skills': {
@@ -61,21 +74,11 @@ const CHAPTER_DESCRIPTION_MAP: Record<string, BilingualText> = {
   },
 };
 
-const ROTATION: { accent: QuizChapterCard['accent']; icon: string }[] = [
-  { accent: 'teal',    icon: 'directions_car' },
-  { accent: 'amber',   icon: 'flag' },
-  { accent: 'info',    icon: 'shield' },
-  { accent: 'success', icon: 'schedule' },
-  { accent: 'teal',    icon: 'shield' },
-  { accent: 'amber',   icon: 'menu_book' },
-  { accent: 'error',   icon: 'quiz' },
-  { accent: 'info',    icon: 'auto_awesome' },
-  { accent: 'success', icon: 'directions_car' },
-];
+const ROTATION: { accent: QuizChapterCard['accent']; icon: string }[] = [];
 
 @Component({
   selector: 'app-quiz-page',
-  imports: [RouterLink, TranslatePipe, LowerCasePipe],
+  imports: [RouterLink, TranslatePipe, LowerCasePipe, NgComponentOutlet],
   templateUrl: './quiz-page.component.html',
   styleUrl: './quiz-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -114,7 +117,9 @@ export class QuizPageComponent {
   }
 
   protected getChapterTitle(chapter: QuizChapterCard): string {
-    return this.isArabicMode() && chapter.chapterTitleAR ? chapter.chapterTitleAR : chapter.chapterTitle;
+    return this.isArabicMode() && chapter.chapterTitleAR
+      ? chapter.chapterTitleAR
+      : chapter.chapterTitle;
   }
 
   protected getChapterDescription(chapter: QuizChapterCard): string {
@@ -174,7 +179,7 @@ export class QuizPageComponent {
 
       const desc = this.fallbackDescription(title);
       const order = map.size;
-      const rot = ROTATION[order % ROTATION.length];
+      const meta = getChapterMeta(title, order);
       map.set(key, {
         chapterKey: key,
         chapterTitle: title,
@@ -183,8 +188,8 @@ export class QuizPageComponent {
         descriptionAR: desc.ar,
         questionCount: 1,
         index: order,
-        accent: rot.accent,
-        icon: rot.icon,
+        accent: meta.accent,
+        icon: meta.icon,
       });
     }
 
@@ -193,10 +198,12 @@ export class QuizPageComponent {
 
   private fallbackDescription(title: string): BilingualText {
     const key = title.trim().toLowerCase().replace(/\s+/g, ' ');
-    return CHAPTER_DESCRIPTION_MAP[key] ?? {
-      en: 'Practice key questions for this chapter.',
-      ar: 'تدرّب على الأسئلة الأساسية لهذا الفصل.',
-    };
+    return (
+      CHAPTER_DESCRIPTION_MAP[key] ?? {
+        en: 'Practice key questions for this chapter.',
+        ar: 'تدرّب على الأسئلة الأساسية لهذا الفصل.',
+      }
+    );
   }
 
   private normalize(value?: string | null): string | undefined {
