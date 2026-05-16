@@ -115,6 +115,7 @@ export class ProgressPageComponent {
   protected readonly loading = signal(true);
   protected readonly summary = signal<ProgressSummary | null>(null);
   protected readonly resetting = signal(false);
+  protected readonly resetConfirmOpen = signal(false);
   protected readonly historyLoading = signal(true);
   protected readonly historyError = signal(false);
   protected readonly history = signal<ExamHistoryRow[]>([]);
@@ -488,21 +489,41 @@ export class ProgressPageComponent {
     }
   }
 
-  protected resetProgress(): void {
-    if (!confirm('Are you sure you want to reset all your progress? This cannot be undone.')) return;
+  protected openResetConfirm(): void {
+    if (this.resetting()) return;
+    this.resetConfirmOpen.set(true);
+  }
 
+  protected closeResetConfirm(): void {
+    if (this.resetting()) return;
+    this.resetConfirmOpen.set(false);
+  }
+
+  protected confirmReset(): void {
+    if (this.resetting()) return;
     this.resetting.set(true);
 
     this.progressApi
       .resetProgress()
       .pipe(
-        finalize(() => this.resetting.set(false)),
+        finalize(() => {
+          this.resetting.set(false);
+          this.resetConfirmOpen.set(false);
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
-          this.toast.success('Progress has been reset.');
+          this.toast.success(this.i18n.t('progress.resetSuccess'));
+          // Refresh every progress-derived view so the UI matches the
+          // server's now-empty state immediately, without requiring a page
+          // reload. Range-scoped data (activity, chapter strength) is
+          // re-fetched at the active filter.
+          this.closeAttemptDetails();
           this.loadSummary();
+          this.loadHistory();
+          this.loadActivity(this.range());
+          this.loadChapterStrength(this.range());
         },
         error: (err: Error) => this.toast.error(err.message),
       });

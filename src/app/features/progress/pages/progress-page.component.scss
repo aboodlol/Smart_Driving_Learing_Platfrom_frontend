@@ -961,3 +961,71 @@
   margin: 4px 0 0;
   line-height: 1.5;
 }
+
+/* ─── Reset confirmation modal ─── */
+.dw-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 20, 30, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: dwModalFade .15s var(--dw-ease);
+}
+
+@keyframes dwModalFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dw-modal__panel {
+  background: var(--dw-surface);
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-r-lg);
+  box-shadow: var(--dw-shadow-md);
+  padding: 22px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dw-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dw-modal__icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--dw-error-bg);
+  color: var(--dw-error);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+
+  .material-icons { font-size: 20px; }
+}
+
+.dw-modal__title {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--dw-text);
+}
+
+.dw-modal__body {
+  font-size: 13px;
+  color: var(--dw-text-2);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.dw-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}

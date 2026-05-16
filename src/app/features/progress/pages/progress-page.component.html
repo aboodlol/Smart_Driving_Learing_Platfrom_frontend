@@ -347,12 +347,35 @@
         <h3>{{ 'progress.resetProgress' | translate }}</h3>
         <p>{{ 'progress.resetDescription' | translate }}</p>
       </div>
-      <button type="button" class="dw-btn dw-btn--danger dw-btn--sm" [disabled]="resetting()" (click)="resetProgress()">
+      <button type="button" class="dw-btn dw-btn--danger dw-btn--sm" [disabled]="resetting()" (click)="openResetConfirm()">
         @if (resetting()) {
           <span class="dw-spinner dw-spinner--sm"></span>
         }
         {{ 'progress.resetAllProgress' | translate }}
       </button>
     </section>
+
+    @if (resetConfirmOpen()) {
+      <div class="dw-modal" role="dialog" aria-modal="true" (click)="closeResetConfirm()">
+        <div class="dw-modal__panel" (click)="$event.stopPropagation()">
+          <div class="dw-modal__head">
+            <span class="dw-modal__icon"><span class="material-icons">warning</span></span>
+            <h3 class="dw-modal__title">{{ 'progress.resetConfirmTitle' | translate }}</h3>
+          </div>
+          <p class="dw-modal__body">{{ 'progress.resetConfirmBody' | translate }}</p>
+          <div class="dw-modal__actions">
+            <button type="button" class="dw-btn dw-btn--ghost dw-btn--sm" [disabled]="resetting()" (click)="closeResetConfirm()">
+              {{ 'progress.resetCancel' | translate }}
+            </button>
+            <button type="button" class="dw-btn dw-btn--danger dw-btn--sm" [disabled]="resetting()" (click)="confirmReset()">
+              @if (resetting()) {
+                <span class="dw-spinner dw-spinner--sm"></span>
+              }
+              {{ 'progress.resetConfirmAction' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>
