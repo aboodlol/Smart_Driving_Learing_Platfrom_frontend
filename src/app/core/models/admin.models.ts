@@ -17,7 +17,7 @@ export interface AdminDocument {
   _id: string;
   originalName: string;
   filename: string;
-  mimetype: string;
+  mimeType: string;
   size: number;
   uploadedBy: {
     _id: string;
@@ -53,29 +53,46 @@ export interface ChapterQuizStats {
 
 export interface ChapterReport {
   chapterTitle: string;
+  chapterTitleAr?: string;
   totalSubLessons: number;
   completionRate: number;
+  completedEntries?: number;
+  studentsCompleted?: number;
+  activeUsers?: number;
   quizStats?: ChapterQuizStats;
 }
 
 export interface RecentQuizAttempt {
-  id?: string;
-  score?: number;
-  createdAt?: string;
-  user?: {
-    id?: string;
-    name?: string;
+  id: string;
+  chapterTitle?: string;
+  chapterTitleAr?: string;
+  score: number;
+  totalQuestions: number;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email?: string;
   };
+}
+
+export interface RecentDocumentUpload {
+  id: string;
+  name: string;
+  uploadedBy: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface RecentUserSignup {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
 }
 
 export interface RecentActivityDto {
   recentQuizAttempts: RecentQuizAttempt[];
-  recentUsers: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    createdAt: string;
-    updatedAt?: string;
-  }[];
+  recentUsers: RecentUserSignup[];
+  recentDocuments?: RecentDocumentUpload[];
 }

@@ -116,16 +116,50 @@
         }
 
         @if (currentUser()?.role === 'admin') {
-          <a
-            routerLink="/admin"
-            routerLinkActive="is-active"
-            class="dw-nav__item dw-nav__item--admin"
-            (click)="closeSidebar()"
-          >
-            <span class="material-icons dw-nav__icon">admin_panel_settings</span>
-            <span class="dw-nav__label">{{ 'nav.admin' | translate }}</span>
-            <span class="dw-nav__dot" aria-hidden="true"></span>
-          </a>
+          @if (isAdminPage()) {
+            <a
+              routerLink="/admin"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="dw-nav__item dw-nav__item--admin"
+              (click)="closeSidebar()"
+            >
+              <span class="material-icons dw-nav__icon">dashboard</span>
+              <span class="dw-nav__label">{{ 'nav.adminDashboard' | translate }}</span>
+              <span class="dw-nav__dot" aria-hidden="true"></span>
+            </a>
+            <a
+              routerLink="/admin/users"
+              routerLinkActive="is-active"
+              class="dw-nav__item dw-nav__item--admin"
+              (click)="closeSidebar()"
+            >
+              <span class="material-icons dw-nav__icon">group</span>
+              <span class="dw-nav__label">{{ 'nav.adminUsers' | translate }}</span>
+              <span class="dw-nav__dot" aria-hidden="true"></span>
+            </a>
+            <a
+              routerLink="/admin/documents"
+              routerLinkActive="is-active"
+              class="dw-nav__item dw-nav__item--admin"
+              (click)="closeSidebar()"
+            >
+              <span class="material-icons dw-nav__icon">description</span>
+              <span class="dw-nav__label">{{ 'nav.adminDocuments' | translate }}</span>
+              <span class="dw-nav__dot" aria-hidden="true"></span>
+            </a>
+          } @else {
+            <a
+              routerLink="/admin"
+              routerLinkActive="is-active"
+              class="dw-nav__item dw-nav__item--admin"
+              (click)="closeSidebar()"
+            >
+              <span class="material-icons dw-nav__icon">admin_panel_settings</span>
+              <span class="dw-nav__label">{{ 'nav.admin' | translate }}</span>
+              <span class="dw-nav__dot" aria-hidden="true"></span>
+            </a>
+          }
         }
       </nav>
 

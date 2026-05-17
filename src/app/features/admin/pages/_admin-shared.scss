@@ -1,0 +1,306 @@
+/* Shared admin design tokens + base layout primitives.
+   Reuses the global --dw-* tokens from app.scss; we just need page-level
+   spacing / radii / shadows that work in both light and dark modes. */
+
+:host {
+  display: block;
+
+  --dw-bg:        oklch(98% 0.005 90);
+  --dw-surface:   oklch(100% 0 0);
+  --dw-surface-2: oklch(96% 0.005 90);
+  --dw-surface-3: oklch(93% 0.008 90);
+  --dw-border:    oklch(90% 0.008 90);
+  --dw-border-strong: oklch(82% 0.01 90);
+
+  --dw-text:   oklch(22% 0.02 220);
+  --dw-text-2: oklch(40% 0.015 220);
+  --dw-text-3: oklch(58% 0.012 220);
+
+  --dw-teal-100: oklch(93% 0.04 195);
+  --dw-teal-500: oklch(62% 0.12 195);
+  --dw-teal-600: oklch(54% 0.115 195);
+  --dw-teal-700: oklch(45% 0.10 195);
+
+  --dw-amber-500: oklch(78% 0.14 75);
+
+  --dw-success:    oklch(68% 0.14 150);
+  --dw-success-bg: oklch(94% 0.05 150);
+  --dw-error:      oklch(60% 0.18 22);
+  --dw-error-bg:   oklch(95% 0.05 22);
+
+  --dw-font-sans: 'Plus Jakarta Sans', 'Tajawal', -apple-system, system-ui, sans-serif;
+
+  --dw-shadow-sm: 0 1px 2px rgba(15, 30, 40, 0.04), 0 1px 1px rgba(15, 30, 40, 0.03);
+  --dw-shadow-md: 0 6px 16px -6px rgba(15, 50, 60, 0.10), 0 2px 4px rgba(15, 50, 60, 0.04);
+  --dw-shadow-lg: 0 18px 40px -12px rgba(15, 50, 60, 0.18);
+
+  --dw-ease: cubic-bezier(.2, .8, .2, 1);
+
+  min-height: 100%;
+}
+
+:host-context(html[data-theme='dark']),
+:host-context([data-theme='dark']) {
+  --dw-bg:        oklch(18% 0.015 220);
+  --dw-surface:   oklch(22% 0.018 220);
+  --dw-surface-2: oklch(26% 0.02 220);
+  --dw-surface-3: oklch(30% 0.022 220);
+  --dw-border:    oklch(32% 0.02 220);
+  --dw-border-strong: oklch(40% 0.025 220);
+
+  --dw-text:   oklch(96% 0.01 220);
+  --dw-text-2: oklch(82% 0.015 220);
+  --dw-text-3: oklch(65% 0.015 220);
+
+  --dw-teal-100: oklch(32% 0.06 195);
+  --dw-teal-500: oklch(72% 0.12 195);
+  --dw-teal-600: oklch(78% 0.13 195);
+  --dw-teal-700: oklch(82% 0.13 195);
+
+  --dw-success-bg: oklch(28% 0.05 150);
+  --dw-error-bg:   oklch(28% 0.05 22);
+
+  --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dw-shadow-md: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  --dw-shadow-lg: 0 24px 50px -16px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Page shell ─── */
+.admin-page {
+  font-family: var(--dw-font-sans);
+  color: var(--dw-text);
+  background: var(--dw-bg);
+  width: 100%;
+  padding: 28px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+}
+
+[dir='rtl'] .admin-page { font-family: 'Tajawal', var(--dw-font-sans); }
+
+@media (max-width: 1024px) { .admin-page { padding: 24px 22px 36px; } }
+@media (max-width: 640px)  { .admin-page { padding: 20px 16px 32px; gap: 16px; } }
+@media (max-width: 480px)  { .admin-page { padding: 16px 14px 28px; } }
+
+.admin-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-page__heading { min-width: 0; }
+
+.admin-page__title {
+  font-size: clamp(20px, 1.5vw + 14px, 28px);
+  font-weight: 800;
+  color: var(--dw-text);
+  letter-spacing: -0.4px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-page__subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--dw-text-3);
+  overflow-wrap: anywhere;
+}
+
+.admin-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--dw-text-2);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--dw-border);
+  background: var(--dw-surface);
+  transition: background 0.15s var(--dw-ease), border-color 0.15s var(--dw-ease);
+
+  .material-icons { font-size: 16px; }
+}
+
+.admin-page__back:hover {
+  background: var(--dw-surface-2);
+  border-color: var(--dw-border-strong);
+}
+
+[dir='rtl'] .admin-page__back .material-icons { transform: rotate(180deg); }
+
+/* ─── Panel (card) ─── */
+.panel {
+  background: var(--dw-surface);
+  border: 1px solid var(--dw-border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--dw-shadow-sm);
+  min-width: 0;
+}
+
+@media (max-width: 640px) { .panel { padding: 18px; border-radius: 18px; } }
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.panel__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dw-text);
+  letter-spacing: -0.2px;
+}
+
+.panel__empty {
+  margin: 0;
+  color: var(--dw-text-3);
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+/* ─── Buttons ─── */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: var(--dw-teal-600);
+  color: oklch(98% 0.008 195);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s var(--dw-ease), background 0.15s var(--dw-ease),
+    border-color 0.15s var(--dw-ease), color 0.15s var(--dw-ease);
+
+  .material-icons { font-size: 18px; }
+}
+
+.admin-btn:hover:not(:disabled) { filter: brightness(1.05); }
+.admin-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.admin-btn--ghost {
+  background: var(--dw-surface);
+  border-color: var(--dw-border);
+  color: var(--dw-text-2);
+}
+
+.admin-btn--ghost:hover:not(:disabled) {
+  background: var(--dw-surface-2);
+  border-color: var(--dw-border-strong);
+  color: var(--dw-text);
+  filter: none;
+}
+
+.admin-btn--danger {
+  background: transparent;
+  border-color: color-mix(in oklch, var(--dw-error) 35%, var(--dw-border));
+  color: var(--dw-error);
+}
+
+.admin-btn--danger:hover:not(:disabled) {
+  background: var(--dw-error-bg);
+  filter: none;
+}
+
+.admin-btn--sm { height: 32px; padding: 0 12px; font-size: 12px; }
+
+/* ─── Loading / Error / Empty ─── */
+.admin-loading {
+  display: grid;
+  place-items: center;
+  padding: 60px 0;
+}
+
+.admin-error {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--dw-error-bg);
+  border: 1px solid color-mix(in oklch, var(--dw-error) 35%, transparent);
+  color: var(--dw-error);
+
+  &__icon { font-size: 28px; flex-shrink: 0; }
+  &__body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  &__body strong { color: var(--dw-error); font-size: 14px; }
+  &__body small  { color: var(--dw-text-2); font-size: 12px; overflow-wrap: anywhere; }
+}
+
+.admin-empty {
+  text-align: center;
+  padding: 56px 20px;
+  border-radius: 18px;
+  border: 1px dashed var(--dw-border-strong);
+  background: var(--dw-surface);
+  color: var(--dw-text-2);
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: var(--dw-surface-2);
+    color: var(--dw-teal-700);
+
+    .material-icons { font-size: 30px; }
+  }
+
+  &__title {
+    margin: 0 0 6px;
+    color: var(--dw-text);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__text {
+    margin: 0 auto 16px;
+    max-width: 420px;
+    font-size: 14px;
+    color: var(--dw-text-3);
+  }
+}
+
+/* ─── Inputs ─── */
+.admin-input,
+.admin-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--dw-border);
+  background: var(--dw-surface);
+  color: var(--dw-text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s var(--dw-ease), box-shadow 0.15s var(--dw-ease);
+}
+
+.admin-input::placeholder { color: var(--dw-text-3); }
+
+.admin-input:focus,
+.admin-select:focus {
+  border-color: var(--dw-teal-500);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--dw-teal-500) 25%, transparent);
+}

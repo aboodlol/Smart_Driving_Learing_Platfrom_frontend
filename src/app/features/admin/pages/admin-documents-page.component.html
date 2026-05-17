@@ -1,88 +1,99 @@
-<div class="admin-documents">
-  <div class="container py-4">
-    <div class="page-header mb-4">
-      <div class="header-back mb-2">
-        <a routerLink="/admin" class="back-link">&larr; {{ 'admin.documents.backToDashboard' | translate }}</a>
-      </div>
-      <div class="header-row">
-        <div>
-          <h1 class="page-title">{{ 'admin.documents.title' | translate }}</h1>
-          <p class="page-subtitle">{{ 'admin.documents.subtitle' | translate }}</p>
-        </div>
-        <div>
-          <input
-            #fileInput
-            type="file"
-            accept=".pdf,.doc,.docx,.txt"
-            class="hidden-input"
-            (change)="onFileSelected($event)"
-          />
-          <button
-            class="btn-upload"
-            (click)="triggerUpload()"
-            [disabled]="uploading()"
-          >
-            @if (uploading()) {
-              <div class="custom-spinner-sm"></div>
-              {{ 'admin.documents.uploading' | translate }}
-            } @else {
-              📤 {{ 'admin.documents.uploadDocument' | translate }}
-            }
-          </button>
-        </div>
-      </div>
+<div class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__heading">
+      <a routerLink="/admin" class="admin-page__back">
+        <span class="material-icons">arrow_back</span>
+        <span>{{ 'admin.documents.backToDashboard' | translate }}</span>
+      </a>
+      <h1 class="admin-page__title">{{ 'admin.documents.title' | translate }}</h1>
+      <p class="admin-page__subtitle">{{ 'admin.documents.subtitle' | translate }}</p>
     </div>
 
-    @if (loading()) {
-      <div class="text-center py-5">
-        <div class="custom-spinner"></div>
-      </div>
-    } @else if (error()) {
-      <div class="error-alert">{{ error() }}</div>
-    } @else if (documents().length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">📄</div>
-        <h3>{{ 'admin.documents.noDocumentsYet' | translate }}</h3>
-        <p>{{ 'admin.documents.noDocumentsDesc' | translate }}</p>
-        <button class="btn-upload" (click)="triggerUpload()">📤 {{ 'admin.documents.uploadFirstDocument' | translate }}</button>
-      </div>
-    } @else {
-      <div class="doc-count mb-3">
-        <span class="count-badge">{{ documents().length }} {{ 'admin.documents.documentCount' | translate }}</span>
-      </div>
+    <div class="admin-page__actions">
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf,.doc,.docx,.txt"
+        class="hidden-input"
+        (change)="onFileSelected($event)"
+      />
+      <button
+        type="button"
+        class="admin-btn"
+        (click)="triggerUpload()"
+        [disabled]="uploading()"
+      >
+        @if (uploading()) {
+          <div class="custom-spinner custom-spinner-sm"></div>
+          <span>{{ 'admin.documents.uploading' | translate }}</span>
+        } @else {
+          <span class="material-icons">upload_file</span>
+          <span>{{ 'admin.documents.uploadDocument' | translate }}</span>
+        }
+      </button>
+    </div>
+  </header>
 
-      <div class="doc-grid">
-        @for (doc of documents(); track doc._id) {
-          <div class="doc-card">
-            <div class="doc-card-header">
-              <span class="doc-icon">{{ fileIcon(doc.mimetype) }}</span>
-              <div class="doc-info">
-                <h3 class="doc-name" [title]="doc.originalName">{{ doc.originalName }}</h3>
-                <span class="doc-size">{{ formatSize(doc.size) }}</span>
-              </div>
+  @if (loading()) {
+    <div class="admin-loading"><div class="custom-spinner"></div></div>
+  } @else if (error()) {
+    <div class="admin-error" role="alert">
+      <span class="material-icons admin-error__icon">error_outline</span>
+      <div class="admin-error__body">
+        <strong>{{ error() }}</strong>
+      </div>
+    </div>
+  } @else if (documents().length === 0) {
+    <div class="admin-empty">
+      <div class="admin-empty__icon"><span class="material-icons">description</span></div>
+      <h3 class="admin-empty__title">{{ 'admin.documents.noDocumentsYet' | translate }}</h3>
+      <p class="admin-empty__text">{{ 'admin.documents.noDocumentsDesc' | translate }}</p>
+      <button type="button" class="admin-btn" (click)="triggerUpload()" [disabled]="uploading()">
+        <span class="material-icons">upload_file</span>
+        <span>{{ 'admin.documents.uploadFirstDocument' | translate }}</span>
+      </button>
+    </div>
+  } @else {
+    <div class="documents-toolbar">
+      <span class="users-count">
+        {{ documents().length }} {{ 'admin.documents.documentCount' | translate }}
+      </span>
+    </div>
+
+    <ul class="doc-grid" aria-label="Documents">
+      @for (doc of documents(); track doc._id) {
+        <li class="doc-card">
+          <div class="doc-card__head">
+            <div class="doc-card__icon" aria-hidden="true">
+              <span class="material-icons">{{ fileIcon(doc.mimeType) }}</span>
             </div>
-            <div class="doc-meta">
-              <div class="meta-row">
-                <span class="meta-label">{{ 'admin.documents.uploadedBy' | translate }}</span>
-                <span class="meta-value">{{ doc.uploadedBy.name }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">{{ 'admin.documents.date' | translate }}</span>
-                <span class="meta-value">{{ formatDate(doc.createdAt) }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">{{ 'admin.documents.type' | translate }}</span>
-                <span class="meta-value">{{ doc.mimetype }}</span>
-              </div>
-            </div>
-            <div class="doc-actions">
-              <button class="btn-delete-doc" (click)="deleteDocument(doc)">
-                {{ 'admin.documents.delete' | translate }}
-              </button>
+            <div class="doc-card__info">
+              <h3 class="doc-card__name" [title]="doc.originalName">{{ doc.originalName }}</h3>
+              <span class="doc-card__tag">{{ fileTypeLabel(doc.mimeType) }} &middot; {{ formatSize(doc.size) }}</span>
             </div>
           </div>
-        }
-      </div>
-    }
-  </div>
+
+          <dl class="doc-card__meta">
+            <div class="doc-card__row">
+              <dt>{{ 'admin.documents.uploadedBy' | translate }}</dt>
+              <dd>{{ doc.uploadedBy?.name || '—' }}</dd>
+            </div>
+            <div class="doc-card__row">
+              <dt>{{ 'admin.documents.date' | translate }}</dt>
+              <dd>{{ formatDate(doc.createdAt) }}</dd>
+            </div>
+          </dl>
+
+          <button
+            type="button"
+            class="admin-btn admin-btn--danger admin-btn--sm doc-card__delete"
+            (click)="deleteDocument(doc)"
+          >
+            <span class="material-icons">delete</span>
+            <span>{{ 'admin.documents.delete' | translate }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
 </div>

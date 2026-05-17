@@ -1,91 +1,165 @@
-<div class="admin-dashboard">
-  <div class="container pt-4 pb-2">
-    <div class="page-header mb-4">
-      <h1 class="page-title">{{ 'admin.dashboard.title' | translate }}</h1>
-      <p class="page-subtitle">{{ 'admin.dashboard.subtitle' | translate }}</p>
+<div class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__heading">
+      <h1 class="admin-page__title">{{ 'admin.dashboard.title' | translate }}</h1>
+      <p class="admin-page__subtitle">{{ 'admin.dashboard.subtitle' | translate }}</p>
     </div>
+  </header>
 
-    @if (loading()) {
-      <div class="text-center py-5">
-        <div class="custom-spinner"></div>
+  @if (loading()) {
+    <div class="admin-loading" role="status" aria-live="polite">
+      <div class="custom-spinner"></div>
+    </div>
+  } @else if (error()) {
+    <div class="admin-error" role="alert">
+      <span class="material-icons admin-error__icon">error_outline</span>
+      <div class="admin-error__body">
+        <strong>{{ 'admin.dashboard.errorLoading' | translate }}</strong>
+        <small>{{ error() }}</small>
       </div>
-    } @else if (error()) {
-      <div class="error-alert">{{ error() }}</div>
-    } @else {
-      <!-- Stats Cards -->
-      <div class="stats-grid mb-4">
-        <div class="stat-card">
-          <div class="stat-icon users-icon">👥</div>
-          <div class="stat-value">{{ stats()?.users?.total ?? 0 }}</div>
-          <div class="stat-label">{{ 'admin.dashboard.totalUsers' | translate }}</div>
+      <button type="button" class="admin-btn admin-btn--ghost" (click)="load()">
+        <span class="material-icons">refresh</span>
+        <span>{{ 'admin.dashboard.retry' | translate }}</span>
+      </button>
+    </div>
+  } @else {
+    <!-- Stat Cards -->
+    <section class="stat-grid" aria-label="Platform statistics">
+      <article class="stat-card">
+        <div class="stat-card__icon stat-card__icon--users" aria-hidden="true">
+          <span class="material-icons">group</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon chapters-icon">📚</div>
-          <div class="stat-value">{{ stats()?.content?.totalChapters ?? 0 }}</div>
-          <div class="stat-label">{{ 'admin.dashboard.chapters' | translate }}</div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">{{ 'admin.dashboard.totalUsers' | translate }}</span>
+          <span class="stat-card__value">{{ stats()?.users?.total ?? 0 }}</span>
+          <span class="stat-card__meta">
+            {{ stats()?.users?.students ?? 0 }} {{ 'admin.dashboard.studentsLabel' | translate }}
+            &middot;
+            {{ stats()?.users?.admins ?? 0 }} {{ 'admin.dashboard.adminsLabel' | translate }}
+          </span>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon lessons-icon">📝</div>
-          <div class="stat-value">{{ stats()?.content?.totalSubLessons ?? 0 }}</div>
-          <div class="stat-label">{{ 'admin.dashboard.subLessons' | translate }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon docs-icon">📄</div>
-          <div class="stat-value">{{ stats()?.documents?.totalDocuments ?? 0 }}</div>
-          <div class="stat-label">{{ 'admin.dashboard.documents' | translate }}</div>
-        </div>
-      </div>
+      </article>
 
-      <div class="dashboard-grid">
-        <!-- Chapter Completion Chart -->
-        <div class="main-col">
-          <div class="panel">
-            <h2 class="panel-title">{{ 'admin.dashboard.chapterCompletionRates' | translate }}</h2>
-            @if (chapters().length === 0) {
-              <p class="empty-text">{{ 'admin.dashboard.noChapterData' | translate }}</p>
-            } @else {
-              <div class="chart-bars">
-                @for (ch of chapters(); track ch.chapterTitle) {
-                  <div class="chart-row">
-                    <div class="chart-label" [title]="ch.chapterTitle">{{ ch.chapterTitle }}</div>
-                    <div class="chart-bar-wrap">
-                      <div
-                        class="chart-bar-fill"
-                        [style.width.%]="ch.completionRate"
-                        [class.bar-high]="ch.completionRate >= 70"
-                        [class.bar-mid]="ch.completionRate >= 40 && ch.completionRate < 70"
-                        [class.bar-low]="ch.completionRate < 40"
-                      ></div>
-                    </div>
-                    <span class="chart-pct">{{ ch.completionRate | number: '1.0-0' }}%</span>
-                  </div>
-                }
-              </div>
-            }
+      <article class="stat-card">
+        <div class="stat-card__icon stat-card__icon--chapters" aria-hidden="true">
+          <span class="material-icons">menu_book</span>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">{{ 'admin.dashboard.chapters' | translate }}</span>
+          <span class="stat-card__value">{{ stats()?.content?.totalChapters ?? 0 }}</span>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-card__icon stat-card__icon--lessons" aria-hidden="true">
+          <span class="material-icons">school</span>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">{{ 'admin.dashboard.subLessons' | translate }}</span>
+          <span class="stat-card__value">{{ stats()?.content?.totalSubLessons ?? 0 }}</span>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-card__icon stat-card__icon--docs" aria-hidden="true">
+          <span class="material-icons">description</span>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">{{ 'admin.dashboard.documents' | translate }}</span>
+          <span class="stat-card__value">{{ stats()?.documents?.totalDocuments ?? 0 }}</span>
+        </div>
+      </article>
+    </section>
+
+    <div class="dashboard-grid">
+      <!-- Main column -->
+      <div class="dashboard-grid__main">
+        <!-- Average Student Progress by Chapter -->
+        <section class="panel">
+          <div class="panel__header">
+            <div class="panel__heading">
+              <h2 class="panel__title">{{ 'admin.dashboard.chapterCompletionRates' | translate }}</h2>
+              <p class="panel__hint">{{ 'admin.dashboard.chapterCompletionDescription' | translate }}</p>
+            </div>
+            <button
+              type="button"
+              class="panel__info"
+              [title]="'admin.dashboard.completionFormulaTooltip' | translate"
+              [attr.aria-label]="'admin.dashboard.completionFormulaShort' | translate"
+            >
+              <span class="material-icons">info_outline</span>
+            </button>
           </div>
+          @if (chapters().length === 0) {
+            <p class="panel__empty">{{ 'admin.dashboard.noChapterData' | translate }}</p>
+          } @else {
+            <ul class="chart-list">
+              @for (ch of chapters(); track ch.chapterTitle) {
+                <li class="chart-row">
+                  <span class="chart-row__label" [title]="ch.displayTitle">{{ ch.displayTitle }}</span>
+                  <div
+                    class="chart-row__bar"
+                    [attr.aria-label]="ch.completionRate + '%'"
+                    [title]="completionTooltip(ch)"
+                  >
+                    <span
+                      class="chart-row__bar-fill"
+                      [class.is-high]="ch.completionRate >= 70"
+                      [class.is-mid]="ch.completionRate >= 40 && ch.completionRate < 70"
+                      [class.is-low]="ch.completionRate < 40"
+                      [style.width.%]="ch.completionRate"
+                    ></span>
+                  </div>
+                  <span class="chart-row__pct">{{ ch.completionRate | number: '1.0-0' }}%</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
 
-          <!-- Quiz Questions per Chapter -->
-          <div class="panel mt-4">
-            <h2 class="panel-title">{{ 'admin.dashboard.contentPerChapter' | translate }}</h2>
-            <div class="table-wrap">
+        <!-- Content Per Chapter Table -->
+        <section class="panel">
+          <div class="panel__header">
+            <div class="panel__heading">
+              <h2 class="panel__title">{{ 'admin.dashboard.contentPerChapter' | translate }}</h2>
+              <p class="panel__hint">{{ 'admin.dashboard.contentPerChapterDescription' | translate }}</p>
+            </div>
+          </div>
+          @if (chapters().length === 0) {
+            <p class="panel__empty">{{ 'admin.dashboard.noChapterData' | translate }}</p>
+          } @else {
+            <div class="table-scroll">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>{{ 'admin.dashboard.tableChapter' | translate }}</th>
-                    <th class="text-center">{{ 'admin.dashboard.tableSubLessons' | translate }}</th>
-                    <th class="text-center">{{ 'admin.dashboard.tableQuizQuestions' | translate }}</th>
-                    <th>{{ 'admin.dashboard.tableCompletion' | translate }}</th>
+                    <th class="data-table__th">{{ 'admin.dashboard.tableChapter' | translate }}</th>
+                    <th class="data-table__th data-table__th--num">
+                      {{ 'admin.dashboard.tableSubLessons' | translate }}
+                    </th>
+                    <th class="data-table__th data-table__th--num">
+                      {{ 'admin.dashboard.tableQuizQuestions' | translate }}
+                    </th>
+                    <th class="data-table__th">{{ 'admin.dashboard.tableCompletion' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (ch of chapters(); track ch.chapterTitle) {
                     <tr>
-                      <td class="fw-500">{{ ch.chapterTitle }}</td>
-                      <td class="text-center">{{ ch.totalSubLessons }}</td>
-                      <td class="text-center">{{ ch.quizStats?.totalQuestions ?? 0 }}</td>
-                      <td style="min-width: 140px">
-                        <div class="progress-track">
-                          <div class="progress-fill" [style.width.%]="ch.completionRate"></div>
+                      <td class="data-table__td data-table__td--name" [title]="ch.displayTitle">
+                        {{ ch.displayTitle }}
+                      </td>
+                      <td class="data-table__td data-table__td--num">{{ ch.totalSubLessons }}</td>
+                      <td class="data-table__td data-table__td--num">
+                        {{ ch.quizStats?.totalQuestions ?? 0 }}
+                      </td>
+                      <td class="data-table__td data-table__td--bar">
+                        <div class="mini-bar-wrap">
+                          <div class="mini-bar">
+                            <span class="mini-bar__fill" [style.width.%]="ch.completionRate"></span>
+                          </div>
+                          <span class="mini-bar__pct">
+                            {{ ch.completionRate | number: '1.0-0' }}%
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -93,46 +167,65 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="side-col">
-          <div class="panel">
-            <h2 class="panel-title">{{ 'admin.dashboard.recentActivity' | translate }}</h2>
-            @if (activities().length === 0) {
-              <p class="empty-text">{{ 'admin.dashboard.noRecentActivity' | translate }}</p>
-            } @else {
-              <div class="activity-feed">
-                @for (a of activities(); track a.id) {
-                  <div class="activity-item">
-                    <span class="activity-icon">{{ activityIcon(a.type) }}</span>
-                    <div class="activity-body">
-                      <div class="activity-desc">{{ a.description }}</div>
-                      <div class="activity-meta">
-                        {{ a.name }} &middot; {{ formatDate(a.createdAt) }}
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-
-          <!-- Quick Links -->
-          <div class="panel mt-4">
-            <h2 class="panel-title">{{ 'admin.dashboard.quickLinks' | translate }}</h2>
-            <div class="quick-links-grid">
-              <a routerLink="/admin/users" class="quick-link-btn">
-                👥 {{ 'admin.dashboard.manageUsers' | translate }}
-              </a>
-              <a routerLink="/admin/documents" class="quick-link-btn">
-                📄 {{ 'admin.dashboard.manageDocuments' | translate }}
-              </a>
-            </div>
-          </div>
-        </div>
+          }
+        </section>
       </div>
-    }
-  </div>
+
+      <!-- Side column -->
+      <aside class="dashboard-grid__side">
+        <!-- Recent Activity -->
+        <section class="panel">
+          <div class="panel__header">
+            <h2 class="panel__title">{{ 'admin.dashboard.recentActivity' | translate }}</h2>
+          </div>
+          @if (activities().length === 0) {
+            <p class="panel__empty">{{ 'admin.dashboard.noRecentActivity' | translate }}</p>
+          } @else {
+            <ul class="activity-feed">
+              @for (a of activities(); track a.id) {
+                <li class="activity-item">
+                  <span
+                    class="activity-item__icon"
+                    [class.is-quiz]="a.type === 'quiz_attempt'"
+                    [class.is-user]="a.type === 'registration'"
+                    [class.is-doc]="a.type === 'document_upload'"
+                    aria-hidden="true"
+                  >
+                    <span class="material-icons">{{ a.icon }}</span>
+                  </span>
+                  <div class="activity-item__body">
+                    <p class="activity-item__title">{{ a.title }}</p>
+                    <p class="activity-item__subject" [title]="a.subject">{{ a.subject }}</p>
+                    @if (a.detail) {
+                      <p class="activity-item__detail">{{ a.detail }}</p>
+                    }
+                    <p class="activity-item__date">{{ formatDate(a.createdAt) }}</p>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- Quick Links -->
+        <section class="panel">
+          <div class="panel__header">
+            <h2 class="panel__title">{{ 'admin.dashboard.quickLinks' | translate }}</h2>
+          </div>
+          <nav class="quick-links">
+            <a routerLink="/admin/users" class="quick-link">
+              <span class="material-icons quick-link__icon">group</span>
+              <span class="quick-link__label">{{ 'admin.dashboard.manageUsers' | translate }}</span>
+              <span class="material-icons quick-link__chev" aria-hidden="true">chevron_right</span>
+            </a>
+            <a routerLink="/admin/documents" class="quick-link">
+              <span class="material-icons quick-link__icon">description</span>
+              <span class="quick-link__label">{{ 'admin.dashboard.manageDocuments' | translate }}</span>
+              <span class="material-icons quick-link__chev" aria-hidden="true">chevron_right</span>
+            </a>
+          </nav>
+        </section>
+      </aside>
+    </div>
+  }
 </div>

@@ -1,74 +1,89 @@
-<div class="admin-users">
-  <div class="container py-4">
-    <div class="page-header mb-4">
-      <div class="header-back mb-2">
-        <a routerLink="/admin" class="back-link">&larr; {{ 'admin.users.backToDashboard' | translate }}</a>
-      </div>
-      <h1 class="page-title">{{ 'admin.users.title' | translate }}</h1>
-      <p class="page-subtitle">{{ 'admin.users.subtitle' | translate }}</p>
+<div class="admin-page">
+  <header class="admin-page__header">
+    <div class="admin-page__heading">
+      <a routerLink="/admin" class="admin-page__back">
+        <span class="material-icons">arrow_back</span>
+        <span>{{ 'admin.users.backToDashboard' | translate }}</span>
+      </a>
+      <h1 class="admin-page__title">{{ 'admin.users.title' | translate }}</h1>
+      <p class="admin-page__subtitle">{{ 'admin.users.subtitle' | translate }}</p>
     </div>
+  </header>
 
-    @if (loading()) {
-      <div class="text-center py-5">
-        <div class="custom-spinner"></div>
+  @if (loading()) {
+    <div class="admin-loading"><div class="custom-spinner"></div></div>
+  } @else if (error()) {
+    <div class="admin-error" role="alert">
+      <span class="material-icons admin-error__icon">error_outline</span>
+      <div class="admin-error__body">
+        <strong>{{ error() }}</strong>
       </div>
-    } @else if (error()) {
-      <div class="error-alert">{{ error() }}</div>
-    } @else {
-      <!-- Search -->
-      <div class="search-bar mb-3">
-        <input
-          type="text"
-          class="search-input"
-          [placeholder]="'admin.users.searchPlaceholder' | translate"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-        />
+      <button type="button" class="admin-btn admin-btn--ghost" (click)="loadUsers()">
+        <span class="material-icons">refresh</span>
+        <span>{{ 'admin.dashboard.retry' | translate }}</span>
+      </button>
+    </div>
+  } @else {
+    <section class="panel">
+      <div class="users-toolbar">
+        <label class="search-field">
+          <span class="material-icons search-field__icon" aria-hidden="true">search</span>
+          <input
+            type="text"
+            class="admin-input search-field__input"
+            [placeholder]="'admin.users.searchPlaceholder' | translate"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+        </label>
+        <span class="users-count">
+          {{ filteredUsers().length }} {{ 'admin.users.userCount' | translate }}
+        </span>
       </div>
 
-      <div class="users-count mb-3">
-        <span class="count-badge">{{ filteredUsers.length }} {{ 'admin.users.userCount' | translate }}</span>
-      </div>
-
-      @if (filteredUsers.length === 0) {
-        <div class="empty-state">
-          <p>{{ 'admin.users.noUsersFound' | translate }}</p>
+      @if (filteredUsers().length === 0) {
+        <div class="admin-empty">
+          <div class="admin-empty__icon"><span class="material-icons">person_search</span></div>
+          <h3 class="admin-empty__title">{{ 'admin.users.noUsersFound' | translate }}</h3>
         </div>
       } @else {
-        <div class="table-wrap">
+        <!-- Desktop / tablet table -->
+        <div class="table-scroll">
           <table class="data-table">
             <thead>
               <tr>
-                <th>{{ 'admin.users.tableName' | translate }}</th>
-                <th>{{ 'admin.users.tableEmail' | translate }}</th>
-                <th>{{ 'admin.users.tableRole' | translate }}</th>
-                <th>{{ 'admin.users.tableJoined' | translate }}</th>
-                <th class="text-end">{{ 'admin.users.tableActions' | translate }}</th>
+                <th class="data-table__th">{{ 'admin.users.tableName' | translate }}</th>
+                <th class="data-table__th">{{ 'admin.users.tableEmail' | translate }}</th>
+                <th class="data-table__th">{{ 'admin.users.tableRole' | translate }}</th>
+                <th class="data-table__th">{{ 'admin.users.tableJoined' | translate }}</th>
+                <th class="data-table__th data-table__th--actions">
+                  {{ 'admin.users.tableActions' | translate }}
+                </th>
               </tr>
             </thead>
             <tbody>
-              @for (user of filteredUsers; track user._id) {
+              @for (user of filteredUsers(); track user._id) {
                 @if (editingId() === user._id) {
-                  <tr class="editing-row">
-                    <td>
+                  <tr class="data-table__row data-table__row--editing">
+                    <td class="data-table__td">
                       <input
                         type="text"
-                        class="edit-input"
+                        class="admin-input admin-input--sm"
                         [ngModel]="editForm().name"
                         (ngModelChange)="editForm.update(f => ({ ...f, name: $event }))"
                       />
                     </td>
-                    <td>
+                    <td class="data-table__td">
                       <input
                         type="email"
-                        class="edit-input"
+                        class="admin-input admin-input--sm"
                         [ngModel]="editForm().email"
                         (ngModelChange)="editForm.update(f => ({ ...f, email: $event }))"
                       />
                     </td>
-                    <td>
+                    <td class="data-table__td">
                       <select
-                        class="edit-select"
+                        class="admin-select admin-select--sm"
                         [ngModel]="editForm().role"
                         (ngModelChange)="editForm.update(f => ({ ...f, role: $event }))"
                       >
@@ -76,25 +91,72 @@
                         <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
                       </select>
                     </td>
-                    <td class="date-cell">{{ formatDate(user.createdAt) }}</td>
-                    <td class="text-end">
-                      <button class="btn-save" (click)="saveEdit(user._id)">{{ 'admin.users.save' | translate }}</button>
-                      <button class="btn-cancel" (click)="cancelEdit()">{{ 'admin.users.cancel' | translate }}</button>
+                    <td class="data-table__td data-table__td--muted">
+                      {{ formatDate(user.createdAt) }}
+                    </td>
+                    <td class="data-table__td data-table__td--actions">
+                      <div class="action-group">
+                        <button
+                          type="button"
+                          class="admin-btn admin-btn--sm"
+                          [disabled]="saving()"
+                          (click)="saveEdit(user._id)"
+                        >
+                          <span class="material-icons">check</span>
+                          <span>{{ 'admin.users.save' | translate }}</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="admin-btn admin-btn--ghost admin-btn--sm"
+                          [disabled]="saving()"
+                          (click)="cancelEdit()"
+                        >
+                          <span>{{ 'admin.users.cancel' | translate }}</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 } @else {
-                  <tr>
-                    <td class="fw-500">{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                      <span class="role-badge" [class.admin-badge]="user.role === 'admin'">
-                        {{ user.role }}
+                  <tr class="data-table__row">
+                    <td class="data-table__td">
+                      <div class="user-cell">
+                        <span class="user-cell__avatar" aria-hidden="true">{{ initial(user.name) }}</span>
+                        <span class="user-cell__name">{{ user.name }}</span>
+                      </div>
+                    </td>
+                    <td class="data-table__td data-table__td--muted">{{ user.email }}</td>
+                    <td class="data-table__td">
+                      <span
+                        class="role-badge"
+                        [class.role-badge--admin]="user.role === 'admin'"
+                      >
+                        {{ (user.role === 'admin' ? 'admin.users.roleAdmin' : 'admin.users.roleStudent') | translate }}
                       </span>
                     </td>
-                    <td class="date-cell">{{ formatDate(user.createdAt) }}</td>
-                    <td class="text-end">
-                      <button class="btn-edit" (click)="startEdit(user)">{{ 'admin.users.edit' | translate }}</button>
-                      <button class="btn-delete" (click)="deleteUser(user)">{{ 'admin.users.delete' | translate }}</button>
+                    <td class="data-table__td data-table__td--muted">
+                      {{ formatDate(user.createdAt) }}
+                    </td>
+                    <td class="data-table__td data-table__td--actions">
+                      <div class="action-group">
+                        <button
+                          type="button"
+                          class="admin-btn admin-btn--ghost admin-btn--sm"
+                          (click)="startEdit(user)"
+                          [attr.aria-label]="'admin.users.edit' | translate"
+                        >
+                          <span class="material-icons">edit</span>
+                          <span>{{ 'admin.users.edit' | translate }}</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="admin-btn admin-btn--danger admin-btn--sm"
+                          (click)="deleteUser(user)"
+                          [attr.aria-label]="'admin.users.delete' | translate"
+                        >
+                          <span class="material-icons">delete</span>
+                          <span>{{ 'admin.users.delete' | translate }}</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 }
@@ -102,7 +164,95 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Mobile card list -->
+        <ul class="user-cards" aria-label="Users (mobile view)">
+          @for (user of filteredUsers(); track user._id) {
+            <li class="user-cards__item">
+              @if (editingId() === user._id) {
+                <div class="user-card user-card--editing">
+                  <input
+                    type="text"
+                    class="admin-input admin-input--sm"
+                    [ngModel]="editForm().name"
+                    (ngModelChange)="editForm.update(f => ({ ...f, name: $event }))"
+                  />
+                  <input
+                    type="email"
+                    class="admin-input admin-input--sm"
+                    [ngModel]="editForm().email"
+                    (ngModelChange)="editForm.update(f => ({ ...f, email: $event }))"
+                  />
+                  <select
+                    class="admin-select admin-select--sm"
+                    [ngModel]="editForm().role"
+                    (ngModelChange)="editForm.update(f => ({ ...f, role: $event }))"
+                  >
+                    <option value="student">{{ 'admin.users.roleStudent' | translate }}</option>
+                    <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
+                  </select>
+                  <div class="action-group action-group--end">
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--ghost admin-btn--sm"
+                      [disabled]="saving()"
+                      (click)="cancelEdit()"
+                    >
+                      {{ 'admin.users.cancel' | translate }}
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--sm"
+                      [disabled]="saving()"
+                      (click)="saveEdit(user._id)"
+                    >
+                      {{ 'admin.users.save' | translate }}
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="user-card">
+                  <div class="user-card__head">
+                    <span class="user-cell__avatar" aria-hidden="true">{{ initial(user.name) }}</span>
+                    <div class="user-card__meta">
+                      <span class="user-card__name">{{ user.name }}</span>
+                      <span class="user-card__email">{{ user.email }}</span>
+                    </div>
+                    <span
+                      class="role-badge"
+                      [class.role-badge--admin]="user.role === 'admin'"
+                    >
+                      {{ (user.role === 'admin' ? 'admin.users.roleAdmin' : 'admin.users.roleStudent') | translate }}
+                    </span>
+                  </div>
+                  <div class="user-card__row">
+                    <span class="user-card__label">{{ 'admin.users.tableJoined' | translate }}</span>
+                    <span class="user-card__value">{{ formatDate(user.createdAt) }}</span>
+                  </div>
+                  <div class="action-group action-group--end">
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--ghost admin-btn--sm"
+                      (click)="startEdit(user)"
+                    >
+                      <span class="material-icons">edit</span>
+                      <span>{{ 'admin.users.edit' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-btn admin-btn--danger admin-btn--sm"
+                      (click)="deleteUser(user)"
+                    >
+                      <span class="material-icons">delete</span>
+                      <span>{{ 'admin.users.delete' | translate }}</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ul>
       }
-    }
-  </div>
+    </section>
+  }
 </div>

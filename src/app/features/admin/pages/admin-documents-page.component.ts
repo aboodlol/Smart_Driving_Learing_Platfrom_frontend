@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { AdminDocument } from '../../../core/models/admin.models';
 import { ToastService } from '../../../core/services/toast.service';
+import { I18nService } from '../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
@@ -27,6 +28,7 @@ export class AdminDocumentsPageComponent implements OnInit {
   private readonly api = inject(AdminApiService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
@@ -84,13 +86,17 @@ export class AdminDocumentsPageComponent implements OnInit {
   }
 
   protected formatSize(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes < 0) return '—';
     if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   protected formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    const locale = this.i18n.isRtl() ? 'ar' : 'en-US';
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -99,15 +105,28 @@ export class AdminDocumentsPageComponent implements OnInit {
     });
   }
 
-  protected fileIcon(mimetype: string): string {
-    if (mimetype.includes('pdf')) return '📕';
-    if (mimetype.includes('word') || mimetype.includes('document')) return '📘';
-    if (mimetype.includes('image')) return '🖼️';
-    if (mimetype.includes('text')) return '📄';
-    return '📁';
+  protected fileIcon(mimeType: string): string {
+    const m = (mimeType || '').toLowerCase();
+    if (m.includes('pdf')) return 'picture_as_pdf';
+    if (m.includes('word') || m.includes('document')) return 'article';
+    if (m.includes('image')) return 'image';
+    if (m.includes('text')) return 'description';
+    return 'insert_drive_file';
+  }
+
+  protected fileTypeLabel(mimeType: string): string {
+    const m = (mimeType || '').toLowerCase();
+    if (m.includes('pdf')) return 'PDF';
+    if (m.includes('officedocument.wordprocessingml')) return 'DOCX';
+    if (m.includes('msword')) return 'DOC';
+    if (m.includes('text/plain')) return 'TXT';
+    const parts = m.split('/');
+    return parts[1]?.toUpperCase() || 'FILE';
   }
 
   private loadDocuments(): void {
+    this.loading.set(true);
+    this.error.set('');
     this.api
       .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))

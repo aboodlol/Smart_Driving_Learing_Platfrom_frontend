@@ -47,7 +47,7 @@ export class AdminApiService {
 
   uploadDocument(file: File): Observable<AdminDocument> {
     const formData = new FormData();
-    formData.append('document', file);
+    formData.append('file', file);
     return this.http
       .post<AdminDocument>(`${this.baseUrl}/documents`, formData)
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
