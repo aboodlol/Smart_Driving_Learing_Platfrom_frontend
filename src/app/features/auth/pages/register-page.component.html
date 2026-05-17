@@ -93,7 +93,7 @@
               type="text"
               autocomplete="name"
               formControlName="name"
-              [placeholder]="isAr() ? 'ليلى الأحمد' : 'Layla Al-Ahmad'"
+              [placeholder]="isAr() ? 'الاسم الكامل' : 'Full Name'"
             />
           </span>
         </label>
@@ -121,7 +121,7 @@
               type="email"
               autocomplete="email"
               formControlName="email"
-              placeholder="layla@example.com"
+              placeholder="user@example.com"
             />
           </span>
         </label>
@@ -306,48 +306,9 @@
   <!-- Visual pane (right, gradient teal) -->
   <aside class="dw-visual-pane">
     <!-- Logo -->
-    <span class="dw-logo">
-      <svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <path d="M20 2 L34 7 V20 C34 28.5 28 34.5 20 38 C12 34.5 6 28.5 6 20 V7 Z" fill="#fff" />
-        <path d="M14 30 L20 12 L26 30 Z" fill="rgba(255,255,255,0.18)" />
-        <rect
-          x="19"
-          y="14"
-          width="2"
-          height="3"
-          rx="1"
-          fill="var(--brand-teal-700)"
-          opacity="0.95"
-        />
-        <rect
-          x="19"
-          y="19"
-          width="2"
-          height="3"
-          rx="1"
-          fill="var(--brand-teal-700)"
-          opacity="0.85"
-        />
-        <rect
-          x="19"
-          y="24"
-          width="2"
-          height="3"
-          rx="1"
-          fill="var(--brand-teal-700)"
-          opacity="0.7"
-        />
-        <circle
-          cx="29.5"
-          cy="10.5"
-          r="3.6"
-          fill="var(--brand-amber-500)"
-          stroke="#fff"
-          stroke-width="1.2"
-        />
-      </svg>
-      <span class="dw-logo-text">{{ isAr() ? 'درايف وايز' : 'Drive Wise' }}</span>
-    </span>
+    <span class="dw-logo"
+      ><img src="/assets/logo.png" alt="DriveWise" style="max-height: 140px; width: auto"
+    /></span>
 
     <div class="dw-visual-mid">
       <h2 class="dw-visual-title">

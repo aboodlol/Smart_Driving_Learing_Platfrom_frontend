@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ─── Dark Theme Design Tokens ─── */
 :root {
@@ -75,7 +75,12 @@ svg:not(.dw-road):not(.dw-mini-sign):not(.dw-sticker) {
 /* Wrap long words/links inside text-bearing blocks so they don't push layout */
 p,
 li,
-h1, h2, h3, h4, h5, h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 .dw-q-card__title,
 .dw-msg__text,
 .dw-ai-msg__text {
@@ -128,7 +133,12 @@ app-root {
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: var(--dr-text);
   background: var(--dr-bg-dark);
 }
@@ -176,6 +186,50 @@ a {
   border: 1px solid #8b5cf6;
 }
 
+.toast-info.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action {
+  color: #a78bfa;
+  background: transparent;
+  --mdc-text-button-container-color: transparent;
+  --mat-text-button-hover-state-layer-color: transparent;
+  --mdc-text-button-hover-state-layer-color: transparent;
+  --mat-text-button-pressed-state-layer-color: transparent;
+}
+
+.toast-success.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action,
+.toast-error.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action {
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  --mdc-text-button-container-color: transparent;
+  --mat-text-button-hover-state-layer-color: transparent;
+  --mdc-text-button-hover-state-layer-color: transparent;
+  --mat-text-button-pressed-state-layer-color: transparent;
+}
+
+.toast-info.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:hover {
+  color: #c4b5fd !important;
+  background: transparent !important;
+}
+
+.toast-success.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:hover,
+.toast-error.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:hover {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+.toast-info.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action .mdc-button__ripple,
+.toast-info.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action .mat-mdc-button-persistent-ripple,
+.toast-success.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action .mdc-button__ripple,
+.toast-success.mat-mdc-snack-bar-container
+  .mat-mdc-snack-bar-action
+  .mat-mdc-button-persistent-ripple,
+.toast-error.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action .mdc-button__ripple,
+.toast-error.mat-mdc-snack-bar-container
+  .mat-mdc-snack-bar-action
+  .mat-mdc-button-persistent-ripple {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
 /* ─── Custom Loading Spinner ─── */
 .custom-spinner {
   width: 40px;
@@ -193,7 +247,9 @@ a {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Glass Card Utility ─── */
@@ -244,7 +300,9 @@ a {
 }
 
 .hover-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .hover-lift:hover {

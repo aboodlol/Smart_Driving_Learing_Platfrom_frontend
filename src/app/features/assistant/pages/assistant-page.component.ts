@@ -21,9 +21,10 @@ import {
   QUIZ_CONTEXT_NAV_KEY,
   QuizQuestionContext,
 } from '../../../core/models/assistant.models';
-import { AssistantApiService } from '../../../core/services/assistant-api.service';
-import { I18nService } from '../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { AssistantApiService } from '../../../core/services/assistant-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
 
@@ -39,12 +40,17 @@ const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
 })
 export class AssistantPageComponent implements OnInit {
   private readonly assistantApi = inject(AssistantApiService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly chatContainer = viewChild<ElementRef<HTMLDivElement>>('chatContainer');
   private readonly imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   private readonly pdfInput = viewChild<ElementRef<HTMLInputElement>>('pdfInput');
   protected readonly i18n = inject(I18nService);
+  protected readonly userInitial = computed(() => {
+    const name = this.auth.currentUser()?.name ?? '';
+    return name.trim().charAt(0).toUpperCase() || 'U';
+  });
 
   protected readonly conversations = signal<ConversationSummary[]>([]);
   protected readonly activeConversationId = signal<string | null>(null);
@@ -71,7 +77,9 @@ export class AssistantPageComponent implements OnInit {
 
   protected readonly canSend = computed(
     () =>
-      (this.inputText().trim().length > 0 || Boolean(this.selectedImage()) || Boolean(this.selectedPdf())) &&
+      (this.inputText().trim().length > 0 ||
+        Boolean(this.selectedImage()) ||
+        Boolean(this.selectedPdf())) &&
       !this.composerDisabled(),
   );
 
@@ -202,7 +210,9 @@ export class AssistantPageComponent implements OnInit {
     if (!file) return;
 
     if (!this.isValidImage(file)) {
-      this.setComposerError('Invalid image type. Please select a PNG, JPG, WEBP, GIF, or BMP file.');
+      this.setComposerError(
+        'Invalid image type. Please select a PNG, JPG, WEBP, GIF, or BMP file.',
+      );
       input.value = '';
       return;
     }
@@ -437,7 +447,9 @@ export class AssistantPageComponent implements OnInit {
       .subscribe({
         next: (conversations) => {
           this.conversations.set(
-            this.sortConversations(conversations.map((conversation) => this.mapConversationSummary(conversation))),
+            this.sortConversations(
+              conversations.map((conversation) => this.mapConversationSummary(conversation)),
+            ),
           );
         },
         error: () => {
@@ -446,7 +458,11 @@ export class AssistantPageComponent implements OnInit {
       });
   }
 
-  private loadConversationById(conversationId: string, showLoader = true, onError?: () => void): void {
+  private loadConversationById(
+    conversationId: string,
+    showLoader = true,
+    onError?: () => void,
+  ): void {
     if (showLoader) {
       this.conversationLoading.set(true);
     }
@@ -520,10 +536,16 @@ export class AssistantPageComponent implements OnInit {
       return normalized.startsWith('/') ? normalized : `/${normalized}`;
     }
 
-    return normalized.startsWith('/') ? `${backendUrl}${normalized}` : `${backendUrl}/${normalized}`;
+    return normalized.startsWith('/')
+      ? `${backendUrl}${normalized}`
+      : `${backendUrl}/${normalized}`;
   }
 
-  private buildOptimisticUserMessage(text: string, image: File | null, file: File | null): ChatMessage {
+  private buildOptimisticUserMessage(
+    text: string,
+    image: File | null,
+    file: File | null,
+  ): ChatMessage {
     const lines: string[] = [];
 
     if (text) {
@@ -544,7 +566,10 @@ export class AssistantPageComponent implements OnInit {
   }
 
   private sortConversations(conversations: ConversationSummary[]): ConversationSummary[] {
-    return [...conversations].sort((a, b) => this.toTimestamp(b.updatedAt ?? b.createdAt) - this.toTimestamp(a.updatedAt ?? a.createdAt));
+    return [...conversations].sort(
+      (a, b) =>
+        this.toTimestamp(b.updatedAt ?? b.createdAt) - this.toTimestamp(a.updatedAt ?? a.createdAt),
+    );
   }
 
   private toTimestamp(dateValue?: string): number {
@@ -564,7 +589,10 @@ export class AssistantPageComponent implements OnInit {
 
   private resolveInitialConversationId(conversations: ConversationSummary[]): string | null {
     const storedConversationId = this.getStoredConversationId();
-    if (storedConversationId && conversations.some((conversation) => conversation._id === storedConversationId)) {
+    if (
+      storedConversationId &&
+      conversations.some((conversation) => conversation._id === storedConversationId)
+    ) {
       return storedConversationId;
     }
 
@@ -766,7 +794,9 @@ export class AssistantPageComponent implements OnInit {
       });
   }
 
-  private async fetchImageAsFile(url: string): Promise<{ file: File | null; failureReason: string | null }> {
+  private async fetchImageAsFile(
+    url: string,
+  ): Promise<{ file: File | null; failureReason: string | null }> {
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -831,10 +861,7 @@ export class AssistantPageComponent implements OnInit {
     const imageUrl = options.imageUrl;
 
     if (isArabic) {
-      const lines = [
-        'هل يمكنك شرح سؤال اختبار القيادة هذا بمزيد من التفصيل؟',
-        '',
-      ];
+      const lines = ['هل يمكنك شرح سؤال اختبار القيادة هذا بمزيد من التفصيل؟', ''];
       if (chapterTitle) lines.push(`الفصل: ${chapterTitle}`);
       lines.push(`السؤال: ${questionText}`);
       if (selectedAnswer) lines.push(`إجابتي: ${selectedAnswer}`);
@@ -856,10 +883,7 @@ export class AssistantPageComponent implements OnInit {
       return lines.join('\n');
     }
 
-    const lines = [
-      'Please explain this driving quiz question in more detail.',
-      '',
-    ];
+    const lines = ['Please explain this driving quiz question in more detail.', ''];
     if (chapterTitle) lines.push(`Chapter: ${chapterTitle}`);
     lines.push(`Question: ${questionText}`);
     if (selectedAnswer) lines.push(`My answer: ${selectedAnswer}`);

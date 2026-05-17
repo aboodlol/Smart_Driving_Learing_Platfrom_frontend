@@ -27,6 +27,17 @@
 
   --dw-font-sans: 'Plus Jakarta Sans', 'Tajawal', -apple-system, system-ui, sans-serif;
   --dw-font-ar: 'Tajawal', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+:host-context(html[data-theme='dark']), :host-context([data-theme='dark']) {
+  --dw-bg: oklch(18% 0.015 220);
+  --dw-surface: oklch(22% 0.018 220);
+  --dw-border: oklch(32% 0.02 220);
+  --dw-border-strong: oklch(40% 0.025 220);
+
+  --dw-text: oklch(96% 0.01 220);
+  --dw-text-2: oklch(82% 0.015 220);
+  --dw-text-3: oklch(65% 0.015 220);
 
   display: block;
   min-height: 100vh;
@@ -367,3 +378,4 @@
   .dw-form-pane { padding: 18px 12px; }
   .dw-h1 { font-size: 22px; }
 }
+

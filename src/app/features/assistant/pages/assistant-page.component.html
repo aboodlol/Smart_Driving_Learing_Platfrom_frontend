@@ -1,23 +1,35 @@
 <div class="dw-ai" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
-
   <!-- ─── Header bar ─── -->
   <header class="dw-ai-header">
     <button
       type="button"
       class="dw-ai-iconbtn"
       (click)="toggleSidebar()"
-      [attr.aria-label]="(sidebarOpen() ? 'assistant.closeSidebar' : 'assistant.openSidebar') | translate"
-      [attr.aria-expanded]="sidebarOpen()">
+      [attr.aria-label]="
+        (sidebarOpen() ? 'assistant.closeSidebar' : 'assistant.openSidebar') | translate
+      "
+      [attr.aria-expanded]="sidebarOpen()"
+    >
       <span class="material-icons">history</span>
     </button>
 
     <div class="dw-ai-brand">
       <span class="dw-ai-brand__avatar" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-          <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-            stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-            stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path
+            d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
+            stroke="#fff"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+            stroke="#fff"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </span>
       <div class="dw-ai-brand__copy">
@@ -33,16 +45,14 @@
       type="button"
       class="dw-ai-newchat"
       (click)="createNewConversation()"
-      [disabled]="creatingConversation() || loading()">
+      [disabled]="creatingConversation() || loading()"
+    >
       <span class="material-icons">edit_square</span>
       <span class="dw-ai-newchat__label">{{ 'assistant.newChat' | translate }}</span>
     </button>
 
     @if (activeConversationId(); as activeId) {
-      <button
-        type="button"
-        class="dw-ai-delete"
-        (click)="deleteConversation(activeId, $event)">
+      <button type="button" class="dw-ai-delete" (click)="deleteConversation(activeId, $event)">
         <span class="material-icons">delete_outline</span>
         <span class="dw-ai-delete__label">{{ 'assistant.delete' | translate }}</span>
       </button>
@@ -56,7 +66,8 @@
     [class.is-visible]="sidebarOpen()"
     aria-hidden="true"
     tabindex="-1"
-    (click)="toggleSidebar()"></button>
+    (click)="toggleSidebar()"
+  ></button>
 
   <aside class="dw-ai-sidebar" [class.is-open]="sidebarOpen()">
     <header class="dw-ai-sidebar__head">
@@ -65,7 +76,8 @@
         type="button"
         class="dw-ai-iconbtn"
         (click)="toggleSidebar()"
-        [attr.aria-label]="'assistant.closeSidebar' | translate">
+        [attr.aria-label]="'assistant.closeSidebar' | translate"
+      >
         <span class="material-icons">close</span>
       </button>
     </header>
@@ -89,19 +101,23 @@
               type="button"
               class="dw-ai-conv__item"
               [class.is-active]="conv._id === activeConversationId()"
-              (click)="selectConversation(conv._id); toggleSidebar()">
+              (click)="selectConversation(conv._id); toggleSidebar()"
+            >
               <span class="material-icons dw-ai-conv__icon">chat_bubble_outline</span>
               <span class="dw-ai-conv__body">
                 <span class="dw-ai-conv__title">{{ getConversationTitle(conv) }}</span>
                 @if (conv.updatedAt || conv.createdAt) {
-                  <span class="dw-ai-conv__date">{{ formatConversationDate(conv.updatedAt || conv.createdAt) }}</span>
+                  <span class="dw-ai-conv__date">{{
+                    formatConversationDate(conv.updatedAt || conv.createdAt)
+                  }}</span>
                 }
               </span>
               <button
                 type="button"
                 class="dw-ai-conv__delete"
                 [attr.title]="'assistant.deleteConversation' | translate"
-                (click)="deleteConversation(conv._id, $event)">
+                (click)="deleteConversation(conv._id, $event)"
+              >
                 <span class="material-icons">delete_outline</span>
               </button>
             </button>
@@ -131,10 +147,20 @@
           <div class="dw-ai-empty-state">
             <span class="dw-ai-empty-state__logo" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="40" height="40" fill="none">
-                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-                  stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-                  stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path
+                  d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </span>
             <h2>{{ 'assistant.welcomeTitle' | translate }}</h2>
@@ -147,23 +173,35 @@
             </p>
 
             <div class="dw-ai-suggest">
-              <button type="button" class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested1')); sendMessage()">
+              <button
+                type="button"
+                class="dw-ai-suggest__btn"
+                (click)="inputText.set(i18n.t('assistant.suggested1')); sendMessage()"
+              >
                 <span class="material-icons">flag</span>
                 {{ 'assistant.suggested1' | translate }}
               </button>
-              <button type="button" class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested2')); sendMessage()">
+              <button
+                type="button"
+                class="dw-ai-suggest__btn"
+                (click)="inputText.set(i18n.t('assistant.suggested2')); sendMessage()"
+              >
                 <span class="material-icons">auto_awesome</span>
                 {{ 'assistant.suggested2' | translate }}
               </button>
-              <button type="button" class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested3')); sendMessage()">
+              <button
+                type="button"
+                class="dw-ai-suggest__btn"
+                (click)="inputText.set(i18n.t('assistant.suggested3')); sendMessage()"
+              >
                 <span class="material-icons">shield</span>
                 {{ 'assistant.suggested3' | translate }}
               </button>
-              <button type="button" class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested4')); sendMessage()">
+              <button
+                type="button"
+                class="dw-ai-suggest__btn"
+                (click)="inputText.set(i18n.t('assistant.suggested4')); sendMessage()"
+              >
                 <span class="material-icons">quiz</span>
                 {{ 'assistant.suggested4' | translate }}
               </button>
@@ -172,38 +210,67 @@
         }
 
         @for (msg of messages(); track msg._id || $index) {
-          <div class="dw-ai-msg" [class.dw-ai-msg--user]="msg.role === 'user'" [class.dw-ai-msg--ai]="msg.role !== 'user'">
+          <div
+            class="dw-ai-msg"
+            [class.dw-ai-msg--user]="msg.role === 'user'"
+            [class.dw-ai-msg--ai]="msg.role !== 'user'"
+          >
             <span class="dw-ai-msg__avatar" aria-hidden="true">
               @if (msg.role === 'user') {
-                L
+                {{ userInitial() }}
               } @else {
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                  <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-                    stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-                    stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path
+                    d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
+                    stroke="#fff"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+                    stroke="#fff"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               }
             </span>
             <div class="dw-ai-msg__col">
               <div class="dw-ai-msg__meta">
                 {{ (msg.role === 'user' ? 'assistant.you' : 'assistant.aiAssistant') | translate }}
-                @if (msg.createdAt) { · <span class="dw-ai-msg__time">{{ formatMessageTime(msg.createdAt) }}</span> }
+                @if (msg.createdAt) {
+                  · <span class="dw-ai-msg__time">{{ formatMessageTime(msg.createdAt) }}</span>
+                }
               </div>
               <div class="dw-ai-msg__bubble">
                 @if (msg.content) {
                   <p class="dw-ai-msg__text">{{ msg.content }}</p>
                 }
                 @if (msg.imageUrl) {
-                  <a class="dw-ai-msg__media" [href]="msg.imageUrl" target="_blank" rel="noopener noreferrer">
+                  <a
+                    class="dw-ai-msg__media"
+                    [href]="msg.imageUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <img [src]="msg.imageUrl" alt="Uploaded image" />
                   </a>
                 }
                 @if (msg.fileUrl) {
-                  <a class="dw-ai-msg__file" [href]="msg.fileUrl" target="_blank" rel="noopener noreferrer" [attr.download]="msg.fileName || null">
+                  <a
+                    class="dw-ai-msg__file"
+                    [href]="msg.fileUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.download]="msg.fileName || null"
+                  >
                     <span class="material-icons">picture_as_pdf</span>
                     <span class="dw-ai-msg__file-meta">
-                      <span class="dw-ai-msg__file-name">{{ msg.fileName || 'Download attachment' }}</span>
+                      <span class="dw-ai-msg__file-name">{{
+                        msg.fileName || 'Download attachment'
+                      }}</span>
                       <span class="dw-ai-msg__file-sub">{{ 'assistant.pdf' | translate }}</span>
                     </span>
                   </a>
@@ -217,8 +284,13 @@
           <div class="dw-ai-msg dw-ai-msg--ai">
             <span class="dw-ai-msg__avatar" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-                  stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path
+                  d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </span>
             <div class="dw-ai-msg__col">
@@ -238,10 +310,23 @@
   <!-- ─── Composer ─── -->
   <footer class="dw-ai-composer">
     <div class="dw-ai-composer__inner">
-
       <!-- Hidden file inputs -->
-      <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" [disabled]="composerDisabled()" />
-      <input #pdfInput type="file" accept="application/pdf,.pdf" hidden (change)="onPdfSelected($event)" [disabled]="composerDisabled()" />
+      <input
+        #imageInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onImageSelected($event)"
+        [disabled]="composerDisabled()"
+      />
+      <input
+        #pdfInput
+        type="file"
+        accept="application/pdf,.pdf"
+        hidden
+        (change)="onPdfSelected($event)"
+        [disabled]="composerDisabled()"
+      />
 
       @if (selectedImage() || selectedPdf()) {
         <div class="dw-ai-composer__attach">
@@ -256,19 +341,31 @@
                 <span class="dw-ai-attach-name">{{ imgFile.name }}</span>
                 <span class="dw-ai-attach-size">{{ formatSize(imgFile.size) }}</span>
               </span>
-              <button type="button" class="dw-ai-attach-x" (click)="removeSelectedImage()" [disabled]="composerDisabled()">
+              <button
+                type="button"
+                class="dw-ai-attach-x"
+                (click)="removeSelectedImage()"
+                [disabled]="composerDisabled()"
+              >
                 <span class="material-icons">close</span>
               </button>
             </div>
           }
           @if (selectedPdf(); as pdfFile) {
             <div class="dw-ai-attach-chip">
-              <span class="dw-ai-attach-icon"><span class="material-icons">picture_as_pdf</span></span>
+              <span class="dw-ai-attach-icon"
+                ><span class="material-icons">picture_as_pdf</span></span
+              >
               <span class="dw-ai-attach-meta">
                 <span class="dw-ai-attach-name">{{ pdfFile.name }}</span>
                 <span class="dw-ai-attach-size">{{ formatSize(pdfFile.size) }}</span>
               </span>
-              <button type="button" class="dw-ai-attach-x" (click)="removeSelectedPdf()" [disabled]="composerDisabled()">
+              <button
+                type="button"
+                class="dw-ai-attach-x"
+                (click)="removeSelectedPdf()"
+                [disabled]="composerDisabled()"
+              >
                 <span class="material-icons">close</span>
               </button>
             </div>
@@ -291,16 +388,27 @@
             (click)="toggleAttachMenu()"
             [disabled]="composerDisabled()"
             [attr.aria-label]="'assistant.attachFile' | translate"
-            [attr.aria-expanded]="attachMenuOpen()">
+            [attr.aria-expanded]="attachMenuOpen()"
+          >
             <span class="material-icons">add</span>
           </button>
           @if (attachMenuOpen()) {
             <div class="dw-ai-attach-menu" role="menu">
-              <button type="button" class="dw-ai-attach-menu__item" (click)="triggerImagePicker()" role="menuitem">
+              <button
+                type="button"
+                class="dw-ai-attach-menu__item"
+                (click)="triggerImagePicker()"
+                role="menuitem"
+              >
                 <span class="material-icons">image</span>
                 {{ 'assistant.image' | translate }}
               </button>
-              <button type="button" class="dw-ai-attach-menu__item" (click)="triggerPdfPicker()" role="menuitem">
+              <button
+                type="button"
+                class="dw-ai-attach-menu__item"
+                (click)="triggerPdfPicker()"
+                role="menuitem"
+              >
                 <span class="material-icons">picture_as_pdf</span>
                 {{ 'assistant.pdf' | translate }}
               </button>
@@ -315,14 +423,16 @@
           [ngModel]="inputText()"
           (ngModelChange)="inputText.set($event)"
           (keydown)="onKeyDown($event)"
-          [disabled]="composerDisabled()"></textarea>
+          [disabled]="composerDisabled()"
+        ></textarea>
 
         <button
           type="button"
           class="dw-ai-send"
           [disabled]="!canSend()"
           (click)="sendMessage()"
-          [attr.aria-label]="'assistant.send' | translate">
+          [attr.aria-label]="'assistant.send' | translate"
+        >
           @if (loading()) {
             <span class="dw-ai-spinner dw-ai-spinner--sm dw-ai-spinner--on-brand"></span>
           } @else {
@@ -334,5 +444,4 @@
       <p class="dw-ai-disclaimer">{{ 'assistant.disclaimer' | translate }}</p>
     </div>
   </footer>
-
 </div>
