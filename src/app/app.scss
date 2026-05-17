@@ -125,7 +125,7 @@
 
 .dw-brand__logo {
   display: block;
-  width: 280px;
+  width: 360px;
   height: auto;
   max-height: 96px;
   object-fit: contain;
@@ -629,7 +629,7 @@
 
 .dw-tb-logo__image {
   display: block;
-  width: 280px;
+  width: 360px;
   height: auto;
   max-height: 96px;
   object-fit: contain;
@@ -762,6 +762,7 @@
 
 @media (max-width: 520px) {
   .dw-tb-logo__image {
-    width: 220px;
+    width: 280px;
   }
 }
+
