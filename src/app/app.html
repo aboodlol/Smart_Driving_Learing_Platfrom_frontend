@@ -10,7 +10,8 @@
       (click)="toggleSidebar()"
       [attr.aria-expanded]="sidebarOpen()"
       aria-controls="dw-sidebar"
-      [attr.aria-label]="(sidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate">
+      [attr.aria-label]="(sidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate"
+    >
       <span class="material-icons">{{ sidebarOpen() ? 'close' : 'menu' }}</span>
     </button>
 
@@ -20,113 +21,151 @@
       [class.is-visible]="sidebarOpen()"
       aria-hidden="true"
       tabindex="-1"
-      (click)="closeSidebar()"></button>
+      (click)="closeSidebar()"
+    ></button>
 
     <aside
       id="dw-sidebar"
       class="dw-sidebar"
       [class.is-open]="sidebarOpen()"
-      [class.is-collapsed]="sidebarCollapsed()">
+      [class.is-collapsed]="sidebarCollapsed()"
+    >
+      <a routerLink="/home" class="dw-brand" (click)="closeSidebar()">
+        <img src="assets/logo.png" alt="DriveWise" class="dw-brand__logo" />
+      </a>
 
-    <a routerLink="/home" class="dw-brand" (click)="closeSidebar()">
-      <span class="dw-brand__mark" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-          <path d="M20 2 L34 7 V20 C34 28.5 28 34.5 20 38 C12 34.5 6 28.5 6 20 V7 Z" fill="var(--dw-teal-500)" />
-          <path d="M14 30 L20 12 L26 30 Z" fill="rgba(255,255,255,0.10)" />
-          <rect x="19" y="14" width="2" height="3" rx="1" fill="#fff" opacity="0.95" />
-          <rect x="19" y="19" width="2" height="3" rx="1" fill="#fff" opacity="0.85" />
-          <rect x="19" y="24" width="2" height="3" rx="1" fill="#fff" opacity="0.7" />
-          <circle cx="29.5" cy="10.5" r="3.6" fill="var(--dw-amber-500)" stroke="var(--dw-surface)" stroke-width="1.2" />
-        </svg>
-      </span>
-      <span class="dw-brand__word">{{ 'brand' | translate }}</span>
-    </a>
-
-    <button
-      type="button"
-      class="dw-collapse"
-      (click)="toggleCollapse()"
-      [attr.aria-label]="(sidebarCollapsed() ? 'nav.expandSidebar' : 'nav.collapseSidebar') | translate"
-      [attr.title]="(sidebarCollapsed() ? 'nav.expandSidebar' : 'nav.collapseSidebar') | translate">
-      <span class="material-icons">{{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</span>
-    </button>
-
-    <nav class="dw-nav">
-      @if (!isAdminPage()) {
-        <a routerLink="/home" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">home</span>
-          <span class="dw-nav__label">{{ 'nav.home' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-        <a routerLink="/lessons" routerLinkActive="is-active" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">menu_book</span>
-          <span class="dw-nav__label">{{ 'nav.lessons' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-        <a routerLink="/quiz" routerLinkActive="is-active" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">quiz</span>
-          <span class="dw-nav__label">{{ 'nav.quiz' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-        <a routerLink="/exam" routerLinkActive="is-active" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">military_tech</span>
-          <span class="dw-nav__label">{{ 'nav.exam' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-        <a routerLink="/progress" routerLinkActive="is-active" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">trending_up</span>
-          <span class="dw-nav__label">{{ 'nav.progress' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-        <a routerLink="/assistant" routerLinkActive="is-active" class="dw-nav__item" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">auto_awesome</span>
-          <span class="dw-nav__label">{{ 'nav.assistant' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-      }
-
-      @if (currentUser()?.role === 'admin') {
-        <a routerLink="/admin" routerLinkActive="is-active" class="dw-nav__item dw-nav__item--admin" (click)="closeSidebar()">
-          <span class="material-icons dw-nav__icon">admin_panel_settings</span>
-          <span class="dw-nav__label">{{ 'nav.admin' | translate }}</span>
-          <span class="dw-nav__dot" aria-hidden="true"></span>
-        </a>
-      }
-    </nav>
-
-    <div class="dw-foot">
-      <div class="dw-user">
-        <span class="dw-user__avatar" aria-hidden="true">{{ userInitial() }}</span>
-        <span class="dw-user__name">{{ currentUser()?.name }}</span>
-      </div>
-
-      <div class="dw-foot__row">
-        <button
-          type="button"
-          class="dw-foot__btn"
-          (click)="i18n.toggle()"
-          [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'"
-          [attr.title]="i18n.isRtl() ? 'EN' : 'عربي'">
-          <span class="material-icons">language</span>
-          <span class="dw-foot__btn-label">{{ i18n.isRtl() ? 'EN' : 'عربي' }}</span>
-        </button>
-
-        <button
-          type="button"
-          class="dw-foot__btn"
-          (click)="toggleTheme()"
-          [attr.aria-label]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate"
-          [attr.title]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate">
-          <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
-        </button>
-      </div>
-
-      <button type="button" class="dw-foot__logout" (click)="logout()">
-        <span class="material-icons">logout</span>
-        <span class="dw-nav__label">{{ 'nav.logout' | translate }}</span>
+      <button
+        type="button"
+        class="dw-collapse"
+        (click)="toggleCollapse()"
+        [attr.aria-label]="
+          (sidebarCollapsed() ? 'nav.expandSidebar' : 'nav.collapseSidebar') | translate
+        "
+        [attr.title]="
+          (sidebarCollapsed() ? 'nav.expandSidebar' : 'nav.collapseSidebar') | translate
+        "
+      >
+        <span class="material-icons">{{
+          sidebarCollapsed() ? 'chevron_right' : 'chevron_left'
+        }}</span>
       </button>
-    </div>
-  </aside>
+
+      <nav class="dw-nav">
+        @if (!isAdminPage()) {
+          <a
+            routerLink="/home"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">home</span>
+            <span class="dw-nav__label">{{ 'nav.home' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+          <a
+            routerLink="/lessons"
+            routerLinkActive="is-active"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">menu_book</span>
+            <span class="dw-nav__label">{{ 'nav.lessons' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+          <a
+            routerLink="/quiz"
+            routerLinkActive="is-active"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">quiz</span>
+            <span class="dw-nav__label">{{ 'nav.quiz' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+          <a
+            routerLink="/exam"
+            routerLinkActive="is-active"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">military_tech</span>
+            <span class="dw-nav__label">{{ 'nav.exam' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+          <a
+            routerLink="/progress"
+            routerLinkActive="is-active"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">trending_up</span>
+            <span class="dw-nav__label">{{ 'nav.progress' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+          <a
+            routerLink="/assistant"
+            routerLinkActive="is-active"
+            class="dw-nav__item"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">auto_awesome</span>
+            <span class="dw-nav__label">{{ 'nav.assistant' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+        }
+
+        @if (currentUser()?.role === 'admin') {
+          <a
+            routerLink="/admin"
+            routerLinkActive="is-active"
+            class="dw-nav__item dw-nav__item--admin"
+            (click)="closeSidebar()"
+          >
+            <span class="material-icons dw-nav__icon">admin_panel_settings</span>
+            <span class="dw-nav__label">{{ 'nav.admin' | translate }}</span>
+            <span class="dw-nav__dot" aria-hidden="true"></span>
+          </a>
+        }
+      </nav>
+
+      <div class="dw-foot">
+        <div class="dw-user">
+          <span class="dw-user__avatar" aria-hidden="true">{{ userInitial() }}</span>
+          <span class="dw-user__name">{{ currentUser()?.name }}</span>
+        </div>
+
+        <div class="dw-foot__row">
+          <button
+            type="button"
+            class="dw-foot__btn"
+            (click)="i18n.toggle()"
+            [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'"
+            [attr.title]="i18n.isRtl() ? 'EN' : 'عربي'"
+          >
+            <span class="material-icons">language</span>
+            <span class="dw-foot__btn-label">{{ i18n.isRtl() ? 'EN' : 'عربي' }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="dw-foot__btn"
+            (click)="toggleTheme()"
+            [attr.aria-label]="
+              (theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate
+            "
+            [attr.title]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate"
+          >
+            <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+          </button>
+        </div>
+
+        <button type="button" class="dw-foot__logout" (click)="logout()">
+          <span class="material-icons">logout</span>
+          <span class="dw-nav__label">{{ 'nav.logout' | translate }}</span>
+        </button>
+      </div>
+    </aside>
   }
 
   <div class="dw-shell" [class.dw-shell--locked]="examLocked()">
@@ -145,15 +184,7 @@
   <!-- ─── Landing only: marketing TopBar ─── -->
   <header class="dw-topbar">
     <a routerLink="/landing" class="dw-tb-logo" aria-label="DriveWise">
-      <svg width="26" height="26" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <path d="M20 2 L34 7 V20 C34 28.5 28 34.5 20 38 C12 34.5 6 28.5 6 20 V7 Z" fill="var(--dw-teal-500)" />
-        <path d="M14 30 L20 12 L26 30 Z" fill="rgba(255,255,255,0.10)" />
-        <rect x="19" y="14" width="2" height="3" rx="1" fill="#fff" opacity="0.95" />
-        <rect x="19" y="19" width="2" height="3" rx="1" fill="#fff" opacity="0.85" />
-        <rect x="19" y="24" width="2" height="3" rx="1" fill="#fff" opacity="0.7" />
-        <circle cx="29.5" cy="10.5" r="3.6" fill="var(--dw-amber-500)" stroke="var(--dw-surface)" stroke-width="1.2" />
-      </svg>
-      <span class="dw-tb-logo-word">{{ 'brand' | translate }}</span>
+      <img src="assets/logo.png" alt="DriveWise" class="dw-tb-logo__image" />
     </a>
 
     <div class="dw-tb-actions">
@@ -161,8 +192,19 @@
         type="button"
         class="dw-tb-lang"
         (click)="i18n.toggle()"
-        [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        [attr.aria-label]="i18n.isRtl() ? 'Switch to English' : 'التبديل إلى العربية'"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
         </svg>
@@ -174,7 +216,8 @@
         class="dw-tb-icon-btn"
         (click)="toggleTheme()"
         [attr.aria-label]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate"
-        [attr.title]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate">
+        [attr.title]="(theme.isDark() ? 'nav.switchToLight' : 'nav.switchToDark') | translate"
+      >
         <span class="dw-tb-theme-glyph">{{ theme.isDark() ? '☀' : '☾' }}</span>
       </button>
 

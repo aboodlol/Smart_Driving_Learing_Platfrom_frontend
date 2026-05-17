@@ -1,9 +1,21 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { ExamAttempt, ExamAttemptAnswer, ExamAttemptHistoryItem } from '../../../core/models/exam-attempt.models';
+import {
+  ExamAttempt,
+  ExamAttemptAnswer,
+  ExamAttemptHistoryItem,
+} from '../../../core/models/exam-attempt.models';
 import {
   ActivityResponse,
   ChapterProgress,
@@ -183,7 +195,7 @@ export class ProgressPageComponent {
 
   protected readonly bestScore = computed(() => {
     const fromHistory = this.filteredHistory()
-      .map(h => h.score)
+      .map((h) => h.score)
       .filter((s): s is number => typeof s === 'number');
     if (fromHistory.length > 0) return Math.max(...fromHistory);
     return this.summary()?.quizStats?.lastScore ?? null;
@@ -254,16 +266,19 @@ export class ProgressPageComponent {
   // ─── Chapter progress rows ───
   protected readonly chapterRows = computed<ChapterProgressRow[]>(() => {
     const lessons = this.summary()?.lessons ?? [];
-    return lessons.map(l => {
-      const percent = l.totalSubLessons > 0
-        ? Math.round((l.completedSubLessons / l.totalSubLessons) * 100)
-        : 0;
+    return lessons.map((l) => {
+      const percent =
+        l.totalSubLessons > 0 ? Math.round((l.completedSubLessons / l.totalSubLessons) * 100) : 0;
       const accent: ChapterProgressRow['accent'] =
-        percent === 100 ? 'success'
-        : percent >= 60 ? 'amber'
-        : percent >= 30 ? 'info'
-        : percent > 0   ? 'teal'
-        : 'neutral';
+        percent === 100
+          ? 'success'
+          : percent >= 60
+            ? 'amber'
+            : percent >= 30
+              ? 'info'
+              : percent > 0
+                ? 'teal'
+                : 'neutral';
       return {
         chapterId: l.chapterId,
         title: this.localizedTitle(l),
@@ -413,7 +428,10 @@ export class ProgressPageComponent {
   protected readonly selectedAttemptScore = computed(() => {
     const attempt = this.selectedAttempt();
     if (!attempt) return '--';
-    const score = typeof attempt.score === 'number' ? attempt.score : this.calculateReviewScore(this.reviewItems());
+    const score =
+      typeof attempt.score === 'number'
+        ? attempt.score
+        : this.calculateReviewScore(this.reviewItems());
     return score === null ? '--' : `${score}%`;
   });
   protected readonly selectedAttemptTotalQuestions = computed(() => {
@@ -542,14 +560,14 @@ export class ProgressPageComponent {
 
   protected localeNumber(n: number): string {
     if (!this.isArabicMode()) return String(n);
-    return String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]);
+    return String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
   }
 
   protected getHistoryStatusLabel(status: string): string {
     const normalized = status.toLowerCase();
     if (normalized === 'submitted') return this.isArabicMode() ? 'مُرسل' : 'Submitted';
-    if (normalized === 'expired')   return this.isArabicMode() ? 'منتهي' : 'Expired';
-    if (normalized === 'active')    return this.isArabicMode() ? 'نشط'   : 'Active';
+    if (normalized === 'expired') return this.isArabicMode() ? 'منتهي' : 'Expired';
+    if (normalized === 'active') return this.isArabicMode() ? 'نشط' : 'Active';
     return status;
   }
 
@@ -679,9 +697,7 @@ export class ProgressPageComponent {
         const rawDate = item.submittedAt ?? item.createdAt ?? item.updatedAt ?? null;
         const score = typeof item.score === 'number' ? item.score : null;
         const total = typeof item.totalQuestions === 'number' ? item.totalQuestions : null;
-        const passed = score !== null && total
-          ? score >= PASSING_SCORE
-          : (score ?? 0) >= 85;
+        const passed = score !== null && total ? score >= PASSING_SCORE : (score ?? 0) >= 85;
 
         return {
           _id: item._id || item.id || '',
@@ -728,7 +744,12 @@ export class ProgressPageComponent {
         const image = question?.image ?? item.image ?? null;
         return {
           ...item,
-          question: this.localizeQuestionText(item.question, item.questionAR, question?.question, question?.questionAR),
+          question: this.localizeQuestionText(
+            item.question,
+            item.questionAR,
+            question?.question,
+            question?.questionAR,
+          ),
           selectedAnswer: this.localizeAnswer(question, item.selectedAnswer, item.selectedAnswerAR),
           correctAnswer: this.localizeQuestionText(
             item.correctAnswer,
@@ -762,14 +783,24 @@ export class ProgressPageComponent {
       return [
         {
           questionId: question._id,
-          question: this.localizeQuestionText(question.question, question.questionAR, question.question, question.questionAR),
+          question: this.localizeQuestionText(
+            question.question,
+            question.questionAR,
+            question.question,
+            question.questionAR,
+          ),
           questionAR: question.questionAR,
           selectedAnswer,
           selectedAnswerAR: this.getSelectedAnswerText(question, attempt.answers, true),
           correctAnswer,
           correctAnswerAR: question.correctAnswerAR,
           isCorrect: this.isAnswerCorrect(question, selectedAnswer, correctAnswer),
-          explanation: this.localizeQuestionText(question.explanation, question.explanationAR, question.explanation, question.explanationAR),
+          explanation: this.localizeQuestionText(
+            question.explanation,
+            question.explanationAR,
+            question.explanation,
+            question.explanationAR,
+          ),
           explanationAR: question.explanationAR,
           image: question.image ?? null,
           video: question.video ?? null,
@@ -808,7 +839,11 @@ export class ProgressPageComponent {
     return rawAnswer;
   }
 
-  private localizeAnswer(question: QuizQuestion | undefined, englishAnswer?: string, arabicAnswer?: string): string {
+  private localizeAnswer(
+    question: QuizQuestion | undefined,
+    englishAnswer?: string,
+    arabicAnswer?: string,
+  ): string {
     if (this.isArabicMode()) {
       return (
         this.normalizeText(arabicAnswer) ??
@@ -849,7 +884,11 @@ export class ProgressPageComponent {
     );
   }
 
-  private isAnswerCorrect(question: QuizQuestion, selectedAnswer: string, correctAnswer: string): boolean {
+  private isAnswerCorrect(
+    question: QuizQuestion,
+    selectedAnswer: string,
+    correctAnswer: string,
+  ): boolean {
     const normalizedSelected = this.normalizeKey(selectedAnswer);
     const normalizedCorrect = this.normalizeKey(correctAnswer);
     if (!normalizedSelected || !normalizedCorrect) return false;
@@ -861,12 +900,20 @@ export class ProgressPageComponent {
     const arabicIndex = this.findOptionIndex(arabicOptions, selectedAnswer);
 
     if (englishIndex >= 0) {
-      return this.normalizeKey(question.correctAnswer ?? '') === this.normalizeKey(englishOptions[englishIndex] ?? '')
-        || this.normalizeKey(question.correctAnswerAR ?? '') === this.normalizeKey(arabicOptions[englishIndex] ?? '');
+      return (
+        this.normalizeKey(question.correctAnswer ?? '') ===
+          this.normalizeKey(englishOptions[englishIndex] ?? '') ||
+        this.normalizeKey(question.correctAnswerAR ?? '') ===
+          this.normalizeKey(arabicOptions[englishIndex] ?? '')
+      );
     }
     if (arabicIndex >= 0) {
-      return this.normalizeKey(question.correctAnswer ?? '') === this.normalizeKey(englishOptions[arabicIndex] ?? '')
-        || this.normalizeKey(question.correctAnswerAR ?? '') === this.normalizeKey(arabicOptions[arabicIndex] ?? '');
+      return (
+        this.normalizeKey(question.correctAnswer ?? '') ===
+          this.normalizeKey(englishOptions[arabicIndex] ?? '') ||
+        this.normalizeKey(question.correctAnswerAR ?? '') ===
+          this.normalizeKey(arabicOptions[arabicIndex] ?? '')
+      );
     }
     return false;
   }
@@ -876,11 +923,16 @@ export class ProgressPageComponent {
     answers: ExamAttemptAnswer[] | Record<string, string> | undefined,
   ): string {
     if (!answers) return '';
-    if (Array.isArray(answers)) return answers.find(a => a.questionId === questionId)?.selectedAnswer ?? '';
+    if (Array.isArray(answers))
+      return answers.find((a) => a.questionId === questionId)?.selectedAnswer ?? '';
     return answers[questionId] ?? '';
   }
 
-  private normalizeOption(firstList: string[] | undefined, secondList: string[] | undefined, value?: string): string | undefined {
+  private normalizeOption(
+    firstList: string[] | undefined,
+    secondList: string[] | undefined,
+    value?: string,
+  ): string | undefined {
     const normalizedValue = this.normalizeText(value);
     if (!normalizedValue) return undefined;
     const firstIndex = this.findOptionIndex(firstList ?? [], normalizedValue);
