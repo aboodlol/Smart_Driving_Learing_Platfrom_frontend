@@ -99,10 +99,7 @@ export class AssistantPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Default: sidebar docked open on desktop (≥1024px), collapsed on smaller screens.
-    if (typeof window !== 'undefined') {
-      this.sidebarOpen.set(window.innerWidth >= 1024);
-    }
+    this.sidebarOpen.set(false);
 
     const quizContext = this.readQuizContextFromHistory();
     if (quizContext) {
