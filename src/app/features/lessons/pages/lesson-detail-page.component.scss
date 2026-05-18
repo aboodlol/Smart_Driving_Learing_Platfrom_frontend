@@ -439,6 +439,17 @@
     border-radius: 12px;
     background: var(--dw-surface);
   }
+
+  .lesson-video {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    height: 320px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #000;
+    outline: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -448,6 +459,7 @@
     min-height: 160px;
 
     img { height: auto; max-height: 240px; }
+    .lesson-video { height: auto; max-height: 240px; }
   }
 }
 
@@ -464,6 +476,7 @@
     min-height: 140px;
 
     img { max-height: 200px; }
+    .lesson-video { max-height: 200px; }
   }
   .dw-stickers .dw-sticker { width: 64px; height: 64px; }
   .dw-btn--grow { min-width: 0; flex: 1 1 100%; }

@@ -332,6 +332,10 @@ export class LessonDetailPageComponent {
     return this.currentSubLesson()?.image || '';
   }
 
+  protected getCurrentVideo(): string {
+    return this.currentSubLesson()?.video || '';
+  }
+
   protected getNextChapterTitle(): string {
     const next = this.nextChapter();
     if (!next) return '';

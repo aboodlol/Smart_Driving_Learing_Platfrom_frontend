@@ -192,7 +192,18 @@
           </section>
         } @else {
           <section class="dw-card dw-current">
-            @if (getCurrentImage(); as src) {
+            @if (getCurrentVideo(); as videoSrc) {
+              <div class="dw-current__media dw-current__media--video">
+                <video
+                  class="lesson-video"
+                  controls
+                  preload="metadata"
+                  playsinline
+                  [src]="videoSrc"
+                  [attr.aria-label]="getCurrentSubLessonTitle()">
+                </video>
+              </div>
+            } @else if (getCurrentImage(); as src) {
               <div class="dw-current__media">
                 <img [src]="src" [alt]="getCurrentSubLessonTitle()" loading="lazy">
               </div>

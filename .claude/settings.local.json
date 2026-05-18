@@ -42,7 +42,14 @@
       "Bash(git stash *)",
       "Bash(npm start *)",
       "Bash(grep -r \"localStorage\\\\\\\\.setItem\\\\|localStorage\\\\\\\\.getItem\" \"c:\\\\Users\\\\ahmad\\\\OneDrive\\\\Desktop\\\\Smart_Driving_Learing_Platfrom_frontend2\\\\Smart_Driving_Learing_Platfrom_frontend\\\\src\\\\app\" --include=\"*.ts\" --include=\"*.tsx\")",
-      "Bash(grep -iE \"\\\\.js$\")"
+      "Bash(grep -iE \"\\\\.js$\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const path=require\\('path'\\);const dir='seeds/questions';const files=fs.readdirSync\\(dir\\);files.forEach\\(f=>{const d=JSON.parse\\(fs.readFileSync\\(path.join\\(dir,f\\),'utf8'\\)\\);console.log\\(f,'-count:',d.length,'-chapter:',d[0]?.chapterTitle,'/',d[0]?.chapterTitleAR\\);}\\);\")",
+      "Bash(node -e \"const m=require\\('c:/Users/ahmad/OneDrive/Desktop/Smart_Driving_Learing_Platfrom_frontend2/Smart_Driving_Learing_Platfrom_frontend/node_modules/@lucide/angular'\\);['LucideGavel','LucidePlayCircle','LucideUser','LucideAmbulance','LucideBookCheck','LucideBookmark','LucideBookOpen','LucideCarFront','LucideCheckSquare','LucideClipboardList','LucideFileText','LucideGauge','LucideGraduationCap','LucideHelpCircle','LucideIdCard','LucideLightbulb','LucideRoute','LucideShieldCheck','LucideTrafficCone','LucideTriangleAlert','LucideWrench'].forEach\\(k=>console.log\\(k, typeof m[k]\\)\\);\")",
+      "Bash(node -e \"const m=require\\('@lucide/angular'\\);['LucideGavel','LucidePlayCircle','LucideUser','LucideAmbulance','LucideTrafficCone','LucideTriangleAlert','LucideWrench'].forEach\\(k=>console.log\\(k, typeof m[k]\\)\\);\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@driving.com\\\\\",\\\\\"password\\\\\":\\\\\"admin123\\\\\"}\")",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZjM2N2UwMzk2ZmRlM2NmNWIzZTJkNSIsImlhdCI6MTc3OTA2MjAyNSwiZXhwIjoxNzc5NjY2ODI1fQ.VzImYzctNl9eSM3O0cpWRDncVA_Vm2iagsHsFPi8y-w' http://localhost:3000/api/quizzes)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);const keys=Object.keys\\(j\\);console.log\\('Chapters:',keys\\);for\\(const k of keys\\)console.log\\(' -',k,':',j[k].length,'questions, sample image:',j[k][0]?.image,', video:',j[k][0]?.video\\);}\\)\")",
+      "Bash(xargs -I {} grep \"titleAR:\" {})"
     ],
     "deny": [
       "Bash(git push --force:*)",

@@ -14,7 +14,7 @@ import { QuizQuestion } from '../../../core/models/quiz.models';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
 import { QuizApiService } from '../../../core/services/quiz-api.service';
-import { getChapterMeta } from '../../../core/utils/chapter-meta';
+import { getChapterMeta, getChapterOrder } from '../../../core/utils/chapter-meta';
 
 import { Type } from '@angular/core';
 
@@ -36,41 +36,45 @@ interface BilingualText {
 }
 
 const CHAPTER_DESCRIPTION_MAP: Record<string, BilingualText> = {
-  'basic driving skills': {
-    en: 'Core vehicle control, observation, and safe driving habits.',
-    ar: 'مهارات التحكم الأساسية بالمركبة والملاحظة وعادات القيادة الآمنة.',
-  },
   'traffic signs': {
     en: 'Recognize and apply warning, regulatory, and guidance signs correctly.',
     ar: 'التعرف على الشواخص التحذيرية والتنظيمية والإرشادية وتطبيقها بشكل صحيح.',
   },
-  'road priorities and right of way': {
+  'traffic rules and priorities': {
     en: 'Right-of-way rules at intersections, roundabouts, and merging lanes.',
     ar: 'قواعد حق المرور عند التقاطعات والدوارات ومناطق الاندماج.',
   },
-  'speed limits and safe following': {
-    en: 'Speed limits and safe following distances in all conditions.',
-    ar: 'حدود السرعة القانونية ومسافة الأمان في كل الظروف.',
+  'jordanian traffic law': {
+    en: 'Key articles of Jordanian traffic law every driver must know.',
+    ar: 'أهم مواد قانون السير الأردني التي يجب على كل سائق معرفتها.',
   },
-  'seat belt safety and passenger rules': {
-    en: 'Seat belt requirements and key safety rules for passengers.',
-    ar: 'متطلبات حزام الأمان وقواعد السلامة لجميع الركاب.',
+  'road lines and ground markings': {
+    en: 'Meaning of road lines, arrows, and pavement markings.',
+    ar: 'دلالات الخطوط والأسهم والعلامات الأرضية على الطريق.',
   },
-  'alcohol and driving laws': {
-    en: 'Legal limits, penalties, and risks of impaired driving.',
-    ar: 'الحدود القانونية والعقوبات ومخاطر القيادة تحت تأثير الكحول.',
+  'driver behavior': {
+    en: 'Safe driver conduct, attention, and decision-making on the road.',
+    ar: 'السلوكيات الآمنة للسائق والانتباه واتخاذ القرار على الطريق.',
   },
-  'license categories and vehicle types': {
-    en: 'License classes mapped to vehicle types and permitted privileges.',
-    ar: 'فئات الرخص وأنواع المركبات المسموح بقيادتها.',
+  'first aid': {
+    en: 'Immediate first-aid actions at the scene of an accident.',
+    ar: 'إجراءات الإسعافات الأولية الفورية في موقع الحادث.',
   },
-  'first aid and emergency response': {
-    en: 'Immediate actions for accidents and basic first aid.',
-    ar: 'الإجراءات الفورية للحوادث ومبادئ الإسعافات الأولية.',
+  'car mechanics': {
+    en: 'Basic vehicle mechanics, maintenance checks, and safety systems.',
+    ar: 'أساسيات ميكانيك السيارات وفحوصات الصيانة وأنظمة السلامة.',
   },
-  'vehicle maintenance and mechanics': {
-    en: 'Maintenance checks and basic mechanical safety knowledge.',
-    ar: 'فحوصات الصيانة وأساسيات السلامة الميكانيكية.',
+  'traffic violations': {
+    en: 'Common traffic violations and their penalties.',
+    ar: 'مخالفات السير الشائعة والعقوبات المترتبة عليها.',
+  },
+  'fifth and sixth license categories': {
+    en: 'Privileges and rules for fifth and sixth license categories.',
+    ar: 'الصلاحيات والقواعد الخاصة بالفئتين الخامسة والسادسة من الرخص.',
+  },
+  'animated questions': {
+    en: 'Video-based scenarios to test real driving judgment.',
+    ar: 'مواقف بالفيديو لاختبار حكم القيادة في الحالات الواقعية.',
   },
 };
 
@@ -178,8 +182,7 @@ export class QuizPageComponent {
       }
 
       const desc = this.fallbackDescription(title);
-      const order = map.size;
-      const meta = getChapterMeta(title, order);
+      const meta = getChapterMeta(title, map.size);
       map.set(key, {
         chapterKey: key,
         chapterTitle: title,
@@ -187,13 +190,20 @@ export class QuizPageComponent {
         description: desc.en,
         descriptionAR: desc.ar,
         questionCount: 1,
-        index: order,
+        index: 0,
         accent: meta.accent,
         icon: meta.icon,
       });
     }
 
-    return Array.from(map.values());
+    const ordered = Array.from(map.values()).sort((a, b) => {
+      const oa = getChapterOrder(a.chapterTitle);
+      const ob = getChapterOrder(b.chapterTitle);
+      if (oa !== ob) return oa - ob;
+      return a.chapterTitle.localeCompare(b.chapterTitle);
+    });
+
+    return ordered.map((card, i) => ({ ...card, index: i }));
   }
 
   private fallbackDescription(title: string): BilingualText {

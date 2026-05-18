@@ -4,6 +4,7 @@ export interface SubLesson {
   content: string;
   contentAR?: string;
   image?: string;
+  video?: string | null;
 }
 
 export interface Chapter {
