@@ -7,6 +7,7 @@ import {
   ConversationDetail,
   ConversationMessageRequest,
   ConversationSummary,
+  SendMessageResponse,
 } from '../models/assistant.models';
 
 @Injectable({
@@ -34,12 +35,15 @@ export class AssistantApiService {
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 
-  sendMessageToConversation(conversationId: string, payload: ConversationMessageRequest): Observable<unknown> {
+  sendMessageToConversation(conversationId: string, payload: ConversationMessageRequest): Observable<SendMessageResponse> {
     const formData = new FormData();
     formData.append('message', payload.message?.trim() ?? '');
 
     if (payload.image) {
       formData.append('image', payload.image, payload.image.name);
+    }
+    if (payload.video) {
+      formData.append('video', payload.video, payload.video.name);
     }
     if (payload.file) {
       formData.append('file', payload.file, payload.file.name);
@@ -49,7 +53,7 @@ export class AssistantApiService {
     }
 
     return this.http
-      .post(`${this.baseUrl}/${conversationId}/messages`, formData)
+      .post<SendMessageResponse>(`${this.baseUrl}/${conversationId}/messages`, formData)
       .pipe(catchError((error: HttpErrorResponse) => this.mapApiError(error)));
   }
 
@@ -67,7 +71,7 @@ export class AssistantApiService {
       return throwError(() => new Error('Upload is too large. Please choose a smaller file.'));
     }
     if (error.status === 415) {
-      return throwError(() => new Error('Unsupported file type. Please upload an image or PDF file.'));
+      return throwError(() => new Error('Unsupported file type. Please upload an image, video, or PDF file.'));
     }
     if (error.status === 404) {
       return throwError(() => new Error('Conversation not found. Please start a new chat.'));

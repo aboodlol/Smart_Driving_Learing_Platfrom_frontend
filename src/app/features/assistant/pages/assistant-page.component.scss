@@ -1,4 +1,4 @@
-/* Drive Wise — AI Assistant page (mirrors ai.jsx::AiScreen) */
+/* DriveWise — AI Assistant page (ChatGPT-style layout) */
 
 :host {
   display: block;
@@ -42,9 +42,7 @@
 
   --dw-ease: cubic-bezier(.2, .8, .2, 1);
 
-  --dw-ai-side-w: 320px;
-  /* Closed-state transform direction: -100% = LTR (off the start/left).
-     Flipped to 100% in RTL so the drawer hides off the start/right side. */
+  --dw-ai-side-w: 280px;
   --dw-ai-side-tx: -100%;
 }
 
@@ -84,129 +82,15 @@
   background: var(--dw-bg);
   height: 100%;
   display: flex;
-  flex-direction: column;
   position: relative;
 }
 
 [dir='rtl'] .dw-ai { font-family: 'Tajawal', var(--dw-font-sans); }
 
-/* ─── Header ─── */
-.dw-ai-header {
-  flex-shrink: 0;
-  padding: 16px 36px;
-  background: var(--dw-surface);
-  border-bottom: 1px solid var(--dw-border);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.dw-ai-iconbtn {
-  appearance: none;
-  width: 40px; height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--dw-border);
-  background: var(--dw-surface);
-  color: var(--dw-text-2);
-  display: grid; place-items: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background .15s var(--dw-ease), color .15s var(--dw-ease), border-color .15s var(--dw-ease);
-
-  .material-icons { font-size: 20px; }
-}
-
-.dw-ai-iconbtn:hover { background: var(--dw-surface-2); color: var(--dw-text); border-color: var(--dw-border-strong); }
-
-.dw-ai-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.dw-ai-brand__avatar {
-  width: 44px; height: 44px;
-  border-radius: 14px;
-  display: grid; place-items: center;
-  background: linear-gradient(135deg, var(--dw-teal-500), var(--dw-amber-500));
-  color: #fff;
-  flex-shrink: 0;
-  box-shadow: var(--dw-shadow-brand);
-}
-
-.dw-ai-brand__copy { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-
-.dw-ai-brand__title {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.2px;
-  color: var(--dw-text);
-}
-
-.dw-ai-brand__sub {
-  font-size: 12px;
-  color: var(--dw-text-3);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dw-ai-dot {
-  width: 6px; height: 6px;
-  border-radius: 999px;
-  background: var(--dw-success);
-  flex-shrink: 0;
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--dw-success) 18%, transparent);
-}
-
-.dw-ai-newchat,
-.dw-ai-delete {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: var(--dw-r-pill);
-  border: 1px solid var(--dw-border);
-  background: var(--dw-surface);
-  color: var(--dw-text-2);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background .15s var(--dw-ease), color .15s var(--dw-ease), border-color .15s var(--dw-ease);
-
-  .material-icons { font-size: 16px; }
-}
-
-.dw-ai-newchat:hover { background: var(--dw-teal-50); color: var(--dw-teal-700); border-color: color-mix(in oklch, var(--dw-teal-500) 30%, var(--dw-border)); }
-.dw-ai-delete:hover  { background: var(--dw-error-bg); color: var(--dw-error); border-color: color-mix(in oklch, var(--dw-error) 30%, var(--dw-border)); }
-
-.dw-ai-newchat:disabled { opacity: 0.5; cursor: not-allowed; }
-
-@media (max-width: 720px) {
-  .dw-ai-header { padding: 12px 16px; gap: 10px; }
-  .dw-ai-newchat__label,
-  .dw-ai-delete__label { display: none; }
-  .dw-ai-newchat,
-  .dw-ai-delete { width: 36px; padding: 0; justify-content: center; }
-  .dw-ai-brand__sub { font-size: 11px; }
-}
-
-/* ─── Sidebar drawer ─── */
+/* ─── Sidebar ─── */
 .dw-ai-backdrop {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
   background: rgba(15, 30, 40, 0.45);
   border: 0;
   padding: 0;
@@ -226,52 +110,91 @@
   inset-inline-start: 0;
   width: var(--dw-ai-side-w);
   max-width: 100%;
-  background: var(--dw-surface);
+  background: var(--dw-surface-2);
   border-inline-end: 1px solid var(--dw-border);
   z-index: 1000;
   transform: translateX(var(--dw-ai-side-tx));
   display: flex;
   flex-direction: column;
   box-shadow: var(--dw-shadow-lg);
+  visibility: hidden;
 }
 
-/* Animate only after first paint so we don't get a slide-in flash on mount. */
 :host(.dw-ai-ready) .dw-ai-sidebar {
-  transition: transform .28s var(--dw-ease);
+  transition: transform .28s var(--dw-ease), visibility 0s linear .28s;
 }
 
-.dw-ai-sidebar.is-open { transform: translateX(0); }
+.dw-ai-sidebar.is-open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+:host(.dw-ai-ready) .dw-ai-sidebar.is-open {
+  transition: transform .28s var(--dw-ease), visibility 0s linear 0s;
+}
 
 .dw-ai-sidebar__head {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 20px 18px;
+  gap: 8px;
+  padding: 14px 14px;
   border-bottom: 1px solid var(--dw-border);
+}
 
-  h2 {
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: -0.2px;
-    margin: 0;
-    color: var(--dw-text);
+.dw-ai-newchat {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--dw-border-strong);
+  background: var(--dw-surface);
+  color: var(--dw-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s var(--dw-ease), border-color .15s var(--dw-ease), color .15s var(--dw-ease);
+
+  .material-icons { font-size: 18px; }
+
+  &:hover:not(:disabled) {
+    background: var(--dw-teal-50);
+    color: var(--dw-teal-700);
+    border-color: color-mix(in oklch, var(--dw-teal-500) 35%, var(--dw-border-strong));
   }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.dw-ai-newchat--compact {
+  flex: 0 0 auto;
+  height: 36px;
+  border-radius: var(--dw-r-pill);
+  padding: 0 14px;
+}
+
+.dw-ai-sidebar__close {
+  display: grid;
 }
 
 .dw-ai-sidebar__body {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 12px 14px 18px;
+  padding: 10px 10px 18px;
 }
 
 .dw-ai-sidebar__body::-webkit-scrollbar { width: 6px; }
 .dw-ai-sidebar__body::-webkit-scrollbar-thumb { background: var(--dw-border-strong); border-radius: 99px; }
 
 .dw-ai-notice {
-  margin: 12px 18px;
+  margin: 12px 14px;
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 12px;
@@ -282,7 +205,30 @@
 .dw-ai-conv {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.dw-ai-conv__row {
+  position: relative;
+  display: flex;
+  align-items: center;
   gap: 4px;
+  border-radius: 10px;
+  padding-inline-end: 4px;
+  transition: background .15s var(--dw-ease);
+
+  &:hover { background: var(--dw-surface-3); }
+
+  &.is-active {
+    background: var(--dw-teal-100);
+
+    .dw-ai-conv__item { color: var(--dw-teal-700); font-weight: 700; }
+    .dw-ai-conv__icon { color: var(--dw-teal-700); }
+  }
+
+  &.is-pending-delete {
+    background: var(--dw-error-bg);
+  }
 }
 
 .dw-ai-conv__item {
@@ -290,25 +236,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   background: transparent;
   color: var(--dw-text-2);
   text-align: start;
   font-family: inherit;
   cursor: pointer;
-  transition: background .15s var(--dw-ease), color .15s var(--dw-ease);
-  position: relative;
-}
-
-.dw-ai-conv__item:hover { background: var(--dw-surface-2); color: var(--dw-text); }
-
-.dw-ai-conv__item.is-active {
-  background: var(--dw-teal-100);
-  color: var(--dw-teal-700);
-  font-weight: 700;
 }
 
 .dw-ai-conv__icon {
@@ -355,8 +292,36 @@
   .material-icons { font-size: 16px; }
 }
 
-.dw-ai-conv__item:hover .dw-ai-conv__delete { opacity: 1; }
-.dw-ai-conv__delete:hover { background: var(--dw-error-bg); color: var(--dw-error); }
+.dw-ai-conv__row:hover .dw-ai-conv__delete,
+.dw-ai-conv__row.is-active .dw-ai-conv__delete { opacity: 1; }
+.dw-ai-conv__delete:hover,
+.dw-ai-conv__delete:focus-visible { background: var(--dw-error-bg); color: var(--dw-error); opacity: 1; }
+
+.dw-ai-conv__confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.dw-ai-conv__confirm-btn {
+  appearance: none;
+  width: 28px; height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dw-surface);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background .15s var(--dw-ease), color .15s var(--dw-ease);
+
+  .material-icons { font-size: 16px; }
+
+  &--yes { color: var(--dw-error); }
+  &--no  { color: var(--dw-text-3); }
+
+  &:hover { background: var(--dw-surface-3); }
+  &--yes:hover { background: var(--dw-error); color: #fff; }
+}
 
 .dw-ai-empty {
   display: flex;
@@ -369,12 +334,129 @@
   text-align: center;
 }
 
+/* ─── Main column ─── */
+.dw-ai-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--dw-bg);
+}
+
+/* Desktop layout: sidebar docks beside chat when open, collapses to 0 width when closed */
+@media (min-width: 1024px) {
+  .dw-ai-sidebar {
+    position: relative;
+    transform: none !important;
+    box-shadow: none;
+    z-index: auto;
+    flex: 0 0 var(--dw-ai-side-w);
+    visibility: visible;
+    margin-inline-start: calc(-1 * var(--dw-ai-side-w));
+  }
+
+  .dw-ai-sidebar.is-open {
+    margin-inline-start: 0;
+  }
+
+  :host(.dw-ai-ready) .dw-ai-sidebar,
+  :host(.dw-ai-ready) .dw-ai-sidebar.is-open {
+    transition: margin-inline-start .28s var(--dw-ease);
+  }
+
+  .dw-ai-backdrop { display: none; }
+}
+
+/* ─── Top bar ─── */
+.dw-ai-topbar {
+  flex-shrink: 0;
+  padding: 12px 24px;
+  background: var(--dw-surface);
+  border-bottom: 1px solid var(--dw-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dw-ai-iconbtn {
+  appearance: none;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--dw-border);
+  background: var(--dw-surface);
+  color: var(--dw-text-2);
+  display: grid; place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s var(--dw-ease), color .15s var(--dw-ease), border-color .15s var(--dw-ease);
+
+  .material-icons { font-size: 20px; }
+
+  &:hover {
+    background: var(--dw-surface-2);
+    color: var(--dw-text);
+    border-color: var(--dw-border-strong);
+  }
+}
+
+.dw-ai-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dw-ai-brand__avatar {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--dw-teal-500), var(--dw-amber-500));
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: var(--dw-shadow-brand);
+}
+
+.dw-ai-brand__copy { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.dw-ai-brand__title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--dw-text);
+}
+
+.dw-ai-brand__sub {
+  font-size: 11px;
+  color: var(--dw-text-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-ai-dot {
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  background: var(--dw-success);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--dw-success) 18%, transparent);
+}
+
+@media (max-width: 720px) {
+  .dw-ai-topbar { padding: 10px 14px; gap: 8px; }
+  .dw-ai-newchat__label { display: none; }
+  .dw-ai-newchat--compact { width: 36px; padding: 0; }
+}
+
 /* ─── Messages scroll area ─── */
 .dw-ai-scroll {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 32px 36px;
+  padding: 28px 28px 32px;
 }
 
 .dw-ai-scroll::-webkit-scrollbar { width: 8px; }
@@ -382,7 +464,7 @@
 .dw-ai-scroll::-webkit-scrollbar-track { background: transparent; }
 
 .dw-ai-thread {
-  max-width: 760px;
+  max-width: 780px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -390,15 +472,15 @@
 }
 
 @media (max-width: 720px) {
-  .dw-ai-scroll { padding: 22px 16px; }
-  .dw-ai-msg__col { max-width: 85%; }
+  .dw-ai-scroll { padding: 18px 14px 24px; }
+  .dw-ai-msg__col { max-width: 86%; }
   .dw-ai-msg__bubble { font-size: 14px; padding: 12px 14px; }
 }
 
 @media (max-width: 480px) {
-  .dw-ai-scroll { padding: 16px 12px; }
+  .dw-ai-scroll { padding: 14px 10px 20px; }
   .dw-ai-msg { gap: 8px; }
-  .dw-ai-msg__col { max-width: 88%; }
+  .dw-ai-msg__col { max-width: 90%; }
   .dw-ai-msg__avatar { width: 30px; height: 30px; border-radius: 10px; font-size: 12px; }
   .dw-ai-empty-state h2 { font-size: 22px; }
   .dw-ai-empty-state__logo { width: 64px; height: 64px; border-radius: 18px; }
@@ -489,9 +571,9 @@
 
 .dw-ai-suggest__btn {
   appearance: none;
-  padding: 16px;
+  padding: 14px;
   text-align: start;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid var(--dw-border);
   background: var(--dw-surface);
   font-family: inherit;
@@ -523,8 +605,8 @@
 .dw-ai-msg--user { flex-direction: row-reverse; }
 
 .dw-ai-msg__avatar {
-  width: 36px; height: 36px;
-  border-radius: 12px;
+  width: 34px; height: 34px;
+  border-radius: 10px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -544,7 +626,7 @@
 }
 
 .dw-ai-msg__col {
-  max-width: 70%;
+  max-width: 72%;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -565,7 +647,7 @@
 }
 
 .dw-ai-msg__bubble {
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-radius: 18px;
   font-size: 15px;
   line-height: 1.55;
@@ -599,13 +681,61 @@
   margin-top: 8px;
   border-radius: 12px;
   overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+  min-height: 80px;
+  min-width: 120px;
 
   img {
     display: block;
+    width: auto;
     max-width: 100%;
-    max-height: 320px;
+    min-height: 80px;
+    max-height: 360px;
     border-radius: 12px;
+    object-fit: contain;
   }
+
+  video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 180px;
+    max-height: 360px;
+    border-radius: 12px;
+    background: #000;
+  }
+}
+
+.dw-ai-msg__media--video {
+  background: #000;
+  min-height: 180px;
+}
+
+.dw-ai-msg__media--fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--dw-surface-2);
+  color: var(--dw-text-2);
+  border: 1px dashed var(--dw-border-strong);
+  min-height: 56px;
+  min-width: 160px;
+
+  .material-icons { font-size: 22px; color: var(--dw-text-3); }
+}
+
+.dw-ai-msg--user .dw-ai-msg__media--fallback {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+
+  .material-icons { color: #fff; }
+}
+
+.dw-ai-msg__media-fallback-text {
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .dw-ai-msg__file {
@@ -661,17 +791,17 @@
 /* ─── Composer ─── */
 .dw-ai-composer {
   flex-shrink: 0;
-  padding: 16px 36px 24px;
+  padding: 14px 28px 20px;
   background: var(--dw-bg);
 }
 
 .dw-ai-composer__inner {
-  max-width: 760px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
 @media (max-width: 720px) {
-  .dw-ai-composer { padding: 14px 14px 18px; }
+  .dw-ai-composer { padding: 12px 14px 16px; }
 }
 
 .dw-ai-composer__attach {
@@ -692,22 +822,34 @@
   max-width: 320px;
 }
 
-.dw-ai-attach-thumb {
-  width: 36px; height: 36px;
+.dw-ai-attach-thumb,
+.dw-ai-attach-video {
+  width: 40px; height: 40px;
   object-fit: cover;
   border-radius: 8px;
   flex-shrink: 0;
+  background: #000;
 }
 
 .dw-ai-attach-icon {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 8px;
-  background: var(--dw-error-bg);
-  color: var(--dw-error);
+  background: var(--dw-teal-100);
+  color: var(--dw-teal-700);
   display: grid; place-items: center;
   flex-shrink: 0;
 
-  .material-icons { font-size: 18px; }
+  .material-icons { font-size: 20px; }
+
+  &--video {
+    background: color-mix(in oklch, var(--dw-amber-500) 18%, transparent);
+    color: oklch(45% 0.15 75);
+  }
+}
+
+.dw-ai-attach-chip--video .dw-ai-attach-icon {
+  background: color-mix(in oklch, var(--dw-amber-500) 18%, transparent);
+  color: oklch(45% 0.15 75);
 }
 
 .dw-ai-attach-meta {

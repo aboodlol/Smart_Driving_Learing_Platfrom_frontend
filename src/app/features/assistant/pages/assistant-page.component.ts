@@ -26,7 +26,9 @@ import { AssistantApiService } from '../../../core/services/assistant-api.servic
 import { AuthService } from '../../../core/services/auth.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
-const LAST_CONVERSATION_STORAGE_KEY = 'drivewise.assistant.lastConversationId';
+const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|webp|gif|bmp)$/i;
+const VIDEO_EXTENSIONS = /\.(mp4|webm|mov|ogg|ogv)$/i;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 @Component({
   selector: 'app-assistant-page',
@@ -45,6 +47,7 @@ export class AssistantPageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly chatContainer = viewChild<ElementRef<HTMLDivElement>>('chatContainer');
   private readonly imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
+  private readonly videoInput = viewChild<ElementRef<HTMLInputElement>>('videoInput');
   private readonly pdfInput = viewChild<ElementRef<HTMLInputElement>>('pdfInput');
   protected readonly i18n = inject(I18nService);
   protected readonly userInitial = computed(() => {
@@ -59,17 +62,21 @@ export class AssistantPageComponent implements OnInit {
   protected readonly creatingConversation = signal(false);
   protected readonly sidebarOpen = signal(false);
   protected readonly transitionsReady = signal(false);
+  protected readonly pendingDeleteId = signal<string | null>(null);
 
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly inputText = signal('');
   protected readonly loading = signal(false);
   protected readonly selectedImage = signal<File | null>(null);
+  protected readonly selectedVideo = signal<File | null>(null);
   protected readonly selectedPdf = signal<File | null>(null);
   protected readonly selectedImagePreviewUrl = signal<string | null>(null);
+  protected readonly selectedVideoPreviewUrl = signal<string | null>(null);
   protected readonly composerError = signal('');
   protected readonly sidebarError = signal('');
   protected readonly pageError = signal('');
   protected readonly attachMenuOpen = signal(false);
+  protected readonly mediaErrors = signal<ReadonlySet<string>>(new Set());
 
   protected readonly composerDisabled = computed(
     () => this.loading() || this.conversationLoading() || this.creatingConversation(),
@@ -79,6 +86,7 @@ export class AssistantPageComponent implements OnInit {
     () =>
       (this.inputText().trim().length > 0 ||
         Boolean(this.selectedImage()) ||
+        Boolean(this.selectedVideo()) ||
         Boolean(this.selectedPdf())) &&
       !this.composerDisabled(),
   );
@@ -86,18 +94,27 @@ export class AssistantPageComponent implements OnInit {
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.revokeImagePreviewUrl();
+      this.revokeVideoPreviewUrl();
     });
   }
 
   ngOnInit(): void {
+    // Default: sidebar docked open on desktop (≥1024px), collapsed on smaller screens.
+    if (typeof window !== 'undefined') {
+      this.sidebarOpen.set(window.innerWidth >= 1024);
+    }
+
     const quizContext = this.readQuizContextFromHistory();
     if (quizContext) {
       this.bootstrapWithQuizContext(quizContext);
     } else {
-      this.loadConversations();
+      // Always start with a fresh empty chat. The sidebar list loads in the
+      // background; an old conversation is only opened if the user selects it.
+      this.activeConversationId.set(null);
+      this.messages.set([]);
+      this.loadConversations({ autoSelect: false });
     }
-    // Defer enabling drawer transitions until after the initial paint, so the
-    // closed-state transform doesn't animate from `none` on mount.
+
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => this.transitionsReady.set(true));
@@ -107,39 +124,41 @@ export class AssistantPageComponent implements OnInit {
     }
   }
 
-  protected createNewConversation(): void {
-    if (this.creatingConversation() || this.loading()) return;
+  protected startNewChat(): void {
+    if (this.composerDisabled()) return;
 
-    this.creatingConversation.set(true);
-    this.sidebarError.set('');
+    this.activeConversationId.set(null);
+    this.messages.set([]);
+    this.inputText.set('');
+    this.clearAttachments();
+    this.clearComposerError();
     this.pageError.set('');
-
-    this.assistantApi
-      .createConversation()
-      .pipe(
-        finalize(() => this.creatingConversation.set(false)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (conversation) => {
-          const mappedConversation = this.mapConversationDetail(conversation);
-          this.upsertConversationSummary(mappedConversation);
-          this.activeConversationId.set(mappedConversation._id);
-          this.persistLastConversationId(mappedConversation._id);
-          this.messages.set(mappedConversation.messages);
-          this.inputText.set('');
-          this.clearComposerError();
-          this.clearAttachments();
-          this.scrollToBottom();
-        },
-        error: (error: unknown) => {
-          this.sidebarError.set(this.toErrorMessage(error, 'Failed to create a new conversation.'));
-        },
-      });
+    this.autoCloseSidebar();
+    this.scrollToBottom();
   }
 
-  protected deleteConversation(conversationId: string, event: Event): void {
+  private autoCloseSidebar(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
+  protected requestDeleteConversation(conversationId: string, event: Event): void {
     event.stopPropagation();
+    event.preventDefault();
+    this.pendingDeleteId.set(conversationId);
+  }
+
+  protected cancelDeleteConversation(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.pendingDeleteId.set(null);
+  }
+
+  protected confirmDeleteConversation(conversationId: string, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.pendingDeleteId.set(null);
 
     this.assistantApi
       .deleteConversation(conversationId)
@@ -149,16 +168,7 @@ export class AssistantPageComponent implements OnInit {
           this.conversations.update((list) => list.filter((c) => c._id !== conversationId));
 
           if (this.activeConversationId() === conversationId) {
-            const remaining = this.conversations();
-            if (remaining.length > 0) {
-              this.activeConversationId.set(remaining[0]._id);
-              this.persistLastConversationId(remaining[0]._id);
-              this.loadConversationById(remaining[0]._id);
-            } else {
-              this.activeConversationId.set(null);
-              this.messages.set([]);
-              this.clearPersistedConversationId();
-            }
+            this.startNewChat();
           }
         },
         error: (error: unknown) => {
@@ -168,21 +178,19 @@ export class AssistantPageComponent implements OnInit {
   }
 
   protected selectConversation(conversationId: string): void {
-    if (conversationId === this.activeConversationId()) return;
+    if (conversationId === this.activeConversationId()) {
+      this.autoCloseSidebar();
+      return;
+    }
 
     const previousConversationId = this.activeConversationId();
     const previousMessages = this.messages();
 
     this.activeConversationId.set(conversationId);
-    this.persistLastConversationId(conversationId);
+    this.autoCloseSidebar();
 
     this.loadConversationById(conversationId, true, () => {
       this.activeConversationId.set(previousConversationId);
-      if (previousConversationId) {
-        this.persistLastConversationId(previousConversationId);
-      } else {
-        this.clearPersistedConversationId();
-      }
       this.messages.set(previousMessages);
     });
   }
@@ -191,10 +199,22 @@ export class AssistantPageComponent implements OnInit {
     this.attachMenuOpen.update((v) => !v);
   }
 
+  protected closeAttachMenu(): void {
+    if (this.attachMenuOpen()) {
+      this.attachMenuOpen.set(false);
+    }
+  }
+
   protected triggerImagePicker(): void {
     if (this.composerDisabled()) return;
     this.attachMenuOpen.set(false);
     this.imageInput()?.nativeElement.click();
+  }
+
+  protected triggerVideoPicker(): void {
+    if (this.composerDisabled()) return;
+    this.attachMenuOpen.set(false);
+    this.videoInput()?.nativeElement.click();
   }
 
   protected triggerPdfPicker(): void {
@@ -220,6 +240,29 @@ export class AssistantPageComponent implements OnInit {
     this.clearComposerError();
     this.selectedImage.set(file);
     this.updateImagePreview(file);
+  }
+
+  protected onVideoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (!this.isValidVideo(file)) {
+      this.setComposerError('Invalid video type. Please select an MP4, WEBM, or MOV file.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > MAX_VIDEO_BYTES) {
+      this.setComposerError('Video is too large. Maximum size is 50 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.clearComposerError();
+    this.selectedVideo.set(file);
+    this.updateVideoPreview(file);
   }
 
   protected onPdfSelected(event: Event): void {
@@ -248,6 +291,16 @@ export class AssistantPageComponent implements OnInit {
     }
   }
 
+  protected removeSelectedVideo(): void {
+    this.selectedVideo.set(null);
+    this.revokeVideoPreviewUrl();
+
+    const input = this.videoInput()?.nativeElement;
+    if (input) {
+      input.value = '';
+    }
+  }
+
   protected removeSelectedPdf(): void {
     this.selectedPdf.set(null);
 
@@ -262,27 +315,30 @@ export class AssistantPageComponent implements OnInit {
 
     const text = this.inputText().trim();
     const image = this.selectedImage();
-    const file = this.selectedPdf();
+    const video = this.selectedVideo();
+    const pdf = this.selectedPdf();
 
-    if (!text && !image && !file) {
-      this.setComposerError('Type a message or attach an image/PDF before sending.');
+    if (!text && !image && !video && !pdf) {
+      this.setComposerError('Type a message or attach a file before sending.');
       return;
     }
 
     this.clearComposerError();
 
     const previousMessages = this.messages();
-    const optimisticMessage = this.buildOptimisticUserMessage(text, image, file);
+    const optimisticMessage = this.buildOptimisticUserMessage(text, image, video, pdf);
     this.messages.set([...previousMessages, optimisticMessage]);
     this.inputText.set('');
-    this.clearAttachments();
+    // NOTE: do NOT clear attachments here — clear only after the server
+    // confirms the saved message (with persistent media URLs) so the chat
+    // never momentarily renders without the image/video.
     this.loading.set(true);
 
     this.scrollToBottom();
 
     const conversationId = this.activeConversationId();
     if (conversationId) {
-      this.dispatchMessage(conversationId, text, image, file, previousMessages);
+      this.dispatchMessage(conversationId, text, image, video, pdf, previousMessages);
       return;
     }
 
@@ -298,8 +354,7 @@ export class AssistantPageComponent implements OnInit {
           const mappedConversation = this.mapConversationDetail(conversation);
           this.upsertConversationSummary(mappedConversation);
           this.activeConversationId.set(mappedConversation._id);
-          this.persistLastConversationId(mappedConversation._id);
-          this.dispatchMessage(mappedConversation._id, text, image, file, previousMessages);
+          this.dispatchMessage(mappedConversation._id, text, image, video, pdf, previousMessages);
         },
         error: (error: unknown) => {
           this.loading.set(false);
@@ -326,9 +381,15 @@ export class AssistantPageComponent implements OnInit {
     this.sidebarOpen.update((v) => !v);
   }
 
+  protected closeSidebar(): void {
+    if (this.sidebarOpen()) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
   protected getConversationTitle(conversation: ConversationSummary): string {
     const title = conversation.title?.trim();
-    if (title) {
+    if (title && title.toLowerCase() !== 'new conversation') {
       return title;
     }
 
@@ -340,7 +401,7 @@ export class AssistantPageComponent implements OnInit {
       return fallback.length > 42 ? `${fallback.slice(0, 42)}...` : fallback;
     }
 
-    return 'New chat';
+    return title || this.i18n.t('assistant.newChat');
   }
 
   protected formatConversationDate(dateValue?: string): string {
@@ -353,7 +414,8 @@ export class AssistantPageComponent implements OnInit {
       return '';
     }
 
-    return date.toLocaleDateString('en-US', {
+    const locale = this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US';
+    return date.toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
     });
@@ -369,22 +431,57 @@ export class AssistantPageComponent implements OnInit {
       return '';
     }
 
-    return date.toLocaleTimeString('en-US', {
+    const locale = this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US';
+    return date.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  protected onMediaError(url?: string | null): void {
+    if (!url) return;
+    this.mediaErrors.update((set) => {
+      if (set.has(url)) return set;
+      const next = new Set(set);
+      next.add(url);
+      return next;
+    });
+  }
+
+  protected hasMediaError(url?: string | null): boolean {
+    return !!url && this.mediaErrors().has(url);
+  }
+
+  protected isImageUrl(url?: string): boolean {
+    return !!url && IMAGE_EXTENSIONS.test(this.stripQuery(url));
+  }
+
+  protected isVideoUrl(url?: string): boolean {
+    return !!url && VIDEO_EXTENSIONS.test(this.stripQuery(url));
+  }
+
+  private stripQuery(url: string): string {
+    const queryIndex = url.indexOf('?');
+    return queryIndex >= 0 ? url.slice(0, queryIndex) : url;
   }
 
   private dispatchMessage(
     conversationId: string,
     text: string,
     image: File | null,
-    file: File | null,
+    video: File | null,
+    pdf: File | null,
     previousMessages: ChatMessage[],
     imageUrl: string | null = null,
   ): void {
     this.assistantApi
-      .sendMessageToConversation(conversationId, { message: text, image, file, imageUrl })
+      .sendMessageToConversation(conversationId, {
+        message: text,
+        image,
+        video,
+        file: pdf,
+        imageUrl,
+      })
       .pipe(
         finalize(() => {
           this.loading.set(false);
@@ -393,9 +490,27 @@ export class AssistantPageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: () => {
+        next: (response) => {
           this.pageError.set('');
-          this.loadConversationById(conversationId, false);
+
+          // Use the POST response's conversation directly — it already contains
+          // the persisted user message (with the saved /uploads/<file>… URL) and
+          // the assistant reply. Re-fetching with a second GET previously caused
+          // the image to "appear then disappear" if any state got stale between
+          // the POST and the GET.
+          const conversation = response?.conversation;
+          if (conversation && Array.isArray(conversation.messages)) {
+            const mapped = this.mapConversationDetail(conversation);
+            this.messages.set(mapped.messages);
+            this.upsertConversationSummary(mapped);
+          } else {
+            this.loadConversationById(conversationId, false);
+          }
+
+          // Clear attachments only now that the server-saved message is in
+          // the chat — prevents the preview from disappearing before the
+          // persistent URL is rendered.
+          this.clearAttachments();
           this.reloadConversationsSilently();
         },
         error: (error: unknown) => {
@@ -405,7 +520,7 @@ export class AssistantPageComponent implements OnInit {
       });
   }
 
-  private loadConversations(): void {
+  private loadConversations({ autoSelect }: { autoSelect: boolean }): void {
     this.conversationsLoading.set(true);
     this.sidebarError.set('');
 
@@ -422,17 +537,10 @@ export class AssistantPageComponent implements OnInit {
           );
           this.conversations.set(sortedConversations);
 
-          const initialConversationId = this.resolveInitialConversationId(sortedConversations);
-          if (!initialConversationId) {
-            this.activeConversationId.set(null);
-            this.messages.set([]);
-            this.clearPersistedConversationId();
-            return;
+          if (autoSelect && sortedConversations[0]?._id) {
+            this.activeConversationId.set(sortedConversations[0]._id);
+            this.loadConversationById(sortedConversations[0]._id);
           }
-
-          this.activeConversationId.set(initialConversationId);
-          this.persistLastConversationId(initialConversationId);
-          this.loadConversationById(initialConversationId);
         },
         error: (error: unknown) => {
           this.sidebarError.set(this.toErrorMessage(error, 'Failed to load conversations.'));
@@ -513,56 +621,63 @@ export class AssistantPageComponent implements OnInit {
       ...message,
       content: message.content ?? '',
       imageUrl: this.resolveMediaUrl(message.imageUrl),
+      videoUrl: this.resolveMediaUrl(message.videoUrl),
       fileUrl: this.resolveMediaUrl(message.fileUrl),
     };
   }
 
-  private resolveMediaUrl(rawUrl?: string): string | undefined {
-    if (!rawUrl) {
+  private resolveMediaUrl(rawUrl?: string | null): string | undefined {
+    if (rawUrl == null) {
       return undefined;
     }
 
-    const normalized = rawUrl.trim();
+    const normalized = String(rawUrl).trim();
     if (!normalized) {
       return undefined;
     }
 
-    if (/^https?:\/\//i.test(normalized)) {
-      return normalized;
+    let resolved: string;
+
+    // Absolute, data, or blob URLs pass through untouched.
+    if (/^(https?:|data:|blob:)/i.test(normalized)) {
+      resolved = normalized;
+    } else {
+      const withLeadingSlash = normalized.startsWith('/') ? normalized : `/${normalized}`;
+      const backendUrl = (environment.backendUrl || '').replace(/\/+$/, '');
+      resolved = backendUrl ? `${backendUrl}${withLeadingSlash}` : withLeadingSlash;
     }
 
-    const backendUrl = (environment.backendUrl || '').replace(/\/+$/, '');
-    if (!backendUrl) {
-      return normalized.startsWith('/') ? normalized : `/${normalized}`;
-    }
+    // TEMP: remove after verifying media URLs render correctly in DevTools.
+    console.log('[AssistantMedia] resolved URL:', { raw: rawUrl, resolved });
 
-    return normalized.startsWith('/')
-      ? `${backendUrl}${normalized}`
-      : `${backendUrl}/${normalized}`;
+    return resolved;
   }
 
   private buildOptimisticUserMessage(
     text: string,
     image: File | null,
-    file: File | null,
+    video: File | null,
+    pdf: File | null,
   ): ChatMessage {
-    const lines: string[] = [];
-
-    if (text) {
-      lines.push(text);
-    }
-    if (image) {
-      lines.push(`[Image attached: ${image.name}]`);
-    }
-    if (file) {
-      lines.push(`[PDF attached: ${file.name}]`);
-    }
-
-    return {
+    const message: ChatMessage = {
       role: 'user',
-      content: lines.join('\n'),
+      content: text,
       createdAt: new Date().toISOString(),
     };
+
+    if (image) {
+      message.imageUrl = URL.createObjectURL(image);
+    }
+    if (video) {
+      message.videoUrl = URL.createObjectURL(video);
+      message.videoMimeType = video.type || undefined;
+    }
+    if (pdf) {
+      message.fileUrl = URL.createObjectURL(pdf);
+      message.fileName = pdf.name;
+    }
+
+    return message;
   }
 
   private sortConversations(conversations: ConversationSummary[]): ConversationSummary[] {
@@ -587,46 +702,10 @@ export class AssistantPageComponent implements OnInit {
     });
   }
 
-  private resolveInitialConversationId(conversations: ConversationSummary[]): string | null {
-    const storedConversationId = this.getStoredConversationId();
-    if (
-      storedConversationId &&
-      conversations.some((conversation) => conversation._id === storedConversationId)
-    ) {
-      return storedConversationId;
-    }
-
-    return conversations[0]?._id ?? null;
-  }
-
-  private persistLastConversationId(conversationId: string): void {
-    try {
-      localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, conversationId);
-    } catch {
-      // Ignore storage failures (private browsing / quota).
-    }
-  }
-
-  private getStoredConversationId(): string | null {
-    try {
-      return localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY);
-    } catch {
-      return null;
-    }
-  }
-
-  private clearPersistedConversationId(): void {
-    try {
-      localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY);
-    } catch {
-      // Ignore storage failures.
-    }
-  }
-
   private handleSendError(error: unknown): void {
     const errorMessage: ChatMessage = {
       role: 'assistant',
-      content: this.toErrorMessage(error, "I'm sorry, something went wrong. Please try again."),
+      content: this.toErrorMessage(error, this.i18n.t('assistant.failedToSend')),
       createdAt: new Date().toISOString(),
     };
     this.messages.update((messages) => [...messages, errorMessage]);
@@ -652,8 +731,22 @@ export class AssistantPageComponent implements OnInit {
     }
   }
 
+  private updateVideoPreview(file: File): void {
+    this.revokeVideoPreviewUrl();
+    this.selectedVideoPreviewUrl.set(URL.createObjectURL(file));
+  }
+
+  private revokeVideoPreviewUrl(): void {
+    const existingUrl = this.selectedVideoPreviewUrl();
+    if (existingUrl) {
+      URL.revokeObjectURL(existingUrl);
+      this.selectedVideoPreviewUrl.set(null);
+    }
+  }
+
   private clearAttachments(): void {
     this.removeSelectedImage();
+    this.removeSelectedVideo();
     this.removeSelectedPdf();
   }
 
@@ -668,7 +761,13 @@ export class AssistantPageComponent implements OnInit {
   }
 
   private isValidImage(file: File): boolean {
-    return file.type.startsWith('image/');
+    if (file.type && file.type.startsWith('image/')) return true;
+    return IMAGE_EXTENSIONS.test(file.name || '');
+  }
+
+  private isValidVideo(file: File): boolean {
+    if (file.type && file.type.startsWith('video/')) return true;
+    return VIDEO_EXTENSIONS.test(file.name || '');
   }
 
   private isValidPdf(file: File): boolean {
@@ -752,7 +851,6 @@ export class AssistantPageComponent implements OnInit {
           const mapped = this.mapConversationDetail(conversation);
           this.upsertConversationSummary(mapped);
           this.activeConversationId.set(mapped._id);
-          this.persistLastConversationId(mapped._id);
           this.messages.set(mapped.messages);
 
           imagePromise.then(({ file: imageFile, failureReason }) => {
@@ -768,8 +866,8 @@ export class AssistantPageComponent implements OnInit {
               imageUrl,
             });
             const previousMessages = this.messages();
-            const optimistic = this.buildOptimisticUserMessage(prompt, imageFile, null);
-            if (imageUrl) {
+            const optimistic = this.buildOptimisticUserMessage(prompt, imageFile, null, null);
+            if (imageUrl && !imageFile) {
               optimistic.imageUrl = imageUrl;
             }
             this.messages.set([...previousMessages, optimistic]);
@@ -780,6 +878,7 @@ export class AssistantPageComponent implements OnInit {
               prompt,
               imageFile,
               null,
+              null,
               previousMessages,
               imageUrl || null,
             );
@@ -789,7 +888,7 @@ export class AssistantPageComponent implements OnInit {
           this.pageError.set(
             this.toErrorMessage(error, 'Failed to start a chat for the quiz question.'),
           );
-          this.loadConversations();
+          this.loadConversations({ autoSelect: false });
         },
       });
   }

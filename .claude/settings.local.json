@@ -49,7 +49,9 @@
       "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@driving.com\\\\\",\\\\\"password\\\\\":\\\\\"admin123\\\\\"}\")",
       "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZjM2N2UwMzk2ZmRlM2NmNWIzZTJkNSIsImlhdCI6MTc3OTA2MjAyNSwiZXhwIjoxNzc5NjY2ODI1fQ.VzImYzctNl9eSM3O0cpWRDncVA_Vm2iagsHsFPi8y-w' http://localhost:3000/api/quizzes)",
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);const keys=Object.keys\\(j\\);console.log\\('Chapters:',keys\\);for\\(const k of keys\\)console.log\\(' -',k,':',j[k].length,'questions, sample image:',j[k][0]?.image,', video:',j[k][0]?.video\\);}\\)\")",
-      "Bash(xargs -I {} grep \"titleAR:\" {})"
+      "Bash(xargs -I {} grep \"titleAR:\" {})",
+      "Bash(cmd /c dir \"c:\\\\Users\\\\ahmad\\\\OneDrive\\\\Desktop\\\\Smart Driving Learning Platform\\\\Backend\" /B)",
+      "Bash(cmd /c \"dir \\\\\"c:\\\\Users\\\\ahmad\\\\OneDrive\\\\Desktop\\\\Smart Driving Learning Platform\\\\Backend\\\\\" /B\")"
     ],
     "deny": [
       "Bash(git push --force:*)",

@@ -1,81 +1,29 @@
-<div class="dw-ai" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
-  <!-- ─── Header bar ─── -->
-  <header class="dw-ai-header">
-    <button
-      type="button"
-      class="dw-ai-iconbtn"
-      (click)="toggleSidebar()"
-      [attr.aria-label]="
-        (sidebarOpen() ? 'assistant.closeSidebar' : 'assistant.openSidebar') | translate
-      "
-      [attr.aria-expanded]="sidebarOpen()"
-    >
-      <span class="material-icons">history</span>
-    </button>
-
-    <div class="dw-ai-brand">
-      <span class="dw-ai-brand__avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-          <path
-            d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-            stroke="#fff"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-            stroke="#fff"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </span>
-      <div class="dw-ai-brand__copy">
-        <div class="dw-ai-brand__title">{{ 'assistant.aiAssistant' | translate }}</div>
-        <div class="dw-ai-brand__sub">
-          <span class="dw-ai-dot" aria-hidden="true"></span>
-          {{ 'assistant.online' | translate }} · {{ 'assistant.repliesIn' | translate }}
-        </div>
-      </div>
-    </div>
-
-    <button
-      type="button"
-      class="dw-ai-newchat"
-      (click)="createNewConversation()"
-      [disabled]="creatingConversation() || loading()"
-    >
-      <span class="material-icons">edit_square</span>
-      <span class="dw-ai-newchat__label">{{ 'assistant.newChat' | translate }}</span>
-    </button>
-
-    @if (activeConversationId(); as activeId) {
-      <button type="button" class="dw-ai-delete" (click)="deleteConversation(activeId, $event)">
-        <span class="material-icons">delete_outline</span>
-        <span class="dw-ai-delete__label">{{ 'assistant.delete' | translate }}</span>
-      </button>
-    }
-  </header>
-
-  <!-- ─── Sidebar drawer (conversation history) ─── -->
+<div class="dw-ai" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'" [class.dw-ai--sidebar-open]="sidebarOpen()">
+  <!-- ─── Sidebar (persistent on desktop, drawer on mobile) ─── -->
   <button
     type="button"
     class="dw-ai-backdrop"
     [class.is-visible]="sidebarOpen()"
     aria-hidden="true"
     tabindex="-1"
-    (click)="toggleSidebar()"
+    (click)="closeSidebar()"
   ></button>
 
   <aside class="dw-ai-sidebar" [class.is-open]="sidebarOpen()">
     <header class="dw-ai-sidebar__head">
-      <h2>{{ 'assistant.history' | translate }}</h2>
       <button
         type="button"
-        class="dw-ai-iconbtn"
-        (click)="toggleSidebar()"
+        class="dw-ai-newchat"
+        (click)="startNewChat()"
+        [disabled]="composerDisabled()"
+      >
+        <span class="material-icons">edit_square</span>
+        <span>{{ 'assistant.newChat' | translate }}</span>
+      </button>
+      <button
+        type="button"
+        class="dw-ai-iconbtn dw-ai-sidebar__close"
+        (click)="closeSidebar()"
         [attr.aria-label]="'assistant.closeSidebar' | translate"
       >
         <span class="material-icons">close</span>
@@ -95,138 +43,132 @@
       } @else if (conversations().length === 0) {
         <p class="dw-ai-empty">{{ 'assistant.noConversations' | translate }}</p>
       } @else {
-        <nav class="dw-ai-conv" aria-label="Conversation history">
+        <nav class="dw-ai-conv" [attr.aria-label]="'assistant.history' | translate">
           @for (conv of conversations(); track conv._id) {
-            <button
-              type="button"
-              class="dw-ai-conv__item"
+            <div
+              class="dw-ai-conv__row"
               [class.is-active]="conv._id === activeConversationId()"
-              (click)="selectConversation(conv._id); toggleSidebar()"
+              [class.is-pending-delete]="conv._id === pendingDeleteId()"
             >
-              <span class="material-icons dw-ai-conv__icon">chat_bubble_outline</span>
-              <span class="dw-ai-conv__body">
-                <span class="dw-ai-conv__title">{{ getConversationTitle(conv) }}</span>
-                @if (conv.updatedAt || conv.createdAt) {
-                  <span class="dw-ai-conv__date">{{
-                    formatConversationDate(conv.updatedAt || conv.createdAt)
-                  }}</span>
-                }
-              </span>
               <button
                 type="button"
-                class="dw-ai-conv__delete"
-                [attr.title]="'assistant.deleteConversation' | translate"
-                (click)="deleteConversation(conv._id, $event)"
+                class="dw-ai-conv__item"
+                (click)="selectConversation(conv._id)"
               >
-                <span class="material-icons">delete_outline</span>
+                <span class="material-icons dw-ai-conv__icon">chat_bubble_outline</span>
+                <span class="dw-ai-conv__body">
+                  <span class="dw-ai-conv__title">{{ getConversationTitle(conv) }}</span>
+                  @if (conv.updatedAt || conv.createdAt) {
+                    <span class="dw-ai-conv__date">{{
+                      formatConversationDate(conv.updatedAt || conv.createdAt)
+                    }}</span>
+                  }
+                </span>
               </button>
-            </button>
+
+              @if (conv._id === pendingDeleteId()) {
+                <div class="dw-ai-conv__confirm" role="group">
+                  <button
+                    type="button"
+                    class="dw-ai-conv__confirm-btn dw-ai-conv__confirm-btn--yes"
+                    (click)="confirmDeleteConversation(conv._id, $event)"
+                  >
+                    <span class="material-icons">check</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="dw-ai-conv__confirm-btn dw-ai-conv__confirm-btn--no"
+                    (click)="cancelDeleteConversation($event)"
+                  >
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+              } @else {
+                <button
+                  type="button"
+                  class="dw-ai-conv__delete"
+                  [attr.title]="'assistant.deleteConversation' | translate"
+                  [attr.aria-label]="'assistant.deleteConversation' | translate"
+                  (click)="requestDeleteConversation(conv._id, $event)"
+                >
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              }
+            </div>
           }
         </nav>
       }
     </div>
   </aside>
 
-  <!-- ─── Messages area ─── -->
-  <section class="dw-ai-scroll" #chatContainer>
-    @if (conversationLoading()) {
-      <div class="dw-ai-loading">
-        <div class="dw-ai-spinner"></div>
-        <p>{{ 'assistant.loadingConversation' | translate }}</p>
+  <!-- ─── Main column ─── -->
+  <main class="dw-ai-main">
+    <!-- Top bar -->
+    <header class="dw-ai-topbar">
+      <button
+        type="button"
+        class="dw-ai-iconbtn dw-ai-topbar__menu"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="
+          (sidebarOpen() ? 'assistant.closeSidebar' : 'assistant.openSidebar') | translate
+        "
+        [attr.aria-expanded]="sidebarOpen()"
+      >
+        <span class="material-icons">menu</span>
+      </button>
+
+      <div class="dw-ai-brand">
+        <span class="dw-ai-brand__avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+            <path
+              d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+              stroke="#fff"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <div class="dw-ai-brand__copy">
+          <div class="dw-ai-brand__title">{{ 'assistant.aiAssistant' | translate }}</div>
+          <div class="dw-ai-brand__sub">
+            <span class="dw-ai-dot" aria-hidden="true"></span>
+            {{ 'assistant.online' | translate }}
+          </div>
+        </div>
       </div>
-    } @else {
-      <div class="dw-ai-thread">
-        @if (pageError()) {
-          <div class="dw-ai-alert" role="alert">
-            <span class="material-icons">error_outline</span>
-            {{ pageError() }}
-          </div>
-        }
 
-        @if (messages().length === 0) {
-          <div class="dw-ai-empty-state">
-            <span class="dw-ai-empty-state__logo" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="40" height="40" fill="none">
-                <path
-                  d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-                  stroke="#fff"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-                  stroke="#fff"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <h2>{{ 'assistant.welcomeTitle' | translate }}</h2>
-            <p>
-              @if (activeConversationId()) {
-                {{ 'assistant.emptyConversation' | translate }}
-              } @else {
-                {{ 'assistant.emptyHelper' | translate }}
-              }
-            </p>
+      <button
+        type="button"
+        class="dw-ai-newchat dw-ai-newchat--compact"
+        (click)="startNewChat()"
+        [disabled]="composerDisabled()"
+      >
+        <span class="material-icons">edit_square</span>
+        <span class="dw-ai-newchat__label">{{ 'assistant.newChat' | translate }}</span>
+      </button>
+    </header>
 
-            <div class="dw-ai-suggest">
-              <button
-                type="button"
-                class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested1')); sendMessage()"
-              >
-                <span class="material-icons">flag</span>
-                {{ 'assistant.suggested1' | translate }}
-              </button>
-              <button
-                type="button"
-                class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested2')); sendMessage()"
-              >
-                <span class="material-icons">auto_awesome</span>
-                {{ 'assistant.suggested2' | translate }}
-              </button>
-              <button
-                type="button"
-                class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested3')); sendMessage()"
-              >
-                <span class="material-icons">shield</span>
-                {{ 'assistant.suggested3' | translate }}
-              </button>
-              <button
-                type="button"
-                class="dw-ai-suggest__btn"
-                (click)="inputText.set(i18n.t('assistant.suggested4')); sendMessage()"
-              >
-                <span class="material-icons">quiz</span>
-                {{ 'assistant.suggested4' | translate }}
-              </button>
+    <!-- Scrollable chat area -->
+    <section class="dw-ai-scroll" #chatContainer>
+      @if (conversationLoading()) {
+        <div class="dw-ai-loading">
+          <div class="dw-ai-spinner"></div>
+          <p>{{ 'assistant.loadingConversation' | translate }}</p>
+        </div>
+      } @else {
+        <div class="dw-ai-thread">
+          @if (pageError()) {
+            <div class="dw-ai-alert" role="alert">
+              <span class="material-icons">error_outline</span>
+              {{ pageError() }}
             </div>
-          </div>
-        }
+          }
 
-        @for (msg of messages(); track msg._id || $index) {
-          <div
-            class="dw-ai-msg"
-            [class.dw-ai-msg--user]="msg.role === 'user'"
-            [class.dw-ai-msg--ai]="msg.role !== 'user'"
-          >
-            <span class="dw-ai-msg__avatar" aria-hidden="true">
-              @if (msg.role === 'user') {
-                {{ userInitial() }}
-              } @else {
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                  <path
-                    d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"
-                    stroke="#fff"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
+          @if (messages().length === 0) {
+            <div class="dw-ai-empty-state">
+              <span class="dw-ai-empty-state__logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none">
                   <path
                     d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
                     stroke="#fff"
@@ -235,213 +177,349 @@
                     stroke-linejoin="round"
                   />
                 </svg>
-              }
-            </span>
-            <div class="dw-ai-msg__col">
-              <div class="dw-ai-msg__meta">
-                {{ (msg.role === 'user' ? 'assistant.you' : 'assistant.aiAssistant') | translate }}
-                @if (msg.createdAt) {
-                  · <span class="dw-ai-msg__time">{{ formatMessageTime(msg.createdAt) }}</span>
-                }
-              </div>
-              <div class="dw-ai-msg__bubble">
-                @if (msg.content) {
-                  <p class="dw-ai-msg__text">{{ msg.content }}</p>
-                }
-                @if (msg.imageUrl) {
-                  <a
-                    class="dw-ai-msg__media"
-                    [href]="msg.imageUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img [src]="msg.imageUrl" alt="Uploaded image" />
-                  </a>
-                }
-                @if (msg.fileUrl) {
-                  <a
-                    class="dw-ai-msg__file"
-                    [href]="msg.fileUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    [attr.download]="msg.fileName || null"
-                  >
-                    <span class="material-icons">picture_as_pdf</span>
-                    <span class="dw-ai-msg__file-meta">
-                      <span class="dw-ai-msg__file-name">{{
-                        msg.fileName || 'Download attachment'
-                      }}</span>
-                      <span class="dw-ai-msg__file-sub">{{ 'assistant.pdf' | translate }}</span>
-                    </span>
-                  </a>
-                }
-              </div>
-            </div>
-          </div>
-        }
-
-        @if (loading()) {
-          <div class="dw-ai-msg dw-ai-msg--ai">
-            <span class="dw-ai-msg__avatar" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                <path
-                  d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
-                  stroke="#fff"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <div class="dw-ai-msg__col">
-              <div class="dw-ai-msg__meta">{{ 'assistant.aiAssistant' | translate }}</div>
-              <div class="dw-ai-msg__bubble dw-ai-msg__bubble--typing">
-                <span class="dw-ai-typing"></span>
-                <span class="dw-ai-typing"></span>
-                <span class="dw-ai-typing"></span>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    }
-  </section>
-
-  <!-- ─── Composer ─── -->
-  <footer class="dw-ai-composer">
-    <div class="dw-ai-composer__inner">
-      <!-- Hidden file inputs -->
-      <input
-        #imageInput
-        type="file"
-        accept="image/*"
-        hidden
-        (change)="onImageSelected($event)"
-        [disabled]="composerDisabled()"
-      />
-      <input
-        #pdfInput
-        type="file"
-        accept="application/pdf,.pdf"
-        hidden
-        (change)="onPdfSelected($event)"
-        [disabled]="composerDisabled()"
-      />
-
-      @if (selectedImage() || selectedPdf()) {
-        <div class="dw-ai-composer__attach">
-          @if (selectedImage(); as imgFile) {
-            <div class="dw-ai-attach-chip">
-              @if (selectedImagePreviewUrl(); as url) {
-                <img class="dw-ai-attach-thumb" [src]="url" alt="" />
-              } @else {
-                <span class="dw-ai-attach-icon"><span class="material-icons">image</span></span>
-              }
-              <span class="dw-ai-attach-meta">
-                <span class="dw-ai-attach-name">{{ imgFile.name }}</span>
-                <span class="dw-ai-attach-size">{{ formatSize(imgFile.size) }}</span>
               </span>
-              <button
-                type="button"
-                class="dw-ai-attach-x"
-                (click)="removeSelectedImage()"
-                [disabled]="composerDisabled()"
-              >
-                <span class="material-icons">close</span>
-              </button>
+              <h2>{{ 'assistant.welcomeTitle' | translate }}</h2>
+              <p>{{ 'assistant.emptyHelper' | translate }}</p>
+
+              <div class="dw-ai-suggest">
+                <button
+                  type="button"
+                  class="dw-ai-suggest__btn"
+                  (click)="inputText.set(i18n.t('assistant.suggested1'))"
+                >
+                  <span class="material-icons">flag</span>
+                  {{ 'assistant.suggested1' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="dw-ai-suggest__btn"
+                  (click)="inputText.set(i18n.t('assistant.suggested2'))"
+                >
+                  <span class="material-icons">auto_awesome</span>
+                  {{ 'assistant.suggested2' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="dw-ai-suggest__btn"
+                  (click)="inputText.set(i18n.t('assistant.suggested3'))"
+                >
+                  <span class="material-icons">shield</span>
+                  {{ 'assistant.suggested3' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="dw-ai-suggest__btn"
+                  (click)="inputText.set(i18n.t('assistant.suggested4'))"
+                >
+                  <span class="material-icons">quiz</span>
+                  {{ 'assistant.suggested4' | translate }}
+                </button>
+              </div>
             </div>
           }
-          @if (selectedPdf(); as pdfFile) {
-            <div class="dw-ai-attach-chip">
-              <span class="dw-ai-attach-icon"
-                ><span class="material-icons">picture_as_pdf</span></span
-              >
-              <span class="dw-ai-attach-meta">
-                <span class="dw-ai-attach-name">{{ pdfFile.name }}</span>
-                <span class="dw-ai-attach-size">{{ formatSize(pdfFile.size) }}</span>
+
+          @for (msg of messages(); track msg._id || $index) {
+            <div
+              class="dw-ai-msg"
+              [class.dw-ai-msg--user]="msg.role === 'user'"
+              [class.dw-ai-msg--ai]="msg.role !== 'user'"
+            >
+              <span class="dw-ai-msg__avatar" aria-hidden="true">
+                @if (msg.role === 'user') {
+                  {{ userInitial() }}
+                } @else {
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                    <path
+                      d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+                      stroke="#fff"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                }
               </span>
-              <button
-                type="button"
-                class="dw-ai-attach-x"
-                (click)="removeSelectedPdf()"
-                [disabled]="composerDisabled()"
-              >
-                <span class="material-icons">close</span>
-              </button>
+              <div class="dw-ai-msg__col">
+                <div class="dw-ai-msg__meta">
+                  {{ (msg.role === 'user' ? 'assistant.you' : 'assistant.aiAssistant') | translate }}
+                  @if (msg.createdAt) {
+                    · <span class="dw-ai-msg__time">{{ formatMessageTime(msg.createdAt) }}</span>
+                  }
+                </div>
+                <div class="dw-ai-msg__bubble">
+                  @if (msg.content) {
+                    <p class="dw-ai-msg__text">{{ msg.content }}</p>
+                  }
+                  @if (msg.imageUrl) {
+                    @if (hasMediaError(msg.imageUrl)) {
+                      <div class="dw-ai-msg__media dw-ai-msg__media--fallback">
+                        <span class="material-icons">image_not_supported</span>
+                        <span class="dw-ai-msg__media-fallback-text">
+                          {{ 'assistant.imageAttached' | translate }}
+                        </span>
+                      </div>
+                    } @else {
+                      <a
+                        class="dw-ai-msg__media dw-ai-msg__media--image"
+                        [href]="msg.imageUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="'assistant.imageAttached' | translate"
+                      >
+                        <img
+                          [src]="msg.imageUrl"
+                          [attr.alt]="'assistant.imageAttached' | translate"
+                          loading="lazy"
+                          (error)="onMediaError(msg.imageUrl)"
+                        />
+                      </a>
+                    }
+                  }
+                  @if (msg.videoUrl) {
+                    @if (hasMediaError(msg.videoUrl)) {
+                      <div class="dw-ai-msg__media dw-ai-msg__media--fallback">
+                        <span class="material-icons">videocam_off</span>
+                        <span class="dw-ai-msg__media-fallback-text">
+                          {{ 'assistant.videoAttached' | translate }}
+                        </span>
+                      </div>
+                    } @else {
+                      <div class="dw-ai-msg__media dw-ai-msg__media--video">
+                        <video
+                          controls
+                          preload="metadata"
+                          playsinline
+                          [src]="msg.videoUrl"
+                          (error)="onMediaError(msg.videoUrl)"
+                        ></video>
+                      </div>
+                    }
+                  }
+                  @if (msg.fileUrl && !isImageUrl(msg.fileUrl) && !isVideoUrl(msg.fileUrl)) {
+                    <a
+                      class="dw-ai-msg__file"
+                      [href]="msg.fileUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      [attr.download]="msg.fileName || null"
+                    >
+                      <span class="material-icons">picture_as_pdf</span>
+                      <span class="dw-ai-msg__file-meta">
+                        <span class="dw-ai-msg__file-name">{{
+                          msg.fileName || 'Download attachment'
+                        }}</span>
+                        <span class="dw-ai-msg__file-sub">{{ 'assistant.pdf' | translate }}</span>
+                      </span>
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (loading()) {
+            <div class="dw-ai-msg dw-ai-msg--ai">
+              <span class="dw-ai-msg__avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                  <path
+                    d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"
+                    stroke="#fff"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <div class="dw-ai-msg__col">
+                <div class="dw-ai-msg__meta">{{ 'assistant.aiAssistant' | translate }}</div>
+                <div class="dw-ai-msg__bubble dw-ai-msg__bubble--typing">
+                  <span class="dw-ai-typing"></span>
+                  <span class="dw-ai-typing"></span>
+                  <span class="dw-ai-typing"></span>
+                </div>
+              </div>
             </div>
           }
         </div>
       }
+    </section>
 
-      @if (composerError()) {
-        <div class="dw-ai-error" role="alert">
-          <span class="material-icons">warning_amber</span>
-          {{ composerError() }}
-        </div>
-      }
+    <!-- Composer -->
+    <footer class="dw-ai-composer">
+      <div class="dw-ai-composer__inner">
+        <input
+          #imageInput
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+          hidden
+          (change)="onImageSelected($event)"
+          [disabled]="composerDisabled()"
+        />
+        <input
+          #videoInput
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+          hidden
+          (change)="onVideoSelected($event)"
+          [disabled]="composerDisabled()"
+        />
+        <input
+          #pdfInput
+          type="file"
+          accept="application/pdf,.pdf"
+          hidden
+          (change)="onPdfSelected($event)"
+          [disabled]="composerDisabled()"
+        />
 
-      <div class="dw-ai-composer__row">
-        <div class="dw-ai-attach-wrap">
+        @if (selectedImage() || selectedVideo() || selectedPdf()) {
+          <div class="dw-ai-composer__attach">
+            @if (selectedImage(); as imgFile) {
+              <div class="dw-ai-attach-chip">
+                @if (selectedImagePreviewUrl(); as url) {
+                  <img class="dw-ai-attach-thumb" [src]="url" alt="" />
+                } @else {
+                  <span class="dw-ai-attach-icon"><span class="material-icons">image</span></span>
+                }
+                <span class="dw-ai-attach-meta">
+                  <span class="dw-ai-attach-name">{{ imgFile.name }}</span>
+                  <span class="dw-ai-attach-size">{{ 'assistant.imageAttached' | translate }} · {{ formatSize(imgFile.size) }}</span>
+                </span>
+                <button
+                  type="button"
+                  class="dw-ai-attach-x"
+                  [attr.aria-label]="'assistant.removeAttachment' | translate"
+                  (click)="removeSelectedImage()"
+                  [disabled]="composerDisabled()"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            }
+            @if (selectedVideo(); as videoFile) {
+              <div class="dw-ai-attach-chip dw-ai-attach-chip--video">
+                @if (selectedVideoPreviewUrl(); as videoPreview) {
+                  <video class="dw-ai-attach-video" [src]="videoPreview" muted preload="metadata" playsinline></video>
+                } @else {
+                  <span class="dw-ai-attach-icon dw-ai-attach-icon--video"><span class="material-icons">movie</span></span>
+                }
+                <span class="dw-ai-attach-meta">
+                  <span class="dw-ai-attach-name">{{ videoFile.name }}</span>
+                  <span class="dw-ai-attach-size">{{ 'assistant.videoAttached' | translate }} · {{ formatSize(videoFile.size) }}</span>
+                </span>
+                <button
+                  type="button"
+                  class="dw-ai-attach-x"
+                  [attr.aria-label]="'assistant.removeAttachment' | translate"
+                  (click)="removeSelectedVideo()"
+                  [disabled]="composerDisabled()"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            }
+            @if (selectedPdf(); as pdfFile) {
+              <div class="dw-ai-attach-chip">
+                <span class="dw-ai-attach-icon"
+                  ><span class="material-icons">picture_as_pdf</span></span
+                >
+                <span class="dw-ai-attach-meta">
+                  <span class="dw-ai-attach-name">{{ pdfFile.name }}</span>
+                  <span class="dw-ai-attach-size">{{ formatSize(pdfFile.size) }}</span>
+                </span>
+                <button
+                  type="button"
+                  class="dw-ai-attach-x"
+                  [attr.aria-label]="'assistant.removeAttachment' | translate"
+                  (click)="removeSelectedPdf()"
+                  [disabled]="composerDisabled()"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (composerError()) {
+          <div class="dw-ai-error" role="alert">
+            <span class="material-icons">warning_amber</span>
+            {{ composerError() }}
+          </div>
+        }
+
+        <div class="dw-ai-composer__row">
+          <div class="dw-ai-attach-wrap">
+            <button
+              type="button"
+              class="dw-ai-attach-btn"
+              (click)="toggleAttachMenu()"
+              [disabled]="composerDisabled()"
+              [attr.aria-label]="'assistant.attachMedia' | translate"
+              [attr.aria-expanded]="attachMenuOpen()"
+            >
+              <span class="material-icons">add</span>
+            </button>
+            @if (attachMenuOpen()) {
+              <div class="dw-ai-attach-menu" role="menu">
+                <button
+                  type="button"
+                  class="dw-ai-attach-menu__item"
+                  (click)="triggerImagePicker()"
+                  role="menuitem"
+                >
+                  <span class="material-icons">image</span>
+                  {{ 'assistant.image' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="dw-ai-attach-menu__item"
+                  (click)="triggerVideoPicker()"
+                  role="menuitem"
+                >
+                  <span class="material-icons">movie</span>
+                  {{ 'assistant.video' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="dw-ai-attach-menu__item"
+                  (click)="triggerPdfPicker()"
+                  role="menuitem"
+                >
+                  <span class="material-icons">picture_as_pdf</span>
+                  {{ 'assistant.pdf' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+
+          <textarea
+            class="dw-ai-input"
+            rows="1"
+            [placeholder]="'assistant.placeholder' | translate"
+            [ngModel]="inputText()"
+            (ngModelChange)="inputText.set($event)"
+            (keydown)="onKeyDown($event)"
+            [disabled]="composerDisabled()"
+          ></textarea>
+
           <button
             type="button"
-            class="dw-ai-attach-btn"
-            (click)="toggleAttachMenu()"
-            [disabled]="composerDisabled()"
-            [attr.aria-label]="'assistant.attachFile' | translate"
-            [attr.aria-expanded]="attachMenuOpen()"
+            class="dw-ai-send"
+            [disabled]="!canSend()"
+            (click)="sendMessage()"
+            [attr.aria-label]="'assistant.send' | translate"
           >
-            <span class="material-icons">add</span>
+            @if (loading()) {
+              <span class="dw-ai-spinner dw-ai-spinner--sm dw-ai-spinner--on-brand"></span>
+            } @else {
+              <span class="material-icons">arrow_upward</span>
+            }
           </button>
-          @if (attachMenuOpen()) {
-            <div class="dw-ai-attach-menu" role="menu">
-              <button
-                type="button"
-                class="dw-ai-attach-menu__item"
-                (click)="triggerImagePicker()"
-                role="menuitem"
-              >
-                <span class="material-icons">image</span>
-                {{ 'assistant.image' | translate }}
-              </button>
-              <button
-                type="button"
-                class="dw-ai-attach-menu__item"
-                (click)="triggerPdfPicker()"
-                role="menuitem"
-              >
-                <span class="material-icons">picture_as_pdf</span>
-                {{ 'assistant.pdf' | translate }}
-              </button>
-            </div>
-          }
         </div>
 
-        <textarea
-          class="dw-ai-input"
-          rows="1"
-          [placeholder]="'assistant.placeholder' | translate"
-          [ngModel]="inputText()"
-          (ngModelChange)="inputText.set($event)"
-          (keydown)="onKeyDown($event)"
-          [disabled]="composerDisabled()"
-        ></textarea>
-
-        <button
-          type="button"
-          class="dw-ai-send"
-          [disabled]="!canSend()"
-          (click)="sendMessage()"
-          [attr.aria-label]="'assistant.send' | translate"
-        >
-          @if (loading()) {
-            <span class="dw-ai-spinner dw-ai-spinner--sm dw-ai-spinner--on-brand"></span>
-          } @else {
-            <span class="material-icons">arrow_upward</span>
-          }
-        </button>
+        <p class="dw-ai-disclaimer">{{ 'assistant.disclaimer' | translate }}</p>
       </div>
-
-      <p class="dw-ai-disclaimer">{{ 'assistant.disclaimer' | translate }}</p>
-    </div>
-  </footer>
+    </footer>
+  </main>
 </div>
